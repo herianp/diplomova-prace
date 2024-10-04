@@ -1,9 +1,21 @@
 <script setup>
-import TheWelcome from '../components/TheWelcome.vue'
+import Dashboard from "@/components/Dashboard.vue";
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
-  </main>
+  <div class="homeView">
+    <Dashboard />
+  </div>
 </template>
+
+<style>
+@media (min-width: 1024px) {
+  .homeView {
+    min-height: 100%;
+    display: flex;
+    align-items: start;
+    justify-content: center;
+    margin-top: 5%;
+  }
+}
+</style>
