@@ -1,6 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import AboutView from '../views/AboutView.vue'
+import HomePage from '@/pages/HomePage.vue'
+import AboutPage from '@/pages/AboutPage.vue'
+import SurveyPage from "@/pages/SurveyPage.vue";
+import DashboardPage from "@/pages/DashboardPage.vue";
+import LoginPage from "@/pages/LoginPage.vue"; //@ is alias from vite.config.js
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,12 +11,27 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      component: HomePage
     },
     {
       path: '/about',
       name: 'about',
-      component: AboutView
+      component: AboutPage
+    },
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: DashboardPage
+    },
+    {
+      path: '/survey',
+      name: 'survey',
+      component: SurveyPage
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: LoginPage
     }
   ]
 })
