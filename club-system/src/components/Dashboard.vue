@@ -16,4 +16,8 @@
   justify-content: center;
   background-color: blue;
 }
+
+p {
+  color: white;
+}
 </style>

@@ -2,6 +2,8 @@ import './assets/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import 'bootstrap/dist/css/bootstrap.min.css'; // Bootstrap CSS
+import 'bootstrap'; // Bootstrap JavaScript (includes Popper.js)
 
 import App from './App.vue'
 import router from './router'
