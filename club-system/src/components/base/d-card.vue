@@ -60,7 +60,7 @@ import SurveyEditForm from "@/components/modal/SurveyEditForm.vue";
 
 const props = defineProps({
   surveyId: {
-    type: Number,
+    type: String,
     default: 0
   }
 });

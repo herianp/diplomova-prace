@@ -6,19 +6,28 @@ export function useFormComposable() {
     const clubStore = useClubStore();
     const title = ref('');
     const description = ref('');
+    const date = ref('');
+    const time = ref('');
     const error = ref(null);
 
     const submitForm = async () => {
+        console.log('submitForm');
         error.value = null; // Reset error before submission
         try {
+            console.log('submitForm');
             if (!title.value || !description.value) {
                 error.value = 'Please fill out both fields';
                 return;
             }
-            // Todo save new survey to the DB
-            await clubStore.addActiveSurvey({ title: title.value, description: description.value, id: clubStore.activeSurveys.length + 1, votes: [] });
+            console.log(`submitForm ${title.value} ${description.value} ${date.value} ${time.value}`);
+            await clubStore.addActiveSurvey({
+                title: title.value,
+                description: description.value,
+                date: date.value,
+                time: time.value
+            });
         } catch (err) {
-            console.log(`err ${error}`)
+            console.log(`err ${err}`)
             error.value = 'Failed to submit data';
         }
     };
@@ -35,17 +44,17 @@ export function useFormComposable() {
         }
     }
 
-    const updateForm = async (surveyId, newTitle, newDescription) => {
+    const updateForm = async (surveyId, newTitle, newDescription, newDate, newTime) => {
         error.value = null; // Reset error before submission
         console.log(`Updated surveyId: ${surveyId}`)
         try {
             // Todo update survey in the DB
-            await clubStore.updateActiveSurvey(surveyId, newTitle, newDescription);
+            await clubStore.updateActiveSurvey(surveyId, newTitle, newDescription, newDate, newTime);
         } catch (err) {
             console.log(`err ${error}`)
             error.value = 'Failed to update data';
         }
     }
 
-    return { title, description, submitForm, deleteForm, error, updateForm };
+    return { title, description, submitForm, deleteForm, error, date, time, updateForm };
 }
