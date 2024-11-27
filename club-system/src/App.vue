@@ -9,6 +9,7 @@ import { RouterView } from 'vue-router'
 import NavBar from "@/components/NavBar.vue";
 import { useClubStore } from "@/stores/club.js";
 import {onMounted} from "vue";
+import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
 
 const clubStore = useClubStore();
 

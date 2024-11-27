@@ -1,54 +1,17 @@
 import {defineStore} from 'pinia'
 import {db} from "@/js/firebase.js";
-import { collection, getDocs, onSnapshot, setDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot,
+    setDoc, doc, deleteDoc, updateDoc, addDoc,
+    arrayUnion, arrayRemove,
+    query, orderBy
+} from "firebase/firestore";
+import {useClubComposable} from "@/use/useClubComposable.js";
 
 export const useClubStore = defineStore({
     id: 'club',
     state: () => ({
         clubName: 'Club Name',
         activeSurveys: [],
-        // activeSurveys: [
-        //     {
-        //         'title': 'Survey 1', 'id': 1, 'description': 'Umělka, úterý 18:00',
-        //         'votes': [
-        //             {'user': {'id': 1, 'name': 'user_1'}, 'vote': false},
-        //             {'user': {'id': 2, 'name': 'user_2'}, 'vote': true},
-        //             {'user': {'id': 3, 'name': 'user_3'}, 'vote': true},
-        //             {'user': {'id': 4, 'name': 'user_4'}, 'vote': true},
-        //         ]
-        //     },
-        //     {
-        //         'title': 'Survey 2', 'id': 2, 'description': 'Umělka, úterý 18:00',
-        //         'votes': [
-        //             {'user': {'id': 1, 'name': 'user_1'}, 'vote': true},
-        //             {'user': {'id': 2, 'name': 'user_2'}, 'vote': false},
-        //             {'user': {'id': 3, 'name': 'user_3'}, 'vote': true},
-        //             {'user': {'id': 4, 'name': 'user_4'}, 'vote': true},
-        //             {'user': {'id': 5, 'name': 'user_5'}, 'vote': false},
-        //         ]
-        //     },
-        //     {
-        //         'title': 'Survey 3', 'id': 3, 'description': 'Umělka, úterý 18:00',
-        //         'votes': [
-        //             {'user': {'id': 1, 'name': 'user_1'}, 'vote': true},
-        //         ]
-        //     },
-        //     {
-        //         'title': 'Survey 4', 'id': 4, 'description': 'Umělka, úterý 18:00',
-        //         'votes': [
-        //             {'user': {'id': 1, 'name': 'user_1'}, 'vote': false},
-        //             {'user': {'id': 2, 'name': 'user_2'}, 'vote': false},
-        //             {'user': {'id': 3, 'name': 'user_3'}, 'vote': true},
-        //         ]
-        //     },
-        //     {
-        //         'title': 'Survey 5', 'id': 5, 'description': 'Umělka, úterý 18:00',
-        //         'votes': [
-        //             {'user': {'id': 1, 'name': 'user_1'}, 'vote': false},
-        //             {'user': {'id': 2, 'name': 'user_2'}, 'vote': false},
-        //         ]
-        //     },
-        // ],
     }),
     getters: {
         getPositiveVotes: (state) => (surveyId) => {
@@ -63,25 +26,17 @@ export const useClubStore = defineStore({
     },
     actions: {
         async getActiveSurveys() {
-            // const querySnapshot = await getDocs(collection(db, "surveys"));
-            // querySnapshot.forEach((doc) => {
-            //     let survey = {
-            //         id: doc.id,
-            //         title: doc.data().title,
-            //         description: doc.data().description,
-            //         votes:doc.data().votes,
-            //     };
-            //     // console.log(`${doc.id} => ${JSON.stringify(doc.data())}`);
-            //     console.log(`${doc.id} => ${JSON.stringify(survey)}`);
-            //     this.activeSurveys = [...this.activeSurveys, survey];
-            // });
-
-            // keep listening to changes
-            onSnapshot(collection(db, "surveys"), (querySnapshot) => {
+            const surveysCollection = collection(db, "surveys");
+            const queryByDateTime = query(surveysCollection, orderBy("dateTime", "asc"));
+            // keep listening to changes [sorted by id]
+            onSnapshot(queryByDateTime, (querySnapshot) => {
                 let surveys = [];
                 querySnapshot.forEach((doc) => {
                     let survey = {
                         id: doc.id,
+                        date: doc.data().date,
+                        time: doc.data().time,
+                        dateTime: doc.data().dateTime,
                         title: doc.data().title,
                         description: doc.data().description,
                         votes:doc.data().votes,
@@ -92,39 +47,46 @@ export const useClubStore = defineStore({
             });
         },
         async addActiveSurvey(newSurvey) {
-            // this.activeSurveys = [...this.activeSurveys, survey];
             // Todo add autoID
             console.log(`added survey ${newSurvey.title} ${newSurvey.description} ${newSurvey.date} ${newSurvey.time}`);
-            await setDoc(doc(db, "surveys", new Date().getTime().toString()), {
+
+            const currentDate = new Date().getTime().toString();
+
+            await addDoc(collection(db, "surveys"), {
+                createdDate: currentDate,
                 date: newSurvey.date,
                 time: newSurvey.time,
                 title: newSurvey.title,
+                dateTime: newSurvey.dateTime,
                 description: newSurvey.description,
                 votes: [],
-            });
+            })
 
-            // const docRef = await addDoc(collection(db, ""), {
-            //     name: "Tokyo",
-            //     country: "Japan"
-            // });
             console.log("Document written with ID:");
         },
-        deleteActiveSurvey(surveyId) {
-            this.activeSurveys = this.activeSurveys.filter(s => s.id !== surveyId);
+        async deleteActiveSurvey(surveyId) {
+            await deleteDoc(doc(db, "surveys", surveyId));
         },
-        updateActiveSurvey(surveyId, newTitle, newDescription, newDate, newTime) {
+        async updateActiveSurvey(surveyId, newTitle, newDescription, newDate, newTime) {
+            const useClub= useClubComposable();
+
             const survey = this.activeSurveys.find(s => s.id === surveyId);
-            if (survey) {
-                survey.title = newTitle;
-                survey.description = newDescription;
-                survey.date = newDate;
-                survey.time = newTime;
+
+            if (survey){
+                await updateDoc(db, "surveys", surveyId, {
+                    title: newTitle,
+                    description: newDescription,
+                    date: newDate,
+                    time: newTime,
+                    dateTime: useClub.getDateByDateAndTime(newDate, newTime),
+                });
             }
         },
-        addVote(surveyId, userId, vote) {
+        async addVote(surveyId, userId, vote) {
             const survey = this.activeSurveys.find(s => s.id === surveyId);
             if (survey) {
                 const existingVote = survey.votes.find(v => v.user.id === userId);
+                const surveyRef = doc(db, "surveys", surveyId);
                 if (existingVote) {
                     if (existingVote.vote === vote) {
                         console.log(`user ${userId} already voted for ${vote} in survey ${surveyId}`);
@@ -132,9 +94,19 @@ export const useClubStore = defineStore({
                     }
                     console.log(`user ${userId} changed vote from ${existingVote.vote} to ${vote} in survey ${surveyId}`);
                     //todo update database
-                    existingVote.vote = vote;
+
+                    // Remove the existing vote in Firestore and add the updated vote
+                    await updateDoc(surveyRef, {
+                        votes: arrayRemove({ user: { id: userId }, vote: existingVote.vote })
+                    });
+                    await updateDoc(surveyRef, {
+                        votes: arrayUnion({ user: { id: userId }, vote })
+                    });
+
                 } else {
-                    survey.votes = [...survey.votes, {user: {id: userId}, vote}];
+                    await updateDoc(surveyRef, {
+                        votes: arrayUnion({ user: { id: userId }, vote })
+                    });
                 }
             }
         }

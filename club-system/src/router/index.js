@@ -3,7 +3,7 @@ import HomePage from '@/pages/HomePage.vue'
 import AboutPage from '@/pages/AboutPage.vue'
 import SurveyPage from "@/pages/SurveyPage.vue";
 import DashboardPage from "@/pages/DashboardPage.vue";
-import LoginPage from "@/pages/LoginPage.vue"; //@ is alias from vite.config.js
+import AuthPage from "@/pages/AuthPage.vue"; //@ is alias from vite.config.js
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -29,9 +29,9 @@ const router = createRouter({
       component: SurveyPage
     },
     {
-      path: '/login',
-      name: 'login',
-      component: LoginPage
+      path: '/auth',
+      name: 'auth',
+      component: AuthPage
     }
   ]
 })

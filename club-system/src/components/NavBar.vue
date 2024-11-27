@@ -14,24 +14,27 @@
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
           <RouterLink to="/" class="nav-link" @click="closeDropdown">
-            Home
+            {{ $t('home.title') }}
           </RouterLink>
         </li>
         <li class="nav-item">
-          <RouterLink to="/about" class="nav-link" @click="closeDropdown">About</RouterLink>
+          <RouterLink to="/about" class="nav-link" @click="closeDropdown">{{ $t('about.title') }}</RouterLink>
         </li>
         <li class="nav-item">
-          <RouterLink to="/dashboard" class="nav-link" @click="closeDropdown">Dashboard</RouterLink>
+          <RouterLink to="/dashboard" class="nav-link" @click="closeDropdown">{{ $t('dashboard.title') }}</RouterLink>
         </li>
         <li class="nav-item">
-          <RouterLink to="/survey" class="nav-link" @click="closeDropdown">Survey</RouterLink>
+          <RouterLink to="/survey" class="nav-link" @click="closeDropdown"> {{ $t('survey.title') }}</RouterLink>
         </li>
       </ul>
 
       <!-- Right-aligned links (sign up, login) -->
       <ul class="navbar-nav">
         <li class="nav-item">
-          <RouterLink to="/login" class="nav-link" @click="closeDropdown">Login</RouterLink>
+          <RouterLink to="/auth" class="nav-link" @click="closeDropdown">{{ $t('login.title') }}</RouterLink>
+        </li>
+        <li class="nav-item btn" >
+          <LanguageSwitcher class="nav-link" />
         </li>
       </ul>
     </div>
@@ -40,6 +43,7 @@
 
 <script setup>
 import {RouterLink} from "vue-router";
+import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
 import {useClubStore} from "@/stores/club.js";
 import {ref} from "vue";
 
