@@ -1,11 +1,11 @@
 <template>
   <div class="container">
-    <h1>Survey</h1>
+    <h1>{{ $t('survey.title') }}</h1>
     <button
         class="btn-danger"
         @click="openNewSurveyForm()"
     >
-      Create Survey
+      {{ $t('survey.create.title') }}
     </button>
     <d-card
         v-for="survey in clubStore.activeSurveys"

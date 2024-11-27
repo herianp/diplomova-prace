@@ -4,7 +4,7 @@ export const useUserStore = defineStore({
     id: 'user',
     state: () => ({
         user: {
-            id: 4,
+            id: 2,
             name: 'User Name',
             email: 'email@seznam.cz',
         }

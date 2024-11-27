@@ -1,6 +1,7 @@
 // useFormSubmit.js
 import { ref } from 'vue';
 import {useClubStore} from "@/stores/club.js";
+import {useClubComposable} from "@/use/useClubComposable.js";
 
 export function useFormComposable() {
     const clubStore = useClubStore();
@@ -11,7 +12,7 @@ export function useFormComposable() {
     const error = ref(null);
 
     const submitForm = async () => {
-        console.log('submitForm');
+        const useClub = useClubComposable();
         error.value = null; // Reset error before submission
         try {
             console.log('submitForm');
@@ -20,12 +21,15 @@ export function useFormComposable() {
                 return;
             }
             console.log(`submitForm ${title.value} ${description.value} ${date.value} ${time.value}`);
+            console.log(`useClub.getDateByDateAndTime(date.value, time.value) ${useClub.getDateByDateAndTime(date.value, time.value)}`);
             await clubStore.addActiveSurvey({
                 title: title.value,
                 description: description.value,
                 date: date.value,
-                time: time.value
+                time: time.value,
+                dateTime: useClub.getDateByDateAndTime(date.value, time.value)
             });
+            await clubStore.getActiveSurveys();
         } catch (err) {
             console.log(`err ${err}`)
             error.value = 'Failed to submit data';

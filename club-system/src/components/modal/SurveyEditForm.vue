@@ -1,7 +1,7 @@
 <template>
   <div class="modal-content">
-
     <form @submit.prevent="submitFormHandler">
+
       <div class="form-group">
         <label for="title">Title</label>
         <input
@@ -11,6 +11,7 @@
             id="title"
             placeholder="Enter title">
       </div>
+
       <div class="form-group">
         <label for="description">Description</label>
         <input
@@ -20,6 +21,28 @@
             id="description"
             placeholder="Description">
       </div>
+
+      <!--   Date picker   -->
+      <div class="form-group">
+        <label for="date">Date</label>
+        <input
+            type="date"
+            v-model="date"
+            class="form-control"
+            id="date"
+            placeholder="Date">
+      </div>
+
+      <div class="form-group">
+        <label for="time">Time</label>
+        <input
+            type="time"
+            v-model="time"
+            class="form-control"
+            id="time"
+            placeholder="Time">
+      </div>
+
       <button type="submit" class="btn btn-primary" style="margin: 10px 0">Update</button>
     </form>
 
@@ -48,7 +71,7 @@ const props = defineProps({
   }
 });
 
-const {title, description, updateForm, deleteForm, error} = useFormComposable();
+const {title, description, updateForm, deleteForm, date, time, error} = useFormComposable();
 const deleteProcess = ref(false);
 
 const closeModal = () => {
@@ -56,7 +79,7 @@ const closeModal = () => {
 }
 
 function submitFormHandler() {
-  updateForm(props.survey.id, title, description);
+  updateForm(props.survey.id, title, description, date, time);
   closeModal();
 }
 
@@ -65,9 +88,15 @@ function deleteSurveyHandler() {
   closeModal();
 }
 
-onMounted(() => {
+function initFormValues() {
   title.value = props.survey.title;
   description.value = props.survey.description;
+  date.value = props.survey.date;
+  time.value = props.survey.time;
+}
+
+onMounted(() => {
+  initFormValues();
 });
 </script>
 

@@ -14,12 +14,13 @@
       </div>
       <p class="card-text">{{ survey.description }}</p>
       <div class="d-flex justify-content-between">
-        <img
-          src="@/assets/icon_settings.png"
-          class="icon-settings"
-          @click="openSurveyEditForm"
-          alt="settings"/>
+        <h5>{{ useClub.getDisplayedDateTime(survey.date, survey.time) }}</h5>
         <div>
+          <img
+              src="@/assets/icon_settings.png"
+              class="icon-settings"
+              @click="openSurveyEditForm"
+              alt="settings"/>
           <a
               class="btn btn-primary me-2"
               :class="{
@@ -28,7 +29,8 @@
             }"
               @click="clubStore.addVote(survey.id, user.id, true)"
           >
-            Going</a>
+            Going
+          </a>
           <a
               class="btn btn-primary"
               :class="{
@@ -37,7 +39,8 @@
             }"
               @click="clubStore.addVote(survey.id, user.id, false)"
           >
-            Not going</a>
+            Not going
+          </a>
         </div>
       </div>
     </div>
@@ -57,6 +60,7 @@ import {useClubStore} from "@/stores/club.js";
 import {useUserStore} from "@/stores/user.js";
 import {computed, ref} from "vue";
 import SurveyEditForm from "@/components/modal/SurveyEditForm.vue";
+import {useClubComposable} from "@/use/useClubComposable.js";
 
 const props = defineProps({
   surveyId: {
@@ -68,6 +72,8 @@ const props = defineProps({
 const clubStore = useClubStore();
 const userStore = useUserStore();
 
+const useClub= useClubComposable();
+
 const user = computed(() => userStore.user);
 const survey = computed(() => clubStore.getSurveyById(props.surveyId));
 const positiveVotes = computed(() => clubStore.getPositiveVotes(survey.value.id));
@@ -76,6 +82,9 @@ const negativeVotes = computed(() => clubStore.getNegativeVotes(survey.value.id)
 const isModalOpen = ref(false);
 
 const isActive = computed(() => {
+  if (survey.value.votes.length === 0) {
+    return false;
+  }
   return survey.value.votes.some(vote => vote.user.id === userStore.user.id);
 });
 
@@ -99,6 +108,7 @@ function closeModal() {
 <style scoped>
 .card {
   width: 100% !important;
+  margin-top: 20px;
 }
 
 .card-custom-header {
@@ -117,6 +127,7 @@ function closeModal() {
   width: 30px;
   height: 30px;
   transition: width 0.3s ease, height 0.3s ease; /* Přidáme přechod */
+  margin: 0 5px;
 }
 
 .icon-settings:hover {

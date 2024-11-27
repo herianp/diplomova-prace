@@ -1,0 +1,40 @@
+{
+  "welcome_message": "Vítejte v naší aplikaci",
+  "survey": {
+    "title": "Anketa",
+    "create": {
+      "title": "Vytvořit anketu"
+    }
+  },
+  "days": {
+    "SUNDAY": "Neděle",
+    "MONDAY": "Pondělí",
+    "TUESDAY": "Úterý",
+    "WEDNESDAY": "Středa",
+    "THURSDAY": "Čtvrtek",
+    "FRIDAY": "Pátek",
+    "SATURDAY": "Sobota"
+  },
+  "dashboard": {
+      "title": "Dashboard",
+      "subtitle": "Vítejte na dashboardu"
+  },
+  "login": {
+    "title": "Přihlášení",
+    "email": "E-mail",
+    "password": "Heslo",
+    "submit": "Přihlásit se"
+  },
+  "logout": {
+      "title": "Odhlášení",
+      "message": "Opravdu se chcete odhlásit?"
+  },
+  "home": {
+      "title": "Domů",
+      "subtitle": "Vítejte na domovské stránce"
+  },
+  "about": {
+      "title": "O nás",
+      "subtitle": "Vítejte na stránce o nás"
+  }
+}

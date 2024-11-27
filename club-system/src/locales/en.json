@@ -1,0 +1,40 @@
+{
+  "welcome_message": "Welcome to our application",
+  "survey": {
+    "title": "Survey",
+    "create": {
+      "title": "Create survey"
+    }
+  },
+  "days": {
+    "SUNDAY": "Sunday",
+    "MONDAY": "Monday",
+    "TUESDAY": "Tuesday",
+    "WEDNESDAY": "Wednesday",
+    "THURSDAY": "Thursday",
+    "FRIDAY": "Friday",
+    "SATURDAY": "Saturday"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Welcome to the dashboard"
+  },
+  "login": {
+      "title": "Login",
+      "email": "E-mail",
+      "password": "Password",
+      "submit": "Log in"
+  },
+  "logout": {
+      "title": "Logout",
+      "message": "Are you sure you want to log out?"
+  },
+  "home": {
+      "title": "Home",
+      "subtitle": "Welcome to the home page"
+  },
+  "about": {
+      "title": "About",
+      "subtitle": "Welcome to the about page"
+  }
+}
