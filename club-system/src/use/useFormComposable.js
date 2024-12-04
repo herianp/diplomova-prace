@@ -2,36 +2,43 @@
 import { ref } from 'vue';
 import {useClubStore} from "@/stores/club.js";
 import {useClubComposable} from "@/use/useClubComposable.js";
+import {useTeamStore} from "@/stores/team.js";
 
 export function useFormComposable() {
     const clubStore = useClubStore();
+    const teamStore = useTeamStore();
     const title = ref('');
     const description = ref('');
     const date = ref('');
     const time = ref('');
     const error = ref(null);
 
-    const submitForm = async () => {
+    const submitForm = async (teamId) => {
         const useClub = useClubComposable();
         error.value = null; // Reset error before submission
+
         try {
             console.log('submitForm');
             if (!title.value || !description.value) {
                 error.value = 'Please fill out both fields';
                 return;
             }
+
             console.log(`submitForm ${title.value} ${description.value} ${date.value} ${time.value}`);
             console.log(`useClub.getDateByDateAndTime(date.value, time.value) ${useClub.getDateByDateAndTime(date.value, time.value)}`);
-            await clubStore.addActiveSurvey({
+
+            await teamStore.addSurvey({
                 title: title.value,
                 description: description.value,
                 date: date.value,
                 time: time.value,
-                dateTime: useClub.getDateByDateAndTime(date.value, time.value)
+                dateTime: useClub.getDateByDateAndTime(date.value, time.value),
+                teamId: teamId,
             });
-            await clubStore.getActiveSurveys();
+
+            await teamStore.getSurveysByTeamId(teamId);
         } catch (err) {
-            console.log(`err ${err}`)
+            console.log(`err ${err}`);
             error.value = 'Failed to submit data';
         }
     };

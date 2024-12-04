@@ -7,14 +7,13 @@
 <script setup>
 import { RouterView } from 'vue-router'
 import NavBar from "@/components/NavBar.vue";
-import { useClubStore } from "@/stores/club.js";
 import {onMounted} from "vue";
-import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
+import {useAuthStore} from "@/stores/auth.js";
 
-const clubStore = useClubStore();
+const authStore = useAuthStore();
 
 onMounted(() => {
-  clubStore.getActiveSurveys();
+  authStore.init();
 });
 </script>
 

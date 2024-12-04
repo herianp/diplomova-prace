@@ -27,7 +27,7 @@
               'btn btn-success me-2': isActive && isActivePositive,
               'btn btn-primary me-2': !isActive
             }"
-              @click="clubStore.addVote(survey.id, user.id, true)"
+              @click="clubStore.addVote(survey.id, user.uid, true)"
           >
             Going
           </a>
@@ -37,7 +37,7 @@
               'btn btn-danger': isActive && !isActivePositive,
               'btn btn-primary': !isActive
             }"
-              @click="clubStore.addVote(survey.id, user.id, false)"
+              @click="clubStore.addVote(survey.id, user.uid, false)"
           >
             Not going
           </a>
@@ -57,7 +57,7 @@
 
 <script setup>
 import {useClubStore} from "@/stores/club.js";
-import {useUserStore} from "@/stores/user.js";
+import {useAuthStore} from "@/stores/auth.js";
 import {computed, ref} from "vue";
 import SurveyEditForm from "@/components/modal/SurveyEditForm.vue";
 import {useClubComposable} from "@/use/useClubComposable.js";
@@ -70,7 +70,7 @@ const props = defineProps({
 });
 
 const clubStore = useClubStore();
-const userStore = useUserStore();
+const userStore = useAuthStore();
 
 const useClub= useClubComposable();
 
@@ -85,12 +85,12 @@ const isActive = computed(() => {
   if (survey.value.votes.length === 0) {
     return false;
   }
-  return survey.value.votes.some(vote => vote.user.id === userStore.user.id);
+  return survey.value.votes.some(vote => vote.user.uid === userStore.user.uid);
 });
 
 const isActivePositive = computed(() => {
   return survey.value.votes.some(vote => {
-    if (vote.user.id === userStore.user.id) {
+    if (vote.user.uid === userStore.user.uid) {
       return vote.vote;
     }
   });
@@ -106,9 +106,18 @@ function closeModal() {
 </script>
 
 <style scoped>
+
 .card {
-  width: 100% !important;
+  min-width: 500px;
   margin-top: 20px;
+}
+
+@media (max-width: 1024px){
+  .card {
+    width: calc(100% - 20px) !important;
+    margin-top: 20px;
+    min-width: 350px;
+  }
 }
 
 .card-custom-header {
