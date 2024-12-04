@@ -17,6 +17,14 @@ html, body {
   font-size: 15px;
 }
 
+.view {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  margin-top: 5%;
+  flex-direction: column;
+}
+
 /* Styl pro modální okno */
 .modal-overlay {
   position: fixed;

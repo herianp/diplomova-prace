@@ -52,7 +52,7 @@
             @click="deleteProcess = true">
       Delete
     </button>
-    <button v-if="deleteProcess" type="submit" class="btn btn-warning" @click="teamStore.deleteSurvey">
+    <button v-if="deleteProcess" type="submit" class="btn btn-warning" @click="deleteSurveyHandler">
       Are you sure?
     </button>
 
@@ -80,7 +80,6 @@ const closeModal = () => {
 }
 
 function submitFormHandler() {
-  console.log(`editedSurvey.value.id, title, description, date, time ${editedSurvey.value.id}, ${title.value}, ${description.value}, ${date.value}, ${time.value}`);
   teamStore.updateSurvey(editedSurvey.value.id, title.value, description.value, date.value, time.value);
   closeModal();
 }
@@ -98,7 +97,6 @@ function initFormValues() {
 }
 
 onMounted(() => {
-  console.log(editedSurvey.value);
   initFormValues();
 });
 </script>

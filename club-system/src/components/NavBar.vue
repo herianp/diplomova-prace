@@ -1,6 +1,6 @@
 <template>
   <nav class="navbar navbar-expand-md bg-dark navbar-dark">
-    <RouterLink to="/" class="navbar-brand">{{clubStore.clubName}}</RouterLink>
+    <RouterLink to="/" class="navbar-brand">LOGO here</RouterLink>
 
     <!-- Toggler button for mobile view -->
     <button class="navbar-toggler" @click="toggleDropdown"
@@ -63,11 +63,9 @@
 <script setup>
 import {RouterLink} from "vue-router";
 import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
-import {useClubStore} from "@/stores/club.js";
 import {ref} from "vue";
 import {useAuthStore} from "@/stores/auth.js";
 
-const clubStore = useClubStore();
 const authStore = useAuthStore();
 
 const isDropdownOpen = ref(false);

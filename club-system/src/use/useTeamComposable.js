@@ -1,7 +1,7 @@
 import {useI18n} from "vue-i18n";
 import {DaysOfWeek} from "@/enums/daysEnum.js";
 
-export function useClubComposable() {
+export function useTeamComposable() {
     const getDisplayedDateTime = (date, time) => {
         const dateTime = getDateByDateAndTime(date, time);
         const dayName = getDayName(dateTime.getDay());

@@ -41,12 +41,10 @@ import {onMounted, ref} from "vue";
 import {useTeamStore} from "@/stores/team.js";
 import DCardSlots from "@/components/base/d-card-slots.vue";
 import TeamForm from "@/components/modal/TeamForm.vue";
-import {useAuthStore} from "@/stores/auth.js";
 import {getAuth, onAuthStateChanged} from "firebase/auth";
 import router from "@/router/index.js";
 
 const teamStore = useTeamStore();
-const authStore = useAuthStore();
 
 const auth = getAuth();
 const isModalOpen = ref(false);
@@ -56,13 +54,11 @@ function openNewTeamForm() {
 }
 
 function openTeam(teamId) {
-  console.log("Joining team:", teamId);
   router.push(`/${teamId}/surveys`);
 }
 
 function closeModal() {
   isModalOpen.value = false;
-  console.log('close modal');
 }
 
 onMounted(() => {

@@ -49,16 +49,14 @@ function submitRegistration(event) {
     alert('Please fill in all fields');
     return;
   }
-  console.log('Registration submitted');
   authStore.register(credentials);
 }
 
-function submitLogin(event) {
+function submitLogin() {
   if (!credentials.email || !credentials.password) {
     alert('Please fill in all fields');
     return;
   }
-  console.log('Login submitted');
   authStore.login(credentials);
 }
 </script>
