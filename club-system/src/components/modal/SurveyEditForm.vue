@@ -1,4 +1,5 @@
 <template>
+  <div class="modal-overlay" @click.self="closeModal">
   <div class="modal-content">
     <form @submit.prevent="submitFormHandler">
 
@@ -51,51 +52,53 @@
             @click="deleteProcess = true">
       Delete
     </button>
-    <button v-if="deleteProcess" type="submit" class="btn btn-warning" @click="deleteSurveyHandler">
+    <button v-if="deleteProcess" type="submit" class="btn btn-warning" @click="teamStore.deleteSurvey">
       Are you sure?
     </button>
 
     <button @click="closeModal" class="btn btn-secondary" style="margin: 5px 0">Close</button>
   </div>
+  </div>
 </template>
 
 <script setup>
 import {useFormComposable} from "@/use/useFormComposable.js";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
+import {useTeamStore} from "@/stores/team.js";
+
+const teamStore = useTeamStore();
 
 const emits = defineEmits(['closeModal']);
-const props = defineProps({
-  survey: {
-    type: Object,
-    default: () => ({})
-  }
-});
 
 const {title, description, updateForm, deleteForm, date, time, error} = useFormComposable();
+
 const deleteProcess = ref(false);
+const editedSurvey = computed(() => teamStore.editedSurvey);
 
 const closeModal = () => {
   emits('closeModal');
 }
 
 function submitFormHandler() {
-  updateForm(props.survey.id, title, description, date, time);
+  console.log(`editedSurvey.value.id, title, description, date, time ${editedSurvey.value.id}, ${title.value}, ${description.value}, ${date.value}, ${time.value}`);
+  teamStore.updateSurvey(editedSurvey.value.id, title.value, description.value, date.value, time.value);
   closeModal();
 }
 
 function deleteSurveyHandler() {
-  deleteForm(props.survey.id);
+  deleteForm(editedSurvey.value.id);
   closeModal();
 }
 
 function initFormValues() {
-  title.value = props.survey.title;
-  description.value = props.survey.description;
-  date.value = props.survey.date;
-  time.value = props.survey.time;
+  title.value = editedSurvey.value.title;
+  description.value = editedSurvey.value.description;
+  date.value = editedSurvey.value.date;
+  time.value = editedSurvey.value.time;
 }
 
 onMounted(() => {
+  console.log(editedSurvey.value);
   initFormValues();
 });
 </script>

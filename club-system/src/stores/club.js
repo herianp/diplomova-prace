@@ -1,7 +1,7 @@
 import {defineStore} from 'pinia'
 import {db} from "@/js/firebase.js";
 import { collection, onSnapshot,
-    setDoc, doc, deleteDoc, updateDoc, addDoc,
+    doc, deleteDoc, updateDoc, addDoc,
     arrayUnion, arrayRemove,
     query, orderBy
 } from "firebase/firestore";
@@ -85,7 +85,7 @@ export const useClubStore = defineStore({
         async addVote(surveyId, userId, vote) {
             const survey = this.activeSurveys.find(s => s.id === surveyId);
             if (survey) {
-                const existingVote = survey.votes.find(v => v.user.id === userId);
+                const existingVote = survey.votes.find(v => v.user.uid === userId);
                 const surveyRef = doc(db, "surveys", surveyId);
                 if (existingVote) {
                     if (existingVote.vote === vote) {
@@ -97,15 +97,15 @@ export const useClubStore = defineStore({
 
                     // Remove the existing vote in Firestore and add the updated vote
                     await updateDoc(surveyRef, {
-                        votes: arrayRemove({ user: { id: userId }, vote: existingVote.vote })
+                        votes: arrayRemove({ user: { uid: userId }, vote: existingVote.vote })
                     });
                     await updateDoc(surveyRef, {
-                        votes: arrayUnion({ user: { id: userId }, vote })
+                        votes: arrayUnion({ user: { uid: userId }, vote })
                     });
 
                 } else {
                     await updateDoc(surveyRef, {
-                        votes: arrayUnion({ user: { id: userId }, vote })
+                        votes: arrayUnion({ user: { uid: userId }, vote })
                     });
                 }
             }

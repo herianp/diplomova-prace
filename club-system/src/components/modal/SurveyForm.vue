@@ -53,6 +53,13 @@ import {useFormComposable} from "@/use/useFormComposable.js";
 
 const emits = defineEmits(['closeModal']);
 
+const props = defineProps({
+  teamId: {
+    type: String,
+    default: "",
+  },
+});
+
 const { title, description, date, time, submitForm, error } = useFormComposable();
 
 const closeModal = () => {
@@ -62,7 +69,7 @@ const closeModal = () => {
 function submitFormHandler() {
   console.log(`date ${date.value}`);
   console.log(`time ${time.value}`);
-  submitForm();
+  submitForm(props.teamId);
   closeModal();
 }
 
