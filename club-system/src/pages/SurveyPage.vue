@@ -1,5 +1,6 @@
 <template>
   <div class="container-page">
+
     <div v-if="isPowerUser" class="powerUser-navbar">
       <ul>
         <li style="display:flex;">
@@ -8,13 +9,16 @@
         </li>
       </ul>
     </div>
+
     <h1>{{ $t('survey.title') }}</h1>
+
     <button
         class="btn-danger"
         @click="openNewSurveyForm()"
     >
       {{ $t('survey.create.title') }}
     </button>
+
     <d-card-slots
         v-for="survey in surveys"
         :key="survey.id"
@@ -85,14 +89,14 @@ import SurveyForm from "@/components/modal/SurveyForm.vue";
 import {useTeamStore} from "@/stores/team.js";
 import {useRoute} from "vue-router";
 import DCardSlots from "@/components/base/d-card-slots.vue";
-import {useClubComposable} from "@/use/useClubComposable.js";
+import {useTeamComposable} from "@/use/useTeamComposable.js";
 import SurveyEditForm from "@/components/modal/SurveyEditForm.vue";
 import {useAuthStore} from "@/stores/auth.js";
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 
-const useClub = useClubComposable();
+const useClub = useTeamComposable();
 
 const surveys = computed(() => teamStore.surveys);
 const user = computed(() => authStore.user);

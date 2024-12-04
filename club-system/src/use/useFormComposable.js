@@ -1,11 +1,9 @@
 // useFormSubmit.js
 import { ref } from 'vue';
-import {useClubStore} from "@/stores/club.js";
-import {useClubComposable} from "@/use/useClubComposable.js";
+import {useTeamComposable} from "@/use/useTeamComposable.js";
 import {useTeamStore} from "@/stores/team.js";
 
 export function useFormComposable() {
-    const clubStore = useClubStore();
     const teamStore = useTeamStore();
     const title = ref('');
     const description = ref('');
@@ -14,7 +12,7 @@ export function useFormComposable() {
     const error = ref(null);
 
     const submitForm = async (teamId) => {
-        const useClub = useClubComposable();
+        const useClub = useTeamComposable();
         error.value = null; // Reset error before submission
 
         try {
@@ -23,9 +21,6 @@ export function useFormComposable() {
                 error.value = 'Please fill out both fields';
                 return;
             }
-
-            console.log(`submitForm ${title.value} ${description.value} ${date.value} ${time.value}`);
-            console.log(`useClub.getDateByDateAndTime(date.value, time.value) ${useClub.getDateByDateAndTime(date.value, time.value)}`);
 
             await teamStore.addSurvey({
                 title: title.value,
@@ -44,11 +39,11 @@ export function useFormComposable() {
     };
 
     const deleteForm = async (surveyId) => {
-        error.value = null; // Reset error before submission
+        error.value = null;
         console.log(`Deleted surveyId: ${surveyId}`)
         try {
             // Todo delete survey from the DB
-            await clubStore.deleteActiveSurvey(surveyId);
+            await teamStore.deleteSurvey(surveyId);
         } catch (err) {
             console.log(`err ${error}`)
             error.value = 'Failed to delete data';
@@ -56,15 +51,7 @@ export function useFormComposable() {
     }
 
     const updateForm = async (surveyId, newTitle, newDescription, newDate, newTime) => {
-        error.value = null; // Reset error before submission
-        console.log(`Updated surveyId: ${surveyId}`)
-        try {
-            // Todo update survey in the DB
-            await clubStore.updateActiveSurvey(surveyId, newTitle, newDescription, newDate, newTime);
-        } catch (err) {
-            console.log(`err ${error}`)
-            error.value = 'Failed to update data';
-        }
+        //TODO move logic here
     }
 
     return { title, description, submitForm, deleteForm, error, date, time, updateForm };

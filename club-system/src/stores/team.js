@@ -14,7 +14,7 @@ import {
 } from "firebase/firestore";
 import {db} from "@/js/firebase.js";
 import {reactive, ref} from "vue";
-import {useClubComposable} from "@/use/useClubComposable.js";
+import {useTeamComposable} from "@/use/useTeamComposable.js";
 
 export const useTeamStore = defineStore({
     id: 'team',
@@ -131,7 +131,7 @@ export const useTeamStore = defineStore({
             console.log("Document written with ID:");
         },
         async updateSurvey(surveyId, newTitle, newDescription, newDate, newTime) {
-            const useClub = useClubComposable();
+            const useClub = useTeamComposable();
             try {
                 console.log('update survey');
                 await updateDoc(doc(db, "surveys", surveyId), {
