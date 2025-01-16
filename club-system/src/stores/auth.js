@@ -3,16 +3,21 @@ import {auth, db} from "@/js/firebase.js";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { RouteEnum } from "@/enums/routesEnum.js";
 import { doc, setDoc } from "firebase/firestore";
+import {useTeamStore} from "@/stores/team.js";
+
+const getInitialUser = () => ({
+    uid: '1',
+});
 
 export const useAuthStore = defineStore({
     id: 'auth',
     state: () => ({
-        user: {}
+        user: getInitialUser(),
     }),
     getters: {
     },
     actions: {
-        async init() {
+        init() {
             // check if user is already signed in, user is filled in after refresh
             onAuthStateChanged(auth, (user) => {
                 if (user) {
@@ -20,6 +25,8 @@ export const useAuthStore = defineStore({
                     this.user = user;
                 } else {
                     console.log(`User out: ${user}`);
+                    this.router.push(RouteEnum.HOME.path);
+                    useTeamStore().clearData();
                 }
             });
         },
@@ -40,6 +47,7 @@ export const useAuthStore = defineStore({
             signOut(auth).then(() => {
                 console.log('Signed out successfully');
                 this.user = {};
+                useTeamStore().clearData();
                 this.router.push(RouteEnum.AUTH.path);
             }).catch((error) => {
                 console.log(`Error signing out: ${error}`);

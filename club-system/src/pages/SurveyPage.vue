@@ -133,8 +133,7 @@ function isPositiveVote(survey) {
 }
 
 function addVote(surveyId, vote) {
-  console.log(`add vote ${vote} to survey ${surveyId} from user ${user.uid}`);
-  teamStore.addVote(surveyId, user.uid, vote)
+  teamStore.addVote(surveyId, user.value.uid, vote)
 }
 
 function handleRequests() {

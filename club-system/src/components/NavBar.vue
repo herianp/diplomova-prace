@@ -13,7 +13,7 @@
     <div :class="{'collapse': !isDropdownOpen, 'navbar-collapse': true}" id="navbarContent">
       <!-- Left-aligned links (home, about, dashboard, survey)-->
       <!-- User logged in: (home, about, dashboard, survey)-->
-      <ul v-if="authStore.user.uid" class="navbar-nav me-auto">
+      <ul v-if="authStore.user?.uid" class="navbar-nav me-auto">
         <li class="nav-item">
           <RouterLink to="/" class="nav-link" @click="closeDropdown">
             {{ $t('home.title') }}
@@ -41,7 +41,7 @@
 
       <!-- Right-aligned links (sign up, login) -->
       <!-- User logged in: Logout, Translate -->
-      <ul v-if="authStore.user.uid" class="navbar-nav">
+      <ul v-if="authStore.user?.uid" class="navbar-nav">
         <li class="nav-item">
           <RouterLink to="/auth" class="nav-link" @click="closeDropdownAndLogout">Logout</RouterLink>
         </li>
