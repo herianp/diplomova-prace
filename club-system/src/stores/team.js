@@ -114,8 +114,6 @@ export const useTeamStore = defineStore({
             }
         },
         async addSurvey(newSurvey) {
-            console.log(`added survey ${newSurvey.title} ${newSurvey.description} ${newSurvey.date} ${newSurvey.time} ${newSurvey.teamId}`);
-
             const currentDate = new Date().getTime().toString();
 
             await addDoc(collection(db, "surveys"), {
@@ -133,7 +131,6 @@ export const useTeamStore = defineStore({
         async updateSurvey(surveyId, newTitle, newDescription, newDate, newTime) {
             const useClub = useTeamComposable();
             try {
-                console.log('update survey');
                 await updateDoc(doc(db, "surveys", surveyId), {
                     title: newTitle,
                     description: newDescription,
@@ -145,31 +142,38 @@ export const useTeamStore = defineStore({
                 console.error("Error updating survey:", error);
             }
         },
-        async addVote(surveyId, userId, newVote) {
+        async addVote(surveyId, userUid, newVote) {
             const survey = this.surveys.find(s => s.id === surveyId);
+            console.log(`survey ${JSON.stringify(survey)}`);
             if (survey) {
-                const existingVote = survey.votes.find(v => v.uid === userId);
+                const existingVote = survey.votes.find(v => v.userUid === userUid);
                 const votes = survey.votes || [];
                 const surveyRef = doc(db, "surveys", surveyId);
-
+                console.log(`existing vote ${JSON.stringify(existingVote)}`);
                 if (existingVote) {
                     if (existingVote.vote === newVote) {
-                        console.log(`user ${userId} already voted for ${newVote} in survey ${surveyId}`);
+                        console.log(`user ${userUid} already voted for ${newVote} in survey ${surveyId}`);
                         return
                     }
-                    console.log(`user ${userId} changed vote from ${existingVote.vote} to ${newVote} in survey ${surveyId}`);
+                    console.log(`user ${userUid} changed vote from ${existingVote.vote} to ${newVote} in survey ${surveyId}`);
 
                     const updatedVotes = votes.map((vote) =>
-                        vote.userUid === userId ? { ...vote, vote: newVote } : vote
+                        vote.userUid === userUid ? { ...vote, vote: newVote } : vote
                     );
 
                     await updateDoc(surveyRef, { votes: updatedVotes });
 
                 } else {
-                    const updatedVotes = [...votes, { userID: userId, vote: newVote }];
+                    console.log('jere')
+                    const updatedVotes = [...votes, { userUid: userUid, vote: newVote }];
                     await updateDoc(surveyRef, { votes: updatedVotes });
                 }
             }
+        },
+        clearData() {
+            this.teams = [];
+            this.surveys = [];
+            this.currentTeam = null;
         }
     },
 });
