@@ -1,16 +1,15 @@
 import {defineStore} from "pinia";
 import {
-    addDoc, arrayRemove, arrayUnion,
+    addDoc,
     collection,
     deleteDoc,
     doc,
     onSnapshot,
-    orderBy,
     query,
-    setDoc,
     updateDoc,
     where,
-    getDoc
+    getDoc,
+    getDocs
 } from "firebase/firestore";
 import {db} from "@/js/firebase.js";
 import {reactive, ref} from "vue";
@@ -80,6 +79,19 @@ export const useTeamStore = defineStore({
                 if (teamDoc.exists()) {
                     console.log("Team data:", teamDoc.data());
                     this.currentTeam = { ...teamDoc.data() };
+
+                    // When you retrieve a document using getDoc, you only get the fields of that document—not the subcollections.
+                    //  Fetch the documents in the cashboxTransactions subcollection with getDocs.
+                    const cashboxTransactionsRef = collection(teamRef, "cashboxTransactions");
+                    const cashboxTransactionsDoc = await getDocs(cashboxTransactionsRef);
+
+                    const cashboxTransactions = cashboxTransactionsDoc.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data(),
+                    }));
+
+                    console.log(`cashboxTransactions: ${JSON.stringify(cashboxTransactions)}`);
+                    this.currentTeam = { ...teamDoc.data(), cashboxTransactions };
                 } else {
                     console.log("No such team document!");
                 }
@@ -174,6 +186,28 @@ export const useTeamStore = defineStore({
             this.teams = [];
             this.surveys = [];
             this.currentTeam = null;
-        }
+        },
+        async addCashboxTransaction(teamId, transactionData) {
+            try {
+                // Reference to the cashboxTransactions subcollection
+                const cashboxTransactionsRef = collection(
+                    doc(db, "teams", teamId),
+                    "cashboxTransactions"
+                );
+
+                // Add a new document to the subcollection
+                const newTransactionRef = await addDoc(cashboxTransactionsRef,
+                    {
+                        amount: transactionData.amount,
+                        reason: transactionData.reason,
+                        userUid: transactionData.userUid,
+                    });
+
+                console.log(`New cashbox transaction created with ID: ${JSON.stringify(newTransactionRef)}`);
+            } catch (error) {
+                console.error("Error adding cashbox transaction:", error);
+                return null;
+            }
+        },
     },
 });
