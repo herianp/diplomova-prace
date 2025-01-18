@@ -7,14 +7,17 @@
           <button class="btn btn-dark" @click="handleRequests">Requests</button>
           <p>0</p>
         </li>
+        <li style="display:flex;">
+          <button class="btn btn-dark" @click="openPaymentForm">Payment</button>
+        </li>
       </ul>
     </div>
 
     <h1>{{ $t('survey.title') }}</h1>
 
     <button
-        class="btn-danger"
-        @click="openNewSurveyForm()"
+        class="btn btn-danger"
+        @click="openNewSurveyForm"
     >
       {{ $t('survey.create.title') }}
     </button>
@@ -80,6 +83,13 @@
       />
     </div>
 
+    <!-- Modalní okno -->
+    <div v-if="isPaymentModalOpen" class="modal-overlay" @click.self="closeModal">
+      <TeamForm
+          @closeModal="closeModal"
+      />
+    </div>
+
   </div>
 </template>
 
@@ -92,6 +102,7 @@ import DCardSlots from "@/components/base/d-card-slots.vue";
 import {useTeamComposable} from "@/use/useTeamComposable.js";
 import SurveyEditForm from "@/components/modal/SurveyEditForm.vue";
 import {useAuthStore} from "@/stores/auth.js";
+import TeamForm from "@/components/modal/TeamForm.vue";
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
@@ -108,6 +119,7 @@ const teamIdFromRoute = route.params.teamId;
 
 const isModalOpen = ref(false);
 const isEditModalOpen = ref(false);
+const isPaymentModalOpen = ref(false);
 
 function openNewSurveyForm() {
   isModalOpen.value = true;
@@ -118,9 +130,14 @@ function openEditSurveyForm(survey) {
   isEditModalOpen.value = true;
 }
 
+function openPaymentForm() {
+  isPaymentModalOpen.value = true;
+}
+
 function closeModal() {
   isModalOpen.value = false;
   isEditModalOpen.value = false;
+  isPaymentModalOpen.value = false;
   console.log('close modal');
 }
 
@@ -157,7 +174,7 @@ onMounted(() => {
   color: white;
   display: flex;
   justify-content: center;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .powerUser-navbar ul {
