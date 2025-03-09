@@ -17,7 +17,7 @@
       <q-item clickable v-ripple>
         <q-item-section avatar>
           <q-avatar size="40px">
-            <img src="https://cdn.quasar.dev/img/avatar.png" />
+            <img src="https://cdn.quasar.dev/img/avatar.png" alt="img" />
           </q-avatar>
         </q-item-section>
         <q-item-section>
@@ -48,7 +48,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/useAuthStore";
+import { useAuthStore } from "@/stores/useAuthStore.ts";
 import { RouteEnum } from '@/enums/routesEnum.ts'
 
 const router = useRouter();

@@ -17,6 +17,7 @@ import { computed } from 'vue'
 const teamStore = useTeamStore();
 
 const userTeams = computed(() => teamStore.teams);
+
 const currentTeam = computed({
   get: () => teamStore.currentTeam,
   set: (team) => teamStore.currentTeam = team
