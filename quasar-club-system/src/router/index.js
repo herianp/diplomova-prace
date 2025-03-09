@@ -26,10 +26,10 @@ export default defineRouter(function () {
     // Wait for the authentication state
     if (!authStore.isInitialized) {
       await new Promise((resolve) => {
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
           authStore.user = user; // Update user in Pinia store
           if (user) {
-            teamStore.setTeamListener(user.uid); // ✅ Restore Firestore listener
+            await teamStore.setTeamListener(user.uid); // ✅ Restore Firestore listener
           }
           resolve();
         });

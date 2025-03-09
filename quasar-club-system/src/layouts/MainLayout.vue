@@ -12,6 +12,7 @@
 
     <CustomDrawer v-model="drawerOpen" />
 
+<!--style="padding-top: 0"-->
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -20,8 +21,8 @@
 
 <script setup>
 import { ref } from "vue";
-import CustomDrawer from "@/components/CustomDrawer.vue";
-import TeamDropdown from '@/components/TeamDropdown.vue'
+import CustomDrawer from "@/components/new/CustomDrawer.vue";
+import TeamDropdown from '@/components/new/TeamDropdown.vue'
 
 const drawerOpen = ref(true);
 </script>
