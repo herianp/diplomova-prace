@@ -1,5 +1,9 @@
 export default {
   app: {
-    title: "Club Manager [cz]"
+    title: "Klubový manažer"
+  },
+  survey: {
+    title: "Ankety",
+    create: "Vytvořit anketu",
   }
 }
