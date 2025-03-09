@@ -1,169 +1,62 @@
 <template>
   <div>
-
+    <h1 style="text-align: center" class="q-ma-none q-pa-none">{{ $t('survey.title') }}</h1>
     <div v-if="isPowerUser" class="powerUser-navbar">
-      <ul>
-        <li style="display:flex;">
-          <button class="btn btn-dark" @click="handleRequests">Requests</button>
-          <p>0</p>
-        </li>
-        <li style="display:flex;">
-          <button class="btn btn-dark" @click="openPaymentForm">Payment</button>
-        </li>
-      </ul>
+      <q-btn @click="handleCreateSurvey" align="around" class="btn-fixed-width" color="brown-5" :label="$t('survey.create')" icon="lightbulb_outline">
+        <q-dialog v-model="dialog" :backdrop-filter="backdropFilter">
+          <q-card>
+            <q-card-section class="row items-center q-pb-none text-h6">
+              Dialog
+            </q-card-section>
+
+            <q-card-section>
+              This dialog has a backdrop filter of {{ backdropFilter }}.
+            </q-card-section>
+
+            <q-card-actions align="right">
+              <q-btn flat label="Close" color="primary" v-close-popup />
+            </q-card-actions>
+          </q-card>
+        </q-dialog>
+      </q-btn>
     </div>
 
-    <h1>{{ $t('survey.title') }}</h1>
-
-    <button
-        class="btn btn-danger"
-        @click="openNewSurveyForm"
-    >
-      {{ $t('survey.create.title') }}
-    </button>
-
-    <d-card-slots
-        v-for="survey in surveys"
-        :key="survey.id"
-        :title="survey.title"
-        :description="survey.description"
-    >
-      <template #statistics>
-        <h5>Votes: {{ survey.votes.length }}</h5>
-        <h5 style="color: gray">
-          <span style="color: green">{{ teamStore.getPositiveVotes(survey.id) }}</span>
-          |
-          <span style="color: red">{{ teamStore.getNegativeVotes(survey.id) }}</span>
-        </h5>
-      </template>
-
-      <template #footer>
-        <h5>{{ useClub.getDisplayedDateTime(survey.date, survey.time) }}</h5>
-        <div>
-          <img
-              src="@/assets/icon_settings.png"
-              class="icon-settings"
-              @click="openEditSurveyForm(survey)"
-              alt="settings"
-          />
-          <a
-              class="btn btn-primary me-2"
-              :class="{
-            'btn btn-success me-2': isSurveyActive(survey) && isPositiveVote(survey),
-            'btn btn-primary me-2': !isSurveyActive(survey),
-          }"
-              @click="addVote(survey.id,true)"
-          >
-            Going
-          </a>
-          <a
-              class="btn btn-primary"
-              :class="{
-            'btn btn-danger': isSurveyActive(survey) && !isPositiveVote(survey),
-            'btn btn-primary': !isSurveyActive(survey),
-          }"
-              @click="addVote(survey.id,false)"
-          >
-            Not going
-          </a>
-        </div>
-      </template>
-
-      <template #modal v-if="isEditModalOpen">
-        <SurveyEditForm
-            @closeModal="closeModal"/>
-      </template>
-    </d-card-slots>
-
-    <!-- Modalní okno -->
-    <div v-if="isModalOpen" class="modal-overlay" @click.self="closeModal">
-      <SurveyForm
-          @closeModal="closeModal"
-          :teamId="teamIdFromRoute"
-      />
-    </div>
-
-    <!-- Modalní okno -->
-    <div v-if="isPaymentModalOpen" class="modal-overlay" @click.self="closeModal">
-      <TeamForm
-          @closeModal="closeModal"
-      />
-    </div>
+    <SurveyCard
+      v-for="survey in surveys"
+      :key="survey.id"
+    />
 
   </div>
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from "vue";
-import SurveyForm from "@/components/modal/SurveyForm.vue";
+import { computed, onMounted, ref } from 'vue'
 import {useTeamStore} from "@/stores/useTeamStore.ts";
-import {useRoute} from "vue-router";
-import DCardSlots from "@/components/base/d-card-slots.vue";
-import {useTeamComposable} from "@/composable/useTeamComposable.js";
-import SurveyEditForm from "@/components/modal/SurveyEditForm.vue";
 import {useAuthStore} from "@/stores/useAuthStore.ts";
-import TeamForm from "@/components/modal/TeamForm.vue";
+import SurveyCard from '@/components/new/surveyCard.vue'
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 
-const useClub = useTeamComposable();
+const surveys = computed(() => teamStore.currentTeam.surveys);
+const dialog = ref(false)
+const backdropFilter = ref(null)
 
-const surveys = computed(() => teamStore.surveys);
 const user = computed(() => authStore.user);
 const currentTeam = computed(() => teamStore.currentTeam);
 const isPowerUser = computed(() => currentTeam.value?.powerusers.includes(user.value.uid));
 
-const route = useRoute();
-const teamIdFromRoute = route.params.teamId;
-
-const isModalOpen = ref(false);
-const isEditModalOpen = ref(false);
-const isPaymentModalOpen = ref(false);
-
-function openNewSurveyForm() {
-  isModalOpen.value = true;
+function handleCreateSurvey() {
+  backdropFilter.value = 'contrast(40%)'
+  dialog.value = true
 }
 
-function openEditSurveyForm(survey) {
-  teamStore.editedSurvey = survey;
-  isEditModalOpen.value = true;
-}
-
-function openPaymentForm() {
-  isPaymentModalOpen.value = true;
-}
-
-function closeModal() {
-  isModalOpen.value = false;
-  isEditModalOpen.value = false;
-  isPaymentModalOpen.value = false;
-  console.log('close modal');
-}
-
-function isSurveyActive(survey) {
-  return survey.votes.some((vote) => vote.uid === user.value.uid); //TODO i add .value
-}
-
-function isPositiveVote(survey) {
-  return survey.votes.some((vote) => vote.uid === user.value.uid && vote.vote); //TODO i add .value
-}
-
-function addVote(surveyId, vote) {
-  teamStore.addVote(surveyId, user.value.uid, vote)
-}
-
-function handleRequests() {
-  alert('Logic for modal okno s requesty');
-}
-
-onMounted(() => {
-  console.log('fetch surveys by team id', teamIdFromRoute);
-  teamStore.setSurveysListener(teamIdFromRoute);
-  teamStore.getTeamByIdAndSetCurrentTeam(teamIdFromRoute);
+onMounted(async () => {
+  console.log(`Current team1: ${teamStore.teams.length}`);
+  // console.log(`Current team2: ${teamStore.currentTeam.name}`);
+  console.log(`Current team3: ${currentTeam.value.name}`);
+  // teamStore.setSurveysListener(teamStore.currentTeam.id);
 });
-
-
 </script>
 
 <style scoped>

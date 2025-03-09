@@ -13,12 +13,22 @@ import {
 } from "@/services/teamService";
 import { ISurvey } from '../interfaces/interfaces'
 
+const getInitialTeam = () => ({
+  creator: '1',
+  id: '1',
+  invitationCode: '123',
+  members: [],
+  name: 'Team 1',
+  powerusers: [],
+  surveys: [],
+});
+
 export const useTeamStore = defineStore("team", {
   state: () => ({
     teams: reactive([]),
     surveys: reactive([]),
     editedSurvey: ref(null),
-    currentTeam: ref(null),
+    currentTeam: getInitialTeam(),
 
     // Firestore listeners
     unsubscribeTeams: ref<(() => void) | null>(null),
@@ -30,17 +40,24 @@ export const useTeamStore = defineStore("team", {
       await createTeam(teamName, userId);
     },
 
-    // ✅ listening for Teams
-    setTeamListener(userId: string) {
-      if (this.unsubscribeTeams) {
-        this.unsubscribe(); // 🛑 Stop previous listener
-      }
-
-      this.unsubscribeTeams = getTeamsByUserId(userId, (teams) => {
-        this.teams = teams
-        if(teams.length > 0) {
-          this.setCurrentTeam(this.teams[0]);
+    // ✅ listening for Teams, return promise, because we need await in beforeEach
+    setTeamListener(userId: string): Promise<void> {
+      return new Promise((resolve) => {
+        if (this.unsubscribeTeams) {
+          this.unsubscribeTeams(); // 🛑 Stop previous listener
         }
+
+        this.unsubscribeTeams = getTeamsByUserId(userId, (teams) => {
+          this.teams = teams;
+          console.log("Teams updated: ", this.teams);
+
+          if (teams.length > 0) {
+            this.setCurrentTeam(this.teams[0]);
+            console.log("Current team set to: ", this.currentTeam);
+          }
+
+          resolve(); // ✅ Resolve the Promise when teams are set
+        });
       });
     },
 
