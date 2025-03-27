@@ -64,7 +64,7 @@
 import {RouterLink} from "vue-router";
 import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
 import {ref} from "vue";
-import {useAuthStore} from "@/stores/useAuthStore.ts";
+import {useAuthStore} from "@/stores/authStore.ts";
 
 const authStore = useAuthStore();
 

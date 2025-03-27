@@ -19,8 +19,8 @@
 
 <script setup>
 import {ref} from "vue";
-import { useAuthStore} from "@/stores/useAuthStore.ts";
-import {useTeamStore} from "@/stores/useTeamStore.ts";
+import { useAuthStore} from "@/stores/authStore.ts";
+import {useTeamStore} from "@/stores/teamStore.ts";
 
 const authStore = useAuthStore();
 const teamStore = useTeamStore();

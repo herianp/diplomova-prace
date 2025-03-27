@@ -48,7 +48,7 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/useAuthStore.ts";
+import { useAuthStore } from "@/stores/authStore.ts";
 import { RouteEnum } from '@/enums/routesEnum.ts'
 
 const router = useRouter();

@@ -38,7 +38,7 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {useTeamStore} from "@/stores/useTeamStore.ts";
+import {useTeamStore} from "@/stores/teamStore.ts";
 import DCardSlots from "@/components/base/d-card-slots.vue";
 import TeamForm from "@/components/modal/TeamForm.vue";
 import {getAuth, onAuthStateChanged} from "firebase/auth";

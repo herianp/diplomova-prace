@@ -1,10 +1,10 @@
 import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
 import routes from './routes'
-import { useAuthStore } from '@/stores/useAuthStore'
+import { useAuthStore } from '@/stores/authStore.js'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { RouteEnum } from '@/enums/routesEnum.ts'
-import { useTeamStore } from '@/stores/useTeamStore.ts'
+import { useTeamStore } from '@/stores/teamStore.ts'
 
 export default defineRouter(function () {
   const createHistory = process.env.SERVER

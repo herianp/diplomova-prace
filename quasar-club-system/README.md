@@ -4,8 +4,6 @@ Club can manage players in many ways.
 
 ## Install the dependencies
 ```bash
-yarn
-# or
 npm install
 ```
 
@@ -17,16 +15,12 @@ quasar dev
 
 ### Lint the files
 ```bash
-yarn lint
-# or
 npm run lint
 ```
 
 
 ### Format the files
 ```bash
-yarn format
-# or
 npm run format
 ```
 
