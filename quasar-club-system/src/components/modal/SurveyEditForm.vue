@@ -64,7 +64,7 @@
 <script setup>
 import {useFormComposable} from "@/composable/useFormComposable.js";
 import {computed, onMounted, ref} from "vue";
-import {useTeamStore} from "@/stores/useTeamStore.ts";
+import {useTeamStore} from "@/stores/teamStore.ts";
 
 const teamStore = useTeamStore();
 

@@ -9,9 +9,10 @@ import {
   addSurvey,
   updateSurvey,
   addVote,
+  addSurveyVote,
   addCashboxTransaction
 } from "@/services/teamService";
-import { ISurvey } from '../interfaces/interfaces'
+import { ISurvey } from '@/interfaces/interfaces'
 
 const getInitialTeam = () => ({
   creator: '1',
@@ -26,7 +27,7 @@ const getInitialTeam = () => ({
 export const useTeamStore = defineStore("team", {
   state: () => ({
     teams: reactive([]),
-    surveys: reactive([]),
+    surveys: ref<ISurvey[]>([]),
     editedSurvey: ref(null),
     currentTeam: getInitialTeam(),
 
@@ -95,6 +96,16 @@ export const useTeamStore = defineStore("team", {
 
     async addCashboxTransaction(teamId: string, transactionData: any) {
       await addCashboxTransaction(teamId, transactionData);
+    },
+
+    async addSurveyVote(surveyId: string, userUid: string, newVote: boolean) {
+      const survey = this.surveys.find(s => s.id === surveyId);
+      if (survey) {
+        const isUserVoteExists = survey.votes.find(v => v.userUid === userUid);
+        const votes = survey.votes || [];
+
+        await addSurveyVote(surveyId, userUid, newVote, votes, isUserVoteExists);
+      }
     },
 
     clearData() {

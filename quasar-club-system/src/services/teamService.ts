@@ -11,7 +11,7 @@ import {
   getDoc,
   getDocs
 } from "firebase/firestore";
-import { ISurvey } from '../interfaces/interfaces'
+import { ISurvey, IVote } from '@/interfaces/interfaces'
 
 // **Create a New Team**
 export const createTeam = async (teamName: string, userId: string) => {
@@ -106,16 +106,21 @@ export const deleteSurvey = async (surveyId: string) => {
 
 // **Add a New Survey**
 export const addSurvey = async (newSurvey: ISurvey) => {
+  const currentDate = new Date().getTime().toString();
   try {
     await addDoc(collection(db, "surveys"), {
-      ...newSurvey,
-      createdDate: new Date().getTime().toString(),
+      createdDate: currentDate,
+      date: newSurvey.date,
+      time: newSurvey.time,
+      title: newSurvey.title,
+      dateTime: newSurvey.dateTime,
+      description: newSurvey.description,
+      teamId: newSurvey.teamId,
       votes: [],
-    });
-    console.log("Survey added:", newSurvey);
+    })
+    console.log("Document written with ID:");
   } catch (error) {
     console.error("Error adding survey:", error);
-    throw error;
   }
 };
 
@@ -164,3 +169,27 @@ export const addCashboxTransaction = async (teamId: string, transactionData: any
     throw error;
   }
 };
+
+export const addSurveyVote = async (surveyId: string, userUid: string, newVote: boolean, votes: any[], isUserVoteExists: IVote) => {
+  const surveyRef = doc(db, "surveys", surveyId);
+  console.log(`existing vote ${JSON.stringify(isUserVoteExists)}`);
+
+  if (isUserVoteExists) {
+    if (isUserVoteExists.vote === newVote) {
+      console.log(`user ${userUid} already voted for ${newVote} in survey ${surveyId}`);
+      return
+    }
+    console.log(`user ${userUid} changed vote from ${isUserVoteExists.vote} to ${newVote} in survey ${surveyId}`);
+
+    const updatedVotes = votes.map((vote) =>
+      vote.userUid === userUid ? { ...vote, vote: newVote } : vote
+    );
+
+    await updateDoc(surveyRef, { votes: updatedVotes });
+
+  } else {
+    console.log('Here')
+    const updatedVotes = [...votes, { userUid: userUid, vote: newVote }];
+    await updateDoc(surveyRef, { votes: updatedVotes });
+  }
+}
