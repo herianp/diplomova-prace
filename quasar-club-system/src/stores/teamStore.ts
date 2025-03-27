@@ -36,6 +36,15 @@ export const useTeamStore = defineStore("team", {
     unsubscribeSurveys: ref<(() => void) | null>(null),
   }),
 
+  getters: {
+    getPositiveVotes: (state) => (surveyId: string) => {
+      return state.surveys.find(survey => survey.id === surveyId).votes.filter(vote => vote.vote).length;
+    },
+    getNegativeVotes: (state) => (surveyId: string) => {
+      return state.surveys.find(survey => survey.id === surveyId).votes.filter(vote => !vote.vote).length;
+    },
+  },
+
   actions: {
     async createTeam(teamName: string, userId: string) {
       await createTeam(teamName, userId);
