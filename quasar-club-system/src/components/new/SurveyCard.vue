@@ -14,24 +14,27 @@
 
     <q-separator />
 
-    <q-card-actions>
-      <q-btn flat round icon="settings" @click="showModal = true" />
+    <q-card-actions style="display:flex; justify-content: space-between">
+      <div>
+        <q-btn flat round icon="settings" @click="showModal = true" />
 
-      <q-btn
-        label="Yes"
-        :color="isSurveyActive() && isPositiveVote() ? 'green' : 'black'"
-        @click="addSurveyVote(survey.id, true)"
-        class="q-mr-sm"
-        unelevated
-        rounded
-      />
-      <q-btn
-        label="No"
-        :color="isSurveyActive() && !isPositiveVote() ? 'red' : 'black'"
-        @click="addSurveyVote(survey.id, false)"
-        unelevated
-        rounded
-      />
+        <q-btn
+          label="Yes"
+          :color="isSurveyActive() && isPositiveVote() ? 'green' : 'black'"
+          @click="addSurveyVote(survey.id, true)"
+          class="q-mr-sm"
+          unelevated
+          rounded
+        />
+        <q-btn
+          label="No"
+          :color="isSurveyActive() && !isPositiveVote() ? 'red' : 'black'"
+          @click="addSurveyVote(survey.id, false)"
+          unelevated
+          rounded
+        />
+      </div>
+      <VoteStats :survey="survey" />
     </q-card-actions>
 
     <BaseModal v-model="showModal" :title="$t('survey.update')">
@@ -48,6 +51,7 @@ import { useAuthStore } from '@/stores/authStore.js'
 import { useTeamStore } from '@/stores/teamStore.js'
 import { useTeamComposable } from '@/composable/useTeamComposable.js'
 import BaseModal from '@/components/modal/BaseModal.vue'
+import VoteStats from '@/components/VoteStats.vue'
 
 const props = defineProps({
   survey: {
