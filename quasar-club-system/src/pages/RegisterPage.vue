@@ -6,7 +6,7 @@
 
 <script setup>
 import { ref } from "vue";
-import { useAuthStore } from "@/stores/useAuthStore.ts";
+import { useAuthStore } from "@/stores/authStore.ts";
 import RegisterFormNew from '@/components/new/RegisterFormNew.vue'
 
 const authStore = useAuthStore();

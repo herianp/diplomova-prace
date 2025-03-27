@@ -1,7 +1,6 @@
-// useFormSubmit.js
 import { ref } from 'vue';
-import {useTeamComposable} from "@/composable/useTeamComposable.js";
-import {useTeamStore} from "@/stores/useTeamStore.ts";
+import {useTeamComposable} from "@/composable/useTeamComposable.ts";
+import {useTeamStore} from "@/stores/teamStore.ts";
 
 export function useFormComposable() {
     const teamStore = useTeamStore();
