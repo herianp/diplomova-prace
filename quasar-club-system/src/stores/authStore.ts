@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { authStateListener, loginUser, logoutUser, registerUser } from "@/services/authService";
 import { RouteEnum } from "@/enums/routesEnum.js";
-import { useTeamStore } from "@/stores/useTeamStore.js";
-import { ICredentials } from '../interfaces/interfaces'
+import { useTeamStore } from "@/stores/teamStore.js";
+import { ICredentials } from '@/interfaces/interfaces'
 import { ref } from 'vue'
 
 const getInitialUser = () => ({

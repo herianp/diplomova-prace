@@ -1,80 +1,78 @@
 <template>
-  <div class="modal-content">
-    <form @submit.prevent="submitFormHandler">
-      <div class="form-group">
-        <label for="title">Title</label>
-        <input
-            type="text"
-            v-model="title"
-            class="form-control"
-            id="title"
-            placeholder="Enter title">
-      </div>
+  <q-form @submit.prevent="submitFormHandler" class="q-gutter-md">
+    <q-input
+      v-model="title"
+      label="Title"
+      filled
+      dense
+      lazy-rules
+      :rules="[(val) => !!val || 'Title is required']"
+    />
 
-      <div class="form-group">
-        <label for="description">Description</label>
-        <input
-            type="text"
-            v-model="description"
-            class="form-control"
-            id="description"
-            placeholder="Description">
-      </div>
-      <!--   Date picker   -->
-      <div class="form-group">
-        <label for="date">Date</label>
-        <input
-            type="date"
-            v-model="date"
-            class="form-control"
-            id="date"
-            placeholder="Date">
-      </div>
+    <q-input v-model="description" label="Description" filled dense type="text" />
 
-      <div class="form-group">
-        <label for="time">Time</label>
-        <input
-            type="time"
-            v-model="time"
-            class="form-control"
-            id="time"
-            placeholder="Time">
-      </div>
+    <!-- ✅ Date Picker -->
+    <q-input
+      v-model="date"
+      label="Select date"
+      filled
+      dense
+      readonly
+      :rules="[(val) => !!val || 'Date is required']"
+    >
+      <template #append>
+        <q-icon name="event" class="cursor-pointer">
+          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+            <q-date v-model="date" mask="YYYY-MM-DD" />
+          </q-popup-proxy>
+        </q-icon>
+      </template>
+    </q-input>
 
-      <button type="submit" class="btn btn-primary" style="margin: 10px 0">Submit</button>
-    </form>
-    <p v-if="error" class="error" style="color: red">{{ error }}</p>
-    <button @click="closeModal" class="btn btn-secondary" style="margin: 5px 0">Close</button>
-  </div>
+    <!-- ✅ Time Picker -->
+    <q-input
+      v-model="time"
+      label="Select time"
+      filled
+      dense
+      readonly
+      :rules="[(val) => !!val || 'Time is required']"
+    >
+      <template #append>
+        <q-icon name="access_time" class="cursor-pointer">
+          <q-popup-proxy cover transition-show="scale" transition-hide="scale">
+            <q-time v-model="time" format24h mask="HH:mm" />
+          </q-popup-proxy>
+        </q-icon>
+      </template>
+    </q-input>
+
+    <q-btn type="submit" label="Submit" color="primary" class="q-mt-md" unelevated />
+  </q-form>
 </template>
 
 <script setup>
-import {useFormComposable} from "@/composable/useFormComposable.js";
+import { ref } from 'vue'
 
-const emits = defineEmits(['closeModal']);
+const emit = defineEmits(['submit'])
 
-const props = defineProps({
-  teamId: {
-    type: String,
-    default: "",
-  },
-});
-
-const { title, description, date, time, submitForm, error } = useFormComposable();
-
-const closeModal = () => {
-  emits('closeModal');
-}
+const title = ref('')
+const description = ref('')
+const date = ref(new Date().toISOString().slice(0, 10))
+const time = ref('19:00')
 
 function submitFormHandler() {
-  console.log(`date ${date.value}`);
-  console.log(`time ${time.value}`);
-  submitForm(props.teamId);
-  closeModal();
+  emit('submit', {
+    title: title.value,
+    description: description.value,
+    date: date.value,
+    time: time.value,
+  })
+
+  // Optionally reset form
+  title.value = ''
+  description.value = ''
+  date.value = ''
+  time.value = ''
 }
-
 </script>
-
-<style scoped>
-
-</style>
