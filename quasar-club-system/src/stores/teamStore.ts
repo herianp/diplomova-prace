@@ -10,7 +10,8 @@ import {
   updateSurvey,
   addVote,
   addSurveyVote,
-  addCashboxTransaction
+  addCashboxTransaction,
+  deleteTeam,
 } from "@/services/teamService";
 import { ISurvey } from '@/interfaces/interfaces'
 
@@ -48,6 +49,10 @@ export const useTeamStore = defineStore("team", {
   actions: {
     async createTeam(teamName: string, userId: string) {
       await createTeam(teamName, userId);
+    },
+
+    async deleteTeam(teamId: string) {
+      await deleteTeam(teamId);
     },
 
     // ✅ listening for Teams, return promise, because we need await in beforeEach

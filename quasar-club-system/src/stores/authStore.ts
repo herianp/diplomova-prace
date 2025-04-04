@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { authStateListener, loginUser, logoutUser, registerUser } from "@/services/authService";
-import { RouteEnum } from "@/enums/routesEnum.js";
-import { useTeamStore } from "@/stores/teamStore.js";
+import { RouteEnum } from "@/enums/routesEnum";
+import { useTeamStore } from "@/stores/teamStore";
 import { ICredentials } from '@/interfaces/interfaces'
 import { ref } from 'vue'
 
@@ -13,6 +13,7 @@ export const useAuthStore = defineStore("auth", {
   state: () => ({
     user: getInitialUser(),
     isLoading: ref(false), // Global loading state
+    isAdmin: ref(true), // Global loading state
   }),
 
   getters: {},
