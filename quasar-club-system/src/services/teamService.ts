@@ -33,6 +33,17 @@ export const createTeam = async (teamName: string, userId: string) => {
   }
 };
 
+// **Delete a Team**
+export const deleteTeam = async (teamId: string) => {
+  try {
+    await deleteDoc(doc(db, "teams", teamId));
+    console.log(`Team ${teamId} deleted.`);
+  } catch (error) {
+    console.error("Error deleting survey:", error);
+    throw error;
+  }
+};
+
 // **Generate an Invitation Code**
 const generateInvitationCode = () => {
   return Math.random().toString(36).substring(2, 8).toUpperCase();

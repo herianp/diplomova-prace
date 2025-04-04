@@ -11,8 +11,10 @@
         icon="lightbulb_outline"
       />
     </div>
-
-    <SurveyCard v-for="survey in surveys" :key="survey.id" :survey="survey" />
+<!-- div-- column items-center q-gutter-y-md  card-- col-12 list-item-width -->
+    <div class="row q-gutter-lg q-pa-lg">
+      <SurveyCard v-for="survey in surveys" :key="survey.id" :survey="survey" />
+    </div>
 
     <BaseModal v-model="showModal" :title="$t('survey.create')">
       <template #body>
@@ -28,9 +30,9 @@ import { useTeamStore } from '@/stores/teamStore.ts'
 import { useAuthStore } from '@/stores/authStore.ts'
 import SurveyCard from '@/components/new/SurveyCard.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
-import BaseModal from '@/components/modal/BaseModal.vue'
+import BaseModal from '@/components/base/BaseModal.vue'
 import SurveyForm from '@/components/modal/SurveyForm.vue'
-import { useDateHelpers } from '@/composable/useDateHelpers.js'
+import { useDateHelpers } from '@/composable/useDateHelpers.ts'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
@@ -81,35 +83,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.powerUser-navbar {
-  width: 100%;
-  background-color: #007bff; /* Bootstrap Primary Blue */
-  padding: 1rem;
-  color: white;
-  display: flex;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-.powerUser-navbar ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.powerUser-navbar li {
-  margin: 0 1rem;
-}
-
-.powerUser-navbar a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
-}
-
-.powerUser-navbar a:hover {
-  color: #ffc107; /* Bootstrap Warning Yellow */
-}
 </style>

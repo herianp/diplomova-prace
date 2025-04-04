@@ -1,54 +1,30 @@
 <template>
-  <div class="modal-content">
-    <form @submit.prevent="submitFormHandler">
-      <div class="form-group">
-        <label for="teamName">Team name</label>
-        <input
-            type="text"
-            v-model="teamName"
-            class="form-control"
-            id="teamName"
-            placeholder="Enter name">
-      </div>
-      <button type="submit" class="btn btn-primary" style="margin: 10px 0">Submit</button>
-    </form>
-    <p v-if="error" class="error" style="color: red">{{ error }}</p>
-    <button @click="closeModal" class="btn btn-secondary" style="margin: 5px 0">Close</button>
-  </div>
+  <q-form @submit.prevent="submitFormHandler" class="q-gutter-md">
+    <q-input
+      v-model="title"
+      label="Title"
+      filled
+      dense
+      lazy-rules
+      :rules="[(val) => !!val || 'Title is required']"
+    />
+
+    <q-btn type="submit" label="Submit" color="primary" class="q-mt-md" unelevated />
+  </q-form>
 </template>
 
 <script setup>
-import {ref} from "vue";
-import { useAuthStore} from "@/stores/authStore.ts";
-import {useTeamStore} from "@/stores/teamStore.ts";
+import { ref } from 'vue'
 
-const authStore = useAuthStore();
-const teamStore = useTeamStore();
+const emit = defineEmits(['submit'])
 
-const emits = defineEmits(['closeModal']);
-
-const teamName = ref('');
-const error = ref(null);
-
-const closeModal = () => {
-  emits('closeModal');
-}
+const title = ref('')
 
 function submitFormHandler() {
-  if (!teamName.value) {
-    error.value = 'Please fill in all fields';
-    return;
-  }
-  createTeam();
-  closeModal();
-}
+  emit('submit', {
+    title: title.value
+  });
 
-function createTeam() {
-  teamStore.createTeam(teamName.value, authStore.user.uid);
+  title.value = ''
 }
-
 </script>
-
-<style scoped>
-
-</style>

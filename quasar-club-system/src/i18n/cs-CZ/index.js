@@ -7,6 +7,11 @@ export default {
     create: "Vytvořit anketu",
     update: "Upravit anketu"
   },
+  team: {
+    title: "Týmy",
+    create: "Vytvořit tým",
+    update: "Upravit tým"
+  },
   days: {
     sunday: "Neděle",
     monday: "Pondělí",

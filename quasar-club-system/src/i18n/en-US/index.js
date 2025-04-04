@@ -7,6 +7,11 @@ export default {
     create: "Creat survey",
     update: "Edit survey"
   },
+  team: {
+    title: "Teams",
+    create: "Create team",
+    update: "Edit team"
+  },
   days: {
     sunday: "Sunday",
     monday: "Monday",
