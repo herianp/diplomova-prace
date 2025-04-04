@@ -1,17 +1,6 @@
 import { defineStore } from "pinia";
 import { reactive, ref } from "vue";
-import {
-  createTeam,
-  getTeamsByUserId,
-  getTeamById,
-  getSurveysByTeamId,
-  deleteSurvey,
-  addSurvey,
-  updateSurvey,
-  addVote,
-  addSurveyVote,
-  addCashboxTransaction
-} from "@/services/teamService";
+import { useTeamComposable } from '@/composable/useTeamComposable'
 import { ISurvey } from '@/interfaces/interfaces'
 
 const getInitialTeam = () => ({
@@ -47,11 +36,14 @@ export const useTeamStore = defineStore("team", {
 
   actions: {
     async createTeam(teamName: string, userId: string) {
+      const { createTeam } = useTeamComposable();
       await createTeam(teamName, userId);
     },
 
     // ✅ listening for Teams, return promise, because we need await in beforeEach
     setTeamListener(userId: string): Promise<void> {
+      const { getTeamsByUserId } = useTeamComposable();
+
       return new Promise((resolve) => {
         if (this.unsubscribeTeams) {
           this.unsubscribeTeams(); // 🛑 Stop previous listener
@@ -73,6 +65,8 @@ export const useTeamStore = defineStore("team", {
 
     // ✅ listening for surveys
     setSurveysListener(teamId: string) {
+      const { getSurveysByTeamId } = useTeamComposable()
+
       if (this.unsubscribeSurveys) {
         this.unsubscribeSurveys(); // 🛑 Stop previous listener
       }
@@ -83,31 +77,44 @@ export const useTeamStore = defineStore("team", {
     },
 
     async getTeamByIdAndSetCurrentTeam(teamId: string) {
+      const { getTeamById } = useTeamComposable();
       this.currentTeam = await getTeamById(teamId);
     },
 
     async deleteSurvey(surveyId: string) {
+      const { deleteSurvey } = useTeamComposable();
+
       await deleteSurvey(surveyId);
     },
 
     async addSurvey(newSurvey: ISurvey) {
+      const { addSurvey } = useTeamComposable();
+
       await addSurvey(newSurvey);
     },
 
     async updateSurvey(surveyId: string, updatedSurvey: any) {
+      const { updateSurvey } = useTeamComposable();
+
       await updateSurvey(surveyId, updatedSurvey);
     },
 
     async addVote(surveyId: string, userUid: string, newVote: boolean) {
+      const { addVote } = useTeamComposable();
+
       const survey = this.surveys.find((s) => s.id === surveyId);
       if (survey) await addVote(surveyId, userUid, newVote, survey.votes);
     },
 
     async addCashboxTransaction(teamId: string, transactionData: any) {
+      const { addCashboxTransaction } = useTeamComposable();
+
       await addCashboxTransaction(teamId, transactionData);
     },
 
     async addSurveyVote(surveyId: string, userUid: string, newVote: boolean) {
+      const { addSurveyVote } = useTeamComposable();
+
       const survey = this.surveys.find(s => s.id === surveyId);
       if (survey) {
         const isUserVoteExists = survey.votes.find(v => v.userUid === userUid);

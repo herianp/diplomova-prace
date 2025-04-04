@@ -2,6 +2,11 @@ export default {
   app: {
     title: "Klubový manažer"
   },
+  team: {
+    title: "Týmy",
+    create: "Vytvořit tým",
+    update: "Upravit tým"
+  },
   survey: {
     title: "Ankety",
     create: "Vytvořit anketu",

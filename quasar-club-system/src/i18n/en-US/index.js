@@ -2,6 +2,11 @@ export default {
   app: {
     title: "Club Manager"
   },
+  team: {
+    title: "Teams",
+    create: "Create team",
+    update: "Edit team"
+  },
   survey: {
     title: "Surveys",
     create: "Creat survey",

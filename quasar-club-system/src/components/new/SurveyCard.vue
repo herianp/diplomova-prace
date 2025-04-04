@@ -1,48 +1,36 @@
 <template>
-  <q-card class="my-card" flat bordered>
-    <q-card-section horizontal class="row justify-between items-center">
+  <BaseCard>
+    <template #header>
       <q-card-section class="q-pt-xs">
         <div class="text-overline">{{ getDisplayedDateTime(survey.date, survey.time) }}</div>
         <div class="text-h5 q-mt-sm q-mb-xs">{{ survey.title }}</div>
         <div class="text-caption text-grey">{{ survey.description }}</div>
       </q-card-section>
+    </template>
 
+    <template #media>
       <q-card-section class="col-5 flex flex-center">
         <q-img class="rounded-borders max-h-150" src="https://cdn.quasar.dev/img/parallax2.jpg" />
       </q-card-section>
-    </q-card-section>
+    </template>
 
-    <q-separator />
-
-    <q-card-actions style="display:flex; justify-content: space-between">
-      <div>
-        <q-btn flat round icon="settings" @click="showModal = true" />
-
-        <q-btn
-          label="Yes"
-          :color="isSurveyActive() && isPositiveVote() ? 'green' : 'black'"
-          @click="addSurveyVote(survey.id, true)"
-          class="q-mr-sm"
-          unelevated
-          rounded
-        />
-        <q-btn
-          label="No"
-          :color="isSurveyActive() && !isPositiveVote() ? 'red' : 'black'"
-          @click="addSurveyVote(survey.id, false)"
-          unelevated
-          rounded
-        />
-      </div>
+    <template #actions>
+      <SurveyActions
+        :yes-active="isSurveyActive() && isPositiveVote()"
+        :no-active="isSurveyActive() && !isPositiveVote()"
+        :is-power-user="isPowerUser"
+        @vote="(val) => addSurveyVote(survey.id, val)"
+        @open-settings="showModal = true"
+      />
       <VoteStats :survey="survey" />
-    </q-card-actions>
+    </template>
+  </BaseCard>
 
-    <BaseModal v-model="showModal" :title="$t('survey.update')">
-      <template #body>
-        <p>This is modal content. from my slot body</p>
-      </template>
-    </BaseModal>
-  </q-card>
+  <BaseModal v-model="showModal" :title="$t('survey.update')">
+    <template #body>
+      <p>This is modal content. from my slot body</p>
+    </template>
+  </BaseModal>
 </template>
 
 <script setup>
@@ -52,6 +40,8 @@ import { useTeamStore } from '@/stores/teamStore.js'
 import { useTeamComposable } from '@/composable/useTeamComposable.js'
 import BaseModal from '@/components/modal/BaseModal.vue'
 import VoteStats from '@/components/VoteStats.vue'
+import BaseCard from '@/components/base/BaseCard.vue'
+import SurveyActions from '@/components/SurveyActions.vue'
 
 const props = defineProps({
   survey: {
@@ -67,6 +57,8 @@ const { getDisplayedDateTime } = useTeamComposable()
 const showModal = ref(false)
 
 const user = computed(() => authStore.user)
+const currentTeam = computed(() => teamStore.currentTeam)
+const isPowerUser = computed(() => currentTeam.value?.powerusers.includes(user.value.uid))
 
 function isSurveyActive() {
   return props.survey.votes.some((vote) => vote.userUid === user.value.uid)

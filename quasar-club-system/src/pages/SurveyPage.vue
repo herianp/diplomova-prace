@@ -12,7 +12,16 @@
       />
     </div>
 
-    <SurveyCard v-for="survey in surveys" :key="survey.id" :survey="survey" />
+
+    <div class="row wrap q-col-gutter-md q-mt-md justify-start">
+      <div
+        v-for="survey in surveys"
+        :key="survey.id"
+        class="col-12"
+      >
+        <SurveyCard :survey="survey" />
+      </div>
+    </div>
 
     <BaseModal v-model="showModal" :title="$t('survey.create')">
       <template #body>
@@ -81,35 +90,5 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.powerUser-navbar {
-  width: 100%;
-  background-color: #007bff; /* Bootstrap Primary Blue */
-  padding: 1rem;
-  color: white;
-  display: flex;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
-.powerUser-navbar ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.powerUser-navbar li {
-  margin: 0 1rem;
-}
-
-.powerUser-navbar a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
-}
-
-.powerUser-navbar a:hover {
-  color: #ffc107; /* Bootstrap Warning Yellow */
-}
 </style>
