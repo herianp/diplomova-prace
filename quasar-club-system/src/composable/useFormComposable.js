@@ -4,6 +4,8 @@ import {useTeamStore} from "@/stores/teamStore.ts";
 
 export function useFormComposable() {
     const teamStore = useTeamStore();
+    const { deleteSurvey, addSurvey } = useTeamComposable();
+
     const title = ref('');
     const description = ref('');
     const date = ref('');
@@ -21,7 +23,7 @@ export function useFormComposable() {
                 return;
             }
 
-            await teamStore.addSurvey({
+            await addSurvey({
                 title: title.value,
                 description: description.value,
                 date: date.value,
@@ -41,8 +43,7 @@ export function useFormComposable() {
         error.value = null;
         console.log(`Deleted surveyId: ${surveyId}`)
         try {
-            // Todo delete survey from the DB
-            await teamStore.deleteSurvey(surveyId);
+            await deleteSurvey(surveyId);
         } catch (err) {
             console.log(`err ${err}`)
             error.value = 'Failed to delete data';

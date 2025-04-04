@@ -65,8 +65,10 @@ import {RouterLink} from "vue-router";
 import LanguageSwitcher from "@/components/LanguageSwitcher.vue";
 import {ref} from "vue";
 import {useAuthStore} from "@/stores/authStore.ts";
+import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
 const authStore = useAuthStore();
+const { logoutUser } = useAuthComposable();
 
 const isDropdownOpen = ref(false);
 
@@ -79,7 +81,7 @@ function closeDropdown() {
 
 function closeDropdownAndLogout() {
   isDropdownOpen.value = false;
-  authStore.logout();
+  logoutUser();
 }
 </script>
 
