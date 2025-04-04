@@ -5,7 +5,16 @@ export default {
   survey: {
     title: "Ankety",
     create: "Vytvořit anketu",
-    update: "Upravit anketu"
+    update: "Upravit anketu",
+    type: {
+      training: "Trénink",
+      match: "Zápas",
+    },
+  },
+  team: {
+    title: "Týmy",
+    create: "Vytvořit tým",
+    update: "Upravit tým"
   },
   days: {
     sunday: "Neděle",

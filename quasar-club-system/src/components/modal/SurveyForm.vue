@@ -1,5 +1,13 @@
 <template>
   <q-form @submit.prevent="submitFormHandler" class="q-gutter-md">
+    <q-select
+      filled
+      dense
+      v-model="surveyType"
+      :options="surveyTypeOptions"
+      style="width: 250px"
+    />
+
     <q-input
       v-model="title"
       label="Title"
@@ -52,7 +60,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { SurveyTypes } from '@/enums/SurveyTypes.js'
+import { useI18n } from 'vue-i18n'
+
+const i18n = useI18n();
 
 const emit = defineEmits(['submit'])
 
@@ -60,6 +72,18 @@ const title = ref('')
 const description = ref('')
 const date = ref(new Date().toISOString().slice(0, 10))
 const time = ref('19:00')
+const surveyType = ref({
+  label: i18n.t(`survey.type.${SurveyTypes.Training.toLowerCase()}`),
+  value: SurveyTypes.Training,
+});
+
+
+const surveyTypeOptions = computed(() => {
+  return Object.values(SurveyTypes).map((type) => ({
+    label: i18n.t(`survey.type.${type.toLowerCase()}`),
+    value: type,
+  }))
+})
 
 function submitFormHandler() {
   emit('submit', {
@@ -67,9 +91,10 @@ function submitFormHandler() {
     description: description.value,
     date: date.value,
     time: time.value,
+    surveyType: surveyType.value.value,
   })
 
-  // Optionally reset form
+  // Reset inputs
   title.value = ''
   description.value = ''
   date.value = ''

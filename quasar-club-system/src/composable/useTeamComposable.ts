@@ -14,8 +14,8 @@ import {
 import { ISurvey, IVote } from '@/interfaces/interfaces'
 import { useDateHelpers } from '@/composable/useDateHelpers'
 
-export function useTeamComposable() {
-  const { getDayName, getDateByDateAndTime, getFormatDate } = useDateHelpers()
+export function useTeamComposable(locale = 'en') {
+  const { getDayName, getDateByDateAndTime, getFormatDate } = useDateHelpers(locale)
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
 
   const createTeam = async (teamName: string, userId: string) => {
@@ -33,6 +33,16 @@ export function useTeamComposable() {
     } catch (error) {
       console.error('Error creating team:', error)
       throw error
+    }
+  }
+
+  async function deleteTeam(teamId: string) {
+    try {
+      await deleteDoc(doc(db, "teams", teamId));
+      console.log(`Team ${teamId} deleted.`);
+    } catch (error) {
+      console.error("Error deleting survey:", error);
+      throw error;
     }
   }
 
@@ -191,5 +201,6 @@ export function useTeamComposable() {
     addSurveyVote,
     addCashboxTransaction,
     getDisplayedDateTime,
+    deleteTeam,
   }
 }

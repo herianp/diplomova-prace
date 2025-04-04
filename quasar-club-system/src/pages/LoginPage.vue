@@ -9,9 +9,10 @@
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/authStore.ts";
 import LoginFormNew from '@/components/new/LoginFormNew.vue'
+import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
 const authStore = useAuthStore();
-
+const { loginUser } = useAuthComposable();
 
 const credentials = ref({
   email: '',
@@ -23,7 +24,7 @@ async function submitLogin() {
     alert('Please fill in all fields');
     return;
   }
-  await authStore.login(credentials.value);
+  await loginUser(credentials.value.email, credentials.value.password);
 }
 </script>
 
