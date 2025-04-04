@@ -5,9 +5,10 @@
         {{ getDisplayedDateTime(survey.date, survey.time) }}
       </div>
       <div class="row items-center no-wrap q-gutter-sm">
-        <div class="text-h5 q-ma-none q-ml-sm">{{ survey.title }}</div>
+        <div class="text-h5 q-ma-sm">{{ survey.title }}</div>
       </div>
-      <div class="text-grey-9 text-h6 q-pl-lg">{{ survey.description }}</div>
+
+      <div class="text-grey-9 q-pa-sm">{{ survey.description }}</div>
       <div class="flex justify-end">
         <SurveyActions
           :yes-active="isSurveyActive() && isPositiveVote()"
@@ -21,7 +22,7 @@
 
     <template #actions>
       <VoteStats :survey="survey" />
-      <SurveyTag :type="survey.type" class="q-ml-lg q-ma-none" />
+      <SurveyTag :type="survey.type" class="q-ma-none" />
     </template>
   </BaseCard>
 

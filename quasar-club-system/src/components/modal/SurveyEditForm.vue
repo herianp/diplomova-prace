@@ -65,12 +65,13 @@
 import {useFormComposable} from "@/composable/useFormComposable.js";
 import {computed, onMounted, ref} from "vue";
 import {useTeamStore} from "@/stores/teamStore.ts";
+import { useTeamComposable } from '@/composable/useTeamComposable.js'
 
 const teamStore = useTeamStore();
+const {title, description, deleteForm, date, time, error} = useFormComposable();
+const { updateSurvey } = useTeamComposable();
 
 const emits = defineEmits(['closeModal']);
-
-const {title, description, deleteForm, date, time, error} = useFormComposable();
 
 const deleteProcess = ref(false);
 const editedSurvey = computed(() => teamStore.editedSurvey);
@@ -80,7 +81,7 @@ const closeModal = () => {
 }
 
 function submitFormHandler() {
-  teamStore.updateSurvey(editedSurvey.value.id, title.value, description.value, date.value, time.value);
+  updateSurvey(editedSurvey.value.id, title.value, description.value, date.value, time.value);
   closeModal();
 }
 

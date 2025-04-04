@@ -1,6 +1,7 @@
 <template>
   <div>
-    <h1 style="text-align: center" class="q-ma-none q-pa-none">{{ $t('survey.title') }}</h1>
+    <h2 v-if="!isMobile" style="text-align: center" class="q-ma-none q-pa-none">{{ $t('survey.title') }}</h2>
+
     <div v-if="isPowerUser" class="powerUser-navbar">
       <q-btn
         @click="handleCreateSurvey"
@@ -11,9 +12,16 @@
         icon="lightbulb_outline"
       />
     </div>
-<!-- div-- column items-center q-gutter-y-md  card-- col-12 list-item-width -->
-    <div class="row q-gutter-lg q-pa-lg">
-      <SurveyCard v-for="survey in surveys" :key="survey.id" :survey="survey" />
+
+    <div class="row wrap q-col-gutter-lg q-pa-lg justify-start">
+      <div
+        v-for="survey in surveys"
+        :key="survey.id"
+        class="col-12"
+      >
+        <SurveyCard v-if="!isMobile" :survey="survey" />
+        <SurveyCardMobile v-else :survey="survey" />
+      </div>
     </div>
 
     <BaseModal v-model="showModal" :title="$t('survey.create')">
@@ -33,11 +41,18 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import BaseModal from '@/components/base/BaseModal.vue'
 import SurveyForm from '@/components/modal/SurveyForm.vue'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
+import { useTeamComposable } from '@/composable/useTeamComposable.js'
+import { useI18n } from 'vue-i18n'
+import { useScreenComposable } from '@/composable/useScreenComposable.js'
+import SurveyCardMobile from '@/components/new/SurveyCardMobile.vue'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
-const { getDateByDateAndTime } = useDateHelpers()
+const { isMobile } = useScreenComposable()
+const i18n = useI18n()
+const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
+const { addSurvey } = useTeamComposable()
 
 const surveys = computed(() => teamStore.surveys)
 const showModal = ref(false)
@@ -54,18 +69,18 @@ function handleCreateSurvey() {
 
 async function handleSurveySubmit(payload) {
   try {
-    await teamStore.addSurvey({
+    await addSurvey({
       title: payload.title,
       description: payload.description,
       date: payload.date,
       time: payload.time,
       dateTime: getDateByDateAndTime(payload.date, payload.time),
       teamId: currentTeam.value.id,
+      type: payload.surveyType,
     })
   } catch (err) {
   console.log(`err ${err}`);
-}
-
+  }
 
   console.log('Submitted data:', payload)
   showModal.value = false

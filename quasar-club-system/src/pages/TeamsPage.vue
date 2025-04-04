@@ -1,10 +1,10 @@
 <template>
   <div>
-    <h1 style="text-align: center" class="q-ma-none q-pa-none">{{ $t('survey.title') }}</h1>
+    <h1 style="text-align: center" class="q-ma-none q-pa-none">{{ $t('team.title') }}</h1>
 
     <div v-if="isAdmin" class="powerUser-navbar">
       <q-btn
-        @click="handleOpenModal"
+        @click="handleOpenNewTeamForm"
         align="around"
         class="btn-fixed-width"
         color="brown-5"
@@ -13,11 +13,17 @@
       />
     </div>
 
-    <div class="row q-gutter-lg q-pa-lg justify-center">
-      <TeamCard v-for="team in teams" :key="team.id" :team="team" />
+    <div class="row wrap q-col-gutter-md q-mt-md justify-start">
+      <div
+        v-for="team in teams"
+        :key="team.id"
+        class="col-xs-12 col-sm-6 col-md-4 col-lg-3"
+      >
+        <TeamCard :team="team" />
+      </div>
     </div>
 
-    <BaseModal v-model="showModal" :title="$t('survey.create')">
+    <BaseModal v-model="showModal" :title="$t('team.create')">
       <template #body>
         <TeamForm @submit="handleCreateTeam" />
       </template>
@@ -33,10 +39,12 @@ import BaseModal from '@/components/base/BaseModal.vue'
 import TeamCard from '@/components/new/TeamCard.vue'
 import TeamForm from '@/components/modal/TeamForm.vue'
 import { useAuthStore } from '@/stores/authStore.js'
+import { useTeamComposable } from '@/composable/useTeamComposable.js'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
+const { createTeam } = useTeamComposable()
 
 const showModal = ref(false)
 const backdropFilter = ref(null)
@@ -45,14 +53,14 @@ const teams = computed(() => teamStore.teams)
 const user = computed(() => auth.currentUser)
 const isAdmin = computed(() => authStore.isAdmin)
 
-function handleOpenModal() {
+function handleOpenNewTeamForm() {
   backdropFilter.value = 'contrast(40%)'
   showModal.value = true
 }
 
 async function handleCreateTeam(payload) {
   try {
-    await teamStore.createTeam(payload.title, user.value.uid);
+    await createTeam(payload.title, user.value.uid);
   } catch (err) {
     console.log(`err ${err}`);
   }

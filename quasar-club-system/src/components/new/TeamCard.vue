@@ -34,10 +34,12 @@ import BaseCard from '@/components/base/BaseCard.vue'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useRouter } from 'vue-router'
+import { useTeamComposable } from '@/composable/useTeamComposable.js'
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 const router = useRouter();
+const { deleteTeam } = useTeamComposable();
 
 const props = defineProps({
   team: {
@@ -60,7 +62,7 @@ function openTeam(teamId) {
 
 async function handleDeleteTeam() {
   try {
-    await teamStore.deleteTeam(props.team.id);
+    await deleteTeam(props.team.id);
   } catch (err) {
     console.log(`err ${err}`);
   }
