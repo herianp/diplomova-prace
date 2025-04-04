@@ -35,7 +35,7 @@
         <q-item-section>Settings</q-item-section>
       </q-item>
 
-      <q-item clickable v-ripple class="logout" @click="authStore.logout">
+      <q-item clickable v-ripple class="logout" @click="logoutUser">
         <q-item-section avatar>
           <q-icon name="logout" color="red" />
         </q-item-section>
@@ -48,11 +48,12 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { useAuthStore } from "@/stores/authStore.ts";
 import { RouteEnum } from '@/enums/routesEnum.ts'
+import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
 const router = useRouter();
-const authStore = useAuthStore();
+const { logoutUser } = useAuthComposable();
+
 const drawerOpen = ref(true);
 
 // Dummy user data (Replace with real data from store)

@@ -1,12 +1,8 @@
 <template>
-  <q-card flat bordered>
+  <q-card flat bordered class="bg-grey-3">
     <q-card-section horizontal class="row justify-between items-center">
-      <q-card-section class="q-pt-xs">
+      <q-card-section style="min-width: 100%">
         <slot name="content" />
-      </q-card-section>
-
-      <q-card-section class="col-5 flex flex-center">
-        <slot name="media" />
       </q-card-section>
     </q-card-section>
 

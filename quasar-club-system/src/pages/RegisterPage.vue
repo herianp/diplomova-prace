@@ -6,10 +6,10 @@
 
 <script setup>
 import { ref } from "vue";
-import { useAuthStore } from "@/stores/authStore.ts";
 import RegisterFormNew from '@/components/new/RegisterFormNew.vue'
+import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
-const authStore = useAuthStore();
+const { registerUser } = useAuthComposable();
 
 const credentials = ref({
   name: '',
@@ -17,13 +17,13 @@ const credentials = ref({
   password: ''
 });
 
-function submitRegister(event) {
+async function submitRegister(event) {
   if (!credentials.value.name || !credentials.value.email|| !credentials.value.password) {
     alert(`Please fill in all fields - ${event}`);
     return;
   }
   console.log(`credentials.value: ${JSON.stringify(credentials.value)}`);
-  authStore.register(credentials.value);
+  await registerUser(credentials.value.email, credentials.value.password, credentials.value.name);
 }
 </script>
 

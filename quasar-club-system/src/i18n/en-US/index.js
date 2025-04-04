@@ -5,7 +5,11 @@ export default {
   survey: {
     title: "Surveys",
     create: "Creat survey",
-    update: "Edit survey"
+    update: "Edit survey",
+    type: {
+      training: "Training",
+      match: "Match",
+    },
   },
   team: {
     title: "Teams",

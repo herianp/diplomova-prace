@@ -1,8 +1,7 @@
 import { defineStore } from 'pinia'
-import { authStateListener, loginUser, logoutUser, registerUser } from "@/services/authService";
+import { authStateListener } from "@/services/authService";
 import { RouteEnum } from "@/enums/routesEnum";
 import { useTeamStore } from "@/stores/teamStore";
-import { ICredentials } from '@/interfaces/interfaces'
 import { ref } from 'vue'
 
 const getInitialUser = () => ({
@@ -33,41 +32,12 @@ export const useAuthStore = defineStore("auth", {
       });
     },
 
-    // **Login Action**
-    async login(credentials: ICredentials) {
-      this.isLoading = true;
-
-      try {
-        this.user = await loginUser(credentials.email, credentials.password);
-        this.router.push(RouteEnum.DASHBOARD.path);
-      } catch (error) {
-        console.error("Login failed:", error.message);
-      } finally {
-        this.isLoading = false;
-      }
+    //setters
+    setUser(user: any) {
+      this.user = user;
     },
-
-    // **Logout Action**
-    async logout() {
-      try {
-        await logoutUser();
-        this.user = null;
-        useTeamStore().clearData();
-        this.router.push(RouteEnum.LOGIN.path);
-      } catch (error) {
-        console.error("Logout failed:", error.message);
-      }
-    },
-
-    // **Register a New User**
-    async register(credentials: ICredentials) {
-      try {
-        console.log(`registering user: ${JSON.stringify(credentials)}`);
-        this.user = await registerUser(credentials.email, credentials.password, credentials.name);
-        this.router.push(RouteEnum.DASHBOARD.path);
-      } catch (error) {
-        console.error("Registration failed:", error.message);
-      }
+    setLoading(user: any) {
+      this.isLoading = user;
     },
   }
 })

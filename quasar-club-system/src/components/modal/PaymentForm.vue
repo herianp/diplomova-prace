@@ -39,7 +39,7 @@ function submitFormHandler() {
 }
 
 function createPayment() {
-  // teamStore.addCashboxTransaction(...);
+  // addCashboxTransaction(...);
 }
 
 </script>

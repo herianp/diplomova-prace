@@ -1,4 +1,4 @@
 export enum SurveyTypes {
-  Match = "Match",
-  Training = "Training"
+  Training = "Training",
+  Match = "Match"
 }
