@@ -1,47 +1,59 @@
 <template>
   <div class="row items-center justify-center q-gutter-sm q-mt-sm">
-    <!-- ⚙️ Settings button -->
-    <q-btn
-      v-if="isPowerUser"
-      round
-      dense
-      flat
-      icon="tune"
-      color="primary"
-      size="sm"
-      @click="$emit('open-settings')"
-      class="action-btn"
-    >
-      <q-tooltip>Settings</q-tooltip>
-    </q-btn>
+    <!-- Show expired message if disabled -->
+    <q-chip
+      v-if="disabled"
+      color="grey-6"
+      text-color="white"
+      :label="$t('survey.expired')"
+      icon="schedule"
+    />
+    
+    <!-- Normal action buttons when not disabled -->
+    <template v-else>
+      <!-- ⚙️ Settings button -->
+      <q-btn
+        v-if="isPowerUser"
+        round
+        dense
+        flat
+        icon="tune"
+        color="primary"
+        size="sm"
+        @click="$emit('open-settings')"
+        class="action-btn"
+      >
+        <q-tooltip>Settings</q-tooltip>
+      </q-btn>
 
-    <!-- 👍 Yes -->
-    <q-btn
-      unelevated
-      rounded
-      size="sm"
-      icon="thumb_up"
-      :color="yesActive ? 'positive' : 'grey-4'"
-      text-color="black"
-      @click="$emit('vote', true)"
-      class="action-btn vote-btn"
-    >
-      <q-tooltip>Vote Yes</q-tooltip>
-    </q-btn>
+      <!-- 👍 Yes -->
+      <q-btn
+        unelevated
+        rounded
+        size="sm"
+        icon="thumb_up"
+        :color="yesActive ? 'positive' : 'grey-4'"
+        text-color="black"
+        @click="$emit('vote', true)"
+        class="action-btn vote-btn"
+      >
+        <q-tooltip>Vote Yes</q-tooltip>
+      </q-btn>
 
-    <!-- 👎 No -->
-    <q-btn
-      unelevated
-      rounded
-      size="sm"
-      icon="thumb_down"
-      :color="noActive ? 'negative' : 'grey-4'"
-      text-color="black"
-      @click="$emit('vote', false)"
-      class="action-btn vote-btn"
-    >
-      <q-tooltip>Vote No</q-tooltip>
-    </q-btn>
+      <!-- 👎 No -->
+      <q-btn
+        unelevated
+        rounded
+        size="sm"
+        icon="thumb_down"
+        :color="noActive ? 'negative' : 'grey-4'"
+        text-color="black"
+        @click="$emit('vote', false)"
+        class="action-btn vote-btn"
+      >
+        <q-tooltip>Vote No</q-tooltip>
+      </q-btn>
+    </template>
   </div>
 </template>
 
@@ -49,7 +61,11 @@
 defineProps({
   yesActive: Boolean,
   noActive: Boolean,
-  isPowerUser: Boolean
+  isPowerUser: Boolean,
+  disabled: {
+    type: Boolean,
+    default: false
+  }
 })
 defineEmits(['vote', 'open-settings'])
 </script>

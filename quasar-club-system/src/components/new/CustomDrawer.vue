@@ -46,29 +46,31 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { RouteEnum } from '@/enums/routesEnum.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
+import { useAuthStore } from '@/stores/authStore.ts'
 
 const router = useRouter();
 const { logoutUser } = useAuthComposable();
+const authStore = useAuthStore();
 
 const drawerOpen = ref(true);
 
-// Dummy user data (Replace with real data from store)
-const user = ref({
-  name: "John Doe",
-  email: "johndoe@example.com",
-});
+// Get user data from auth store
+const user = computed(() => ({
+  name: authStore.user?.displayName || authStore.user?.email || "User",
+  email: authStore.user?.email || "No email"
+}));
 
 // Top navigation links
 const topLinks = [
   { title: "Dashboard", icon: "dashboard", route: RouteEnum.DASHBOARD.path },
   { title: "Teams", icon: "groups", route: RouteEnum.TEAM.path },
   { title: "Surveys", icon: "poll", route: RouteEnum.SURVEY.path },
-  { title: "Reports", icon: "bar_chart", route: RouteEnum.CASHBOX.path },
-  { title: "Messages", icon: "chat", route: "/messages" },
+  { title: "Reports", icon: "bar_chart", route: RouteEnum.REPORTS.path },
+  { title: "Messages", icon: "chat", route: RouteEnum.MESSAGES.path },
 ];
 
 // Navigation function

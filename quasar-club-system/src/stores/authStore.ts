@@ -3,6 +3,7 @@ import { authStateListener } from "@/services/authService";
 import { RouteEnum } from "@/enums/routesEnum";
 import { useTeamStore } from "@/stores/teamStore";
 import { ref } from 'vue'
+import { getAuth, signOut as firebaseSignOut } from 'firebase/auth'
 
 const getInitialUser = () => ({
   uid: '1',
@@ -38,6 +39,21 @@ export const useAuthStore = defineStore("auth", {
     },
     setLoading(user: any) {
       this.isLoading = user;
+    },
+
+    async refreshUser() {
+      const auth = getAuth()
+      if (auth.currentUser) {
+        await auth.currentUser.reload()
+        this.user = auth.currentUser
+      }
+    },
+
+    async signOut() {
+      const auth = getAuth()
+      await firebaseSignOut(auth)
+      this.user = null
+      useTeamStore().clearData()
     },
   }
 })

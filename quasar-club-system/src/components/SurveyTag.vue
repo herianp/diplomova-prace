@@ -1,11 +1,14 @@
 <template>
   <div :class="tagClass">
-    {{ type }}
+    {{ t(`survey.type.${type}`) }}
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 // Props
 const props = defineProps({
@@ -15,16 +18,16 @@ const props = defineProps({
   }
 });
 
-// Color mapping by type
+// Color mapping by type (using lowercase keys to match enum values)
 const tagColors = {
-  Training: 'bg-blue-3',
-  Match: 'bg-green-3',
-  Default: 'bg-grey-3',
+  training: 'bg-blue-3',
+  match: 'bg-green-3',
+  default: 'bg-grey-3',
 }
 
 // Computed class with fallback color
 const tagClass = computed(() => {
-  const colorClass = tagColors[props.type] || tagColors.Default;
+  const colorClass = tagColors[props.type] || tagColors.default;
   return `${colorClass} text-grey-8 q-pa-xs q-px-sm rounded-borders text-caption`;
 })
 </script>

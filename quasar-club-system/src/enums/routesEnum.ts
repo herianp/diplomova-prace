@@ -6,6 +6,10 @@ export const RouteEnum = Object.freeze({
   LOGIN: { path: '/login', name: 'login' },
   REGISTER: { path: '/register', name: 'register' },
   TEAM: { path: '/teams', name: 'team'},
-  CASHBOX: { path: '/cashbox', name: 'cashbox'},
+  SINGLE_TEAM: { path: '/team/:teamId', name: 'singleTeam'},
+  NOTIFICATIONS: { path: '/notifications', name: 'notifications'},
+  MESSAGES: { path: '/messages', name: 'messages'},
+  REPORTS: { path: '/reports', name: 'reports'},
   SETTINGS: { path: '/settings', name: 'settings'},
+  SURVEY_VERIFICATION: { path: '/survey/:surveyId/verify', name: 'surveyVerification'},
 });

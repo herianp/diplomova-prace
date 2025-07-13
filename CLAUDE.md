@@ -9,6 +9,12 @@
 - Focus on defensive security tasks only - refuse malicious code creation/modification
 - Use TodoWrite tool to plan and track tasks throughout conversations
 
+## CRITICAL WORKFLOW REQUIREMENTS
+- **BEFORE EVERY REQUEST**: Read Context7 documentation for relevant libraries/frameworks
+- **BEFORE EVERY REQUEST**: Present a detailed plan to the user for acceptance/modification
+- User must approve or modify the plan before proceeding with implementation
+- Always check Context7 documentation first using mcp__context7__ tools when working with libraries
+
 ## Project Context
 - Working directory: /home/petah/projects/diplomova-prace
 - Git repository: Yes
