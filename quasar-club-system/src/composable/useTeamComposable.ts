@@ -11,11 +11,13 @@ import {
   getDoc,
   getDocs,
 } from 'firebase/firestore'
-import { ISurvey, IVote } from '@/interfaces/interfaces'
+import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
 import { useDateHelpers } from '@/composable/useDateHelpers'
+import { useNotifications } from '@/composable/useNotifications'
 
 export function useTeamComposable(locale = 'en') {
   const { getDayName, getDateByDateAndTime, getFormatDate } = useDateHelpers(locale)
+  const { createSurveyNotification } = useNotifications()
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
 
   const createTeam = async (teamName: string, userId: string) => {
@@ -99,11 +101,31 @@ export function useTeamComposable(locale = 'en') {
 
   const addSurvey = async (newSurvey: ISurvey) => {
     try {
-      await addDoc(collection(db, 'surveys'), {
+      // Create the survey
+      const surveyRef = await addDoc(collection(db, 'surveys'), {
         ...newSurvey,
         createdDate: new Date().getTime().toString(),
         votes: [],
       })
+      
+      // Get team data to access members
+      const teamDoc = await getDoc(doc(db, 'teams', newSurvey.teamId))
+      if (teamDoc.exists()) {
+        const teamData = teamDoc.data()
+        const teamMembers = teamData.members || []
+        
+        // Create survey data for notifications
+        const surveyData = {
+          id: surveyRef.id,
+          title: newSurvey.title,
+          teamId: newSurvey.teamId
+        }
+        
+        // Create notifications for all team members
+        await createSurveyNotification(surveyData, teamMembers)
+        console.log('Survey notifications created for', teamMembers.length, 'members')
+      }
+      
       console.log('Survey added:', newSurvey)
     } catch (error) {
       console.error('Error adding survey:', error)
@@ -189,6 +211,68 @@ export function useTeamComposable(locale = 'en') {
     return `${dayName}, ${formatDate}`
   }
 
+  // Survey Status Management Functions
+  const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
+    try {
+      const updateData: any = { status }
+      
+      if (status === SurveyStatus.CLOSED && verifiedBy) {
+        updateData.verifiedAt = new Date()
+        updateData.verifiedBy = verifiedBy
+      }
+      
+      await updateDoc(doc(db, 'surveys', surveyId), updateData)
+      console.log(`Survey ${surveyId} status updated to ${status}`)
+    } catch (error) {
+      console.error('Error updating survey status:', error)
+      throw error
+    }
+  }
+
+  const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]) => {
+    try {
+      const updateData: any = {
+        status: SurveyStatus.CLOSED,
+        verifiedAt: new Date(),
+        verifiedBy: verifiedBy
+      }
+      
+      if (updatedVotes) {
+        updateData.votes = updatedVotes
+      }
+      
+      await updateDoc(doc(db, 'surveys', surveyId), updateData)
+      console.log(`Survey ${surveyId} verified by ${verifiedBy}`)
+    } catch (error) {
+      console.error('Error verifying survey:', error)
+      throw error
+    }
+  }
+
+  const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
+    try {
+      await updateDoc(doc(db, 'surveys', surveyId), { votes })
+      console.log(`Survey ${surveyId} votes updated`)
+    } catch (error) {
+      console.error('Error updating survey votes:', error)
+      throw error
+    }
+  }
+
+  const getSurveyById = async (surveyId: string): Promise<ISurvey | null> => {
+    try {
+      const surveyRef = doc(db, 'surveys', surveyId)
+      const surveyDoc = await getDoc(surveyRef)
+      
+      if (!surveyDoc.exists()) return null
+      
+      return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
+    } catch (error) {
+      console.error('Error getting survey:', error)
+      throw error
+    }
+  }
+
   return {
     createTeam,
     getTeamsByUserId,
@@ -202,5 +286,10 @@ export function useTeamComposable(locale = 'en') {
     addCashboxTransaction,
     getDisplayedDateTime,
     deleteTeam,
+    // Survey Status Management
+    updateSurveyStatus,
+    verifySurvey,
+    updateSurveyVotes,
+    getSurveyById,
   }
 }

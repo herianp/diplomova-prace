@@ -7,6 +7,9 @@
 
         <!-- 🔽 Team Dropdown Button -->
         <TeamDropdown />
+        
+        <!-- 🔔 Notifications Dropdown -->
+        <NotificationsDropdown class="q-ml-sm" />
       </q-toolbar>
     </q-header>
 
@@ -23,6 +26,7 @@
 import { ref } from "vue";
 import CustomDrawer from "@/components/new/CustomDrawer.vue";
 import TeamDropdown from '@/components/new/TeamDropdown.vue'
+import NotificationsDropdown from '@/components/notifications/NotificationsDropdown.vue'
 
 const drawerOpen = ref(true);
 </script>

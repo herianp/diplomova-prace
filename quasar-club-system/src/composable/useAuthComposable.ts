@@ -1,4 +1,5 @@
 ﻿import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { auth, db } from '@/firebase/config'
 import {
   createUserWithEmailAndPassword,
@@ -8,12 +9,13 @@ import {
   User
 } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore'
-import { RouteEnum } from '../enums/routesEnum'
-import { useAuthStore } from '../stores/authStore'
-import { useTeamStore } from '../stores/teamStore'
+import { RouteEnum } from '@/enums/routesEnum'
+import { useAuthStore } from '@/stores/authStore'
+import { useTeamStore } from '@/stores/teamStore'
 
 // Composable
 export function useAuthComposable() {
+  const router = useRouter()
   const authStore = useAuthStore();
   const { clearData } = useTeamStore();
 
@@ -32,7 +34,7 @@ export function useAuthComposable() {
       authStore.setLoading(true);
       const userCredential = await signInWithEmailAndPassword(auth, email, password)
       authStore.setUser(userCredential.user);
-      this.router.push(RouteEnum.DASHBOARD.path);
+      router.push(RouteEnum.DASHBOARD.path);
     } catch (error: any) {
       console.error(`Login Error: ${error.code} - ${error.message}`)
       throw error
@@ -47,7 +49,7 @@ export function useAuthComposable() {
       await signOut(auth)
       authStore.setUser(null)
       clearData();
-      this.router.push(RouteEnum.LOGIN.path);
+      router.push(RouteEnum.LOGIN.path);
       console.log('User signed out successfully')
     } catch (error: any) {
       console.error(`Logout Error: ${error.message}`)
@@ -63,7 +65,7 @@ export function useAuthComposable() {
 
       await createUserInFirestore(user, name)
       authStore.setUser(user);
-      this.router.push(RouteEnum.DASHBOARD.path);
+      router.push(RouteEnum.DASHBOARD.path);
     } catch (error: any) {
       console.error(`Registration Error: ${error.code} - ${error.message}`)
       throw error

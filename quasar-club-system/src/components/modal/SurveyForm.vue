@@ -73,14 +73,14 @@ const description = ref('')
 const date = ref(new Date().toISOString().slice(0, 10))
 const time = ref('19:00')
 const surveyType = ref({
-  label: i18n.t(`survey.type.${SurveyTypes.Training.toLowerCase()}`),
+  label: i18n.t(`survey.type.${SurveyTypes.Training}`),
   value: SurveyTypes.Training,
 });
 
 
 const surveyTypeOptions = computed(() => {
   return Object.values(SurveyTypes).map((type) => ({
-    label: i18n.t(`survey.type.${type.toLowerCase()}`),
+    label: i18n.t(`survey.type.${type}`),
     value: type,
   }))
 })
