@@ -32,6 +32,8 @@
 - Updated "Tento měsíc" (This Month) quick filter to show full month range (start to end of month)
 - Added firebase-admin-key.json to .gitignore for security
 - Removed firebase-admin-key.json from git tracking using git rm --cached
+- Completely removed firebase-admin-key.json from entire git history using git filter-branch
+- Ready for force push to remove credentials from remote repository
 
 ## Archive Scripts
 Scripts used for user creation and team management have been moved to `quasar-club-system/archive/`:
