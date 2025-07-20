@@ -31,6 +31,7 @@
 - Updated "Tata sezóna" (This Season) quick filter to use date range 13/07/2025 - 30/06/2026
 - Updated "Tento měsíc" (This Month) quick filter to show full month range (start to end of month)
 - Added firebase-admin-key.json to .gitignore for security
+- Removed firebase-admin-key.json from git tracking using git rm --cached
 
 ## Archive Scripts
 Scripts used for user creation and team management have been moved to `quasar-club-system/archive/`:
