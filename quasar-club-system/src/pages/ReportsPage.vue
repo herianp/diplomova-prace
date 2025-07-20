@@ -503,15 +503,29 @@ const loadTeamMembers = async () => {
   }
 
   try {
-    const usersQuery = query(
-      collection(db, 'users'),
-      where('__name__', 'in', currentTeam.value.members)
-    )
-    const usersSnapshot = await getDocs(usersQuery)
-    teamMembers.value = usersSnapshot.docs.map(doc => ({
-      uid: doc.id,
-      ...doc.data()
-    }))
+    const members = currentTeam.value.members
+    const allUsers = []
+    
+    // Split members into chunks of 30 (Firestore IN query limit)
+    const chunkSize = 30
+    for (let i = 0; i < members.length; i += chunkSize) {
+      const chunk = members.slice(i, i + chunkSize)
+      
+      const usersQuery = query(
+        collection(db, 'users'),
+        where('__name__', 'in', chunk)
+      )
+      const usersSnapshot = await getDocs(usersQuery)
+      
+      const chunkUsers = usersSnapshot.docs.map(doc => ({
+        uid: doc.id,
+        ...doc.data()
+      }))
+      
+      allUsers.push(...chunkUsers)
+    }
+    
+    teamMembers.value = allUsers
   } catch (error) {
     console.error('Error loading team members:', error)
     teamMembers.value = []

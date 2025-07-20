@@ -238,6 +238,8 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useScreenComposable } from '@/composable/useScreenComposable.js'
 import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth'
+import { doc, updateDoc } from 'firebase/firestore'
+import { db } from '@/firebase/config.ts'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { RouteEnum } from '@/enums/routesEnum.ts'
@@ -298,7 +300,14 @@ const saveProfile = async () => {
   try {
     savingProfile.value = true
     
+    // Update Firebase Auth profile
     await updateProfile(auth.currentUser, {
+      displayName: profileForm.displayName
+    })
+    
+    // Update Firestore user document
+    const userRef = doc(db, 'users', user.value.uid)
+    await updateDoc(userRef, {
       displayName: profileForm.displayName
     })
     

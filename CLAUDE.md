@@ -34,11 +34,19 @@
 - Removed firebase-admin-key.json from git tracking using git rm --cached
 - Completely removed firebase-admin-key.json from entire git history using git filter-branch
 - Ready for force push to remove credentials from remote repository
+- Created additional 15 users with names: brejchic, cermy, natan, lukasisler, liborneufus, pluchyc, vitovito, tonday, denis, kovi, stocky, souky, kubarych, tomasvojta, vrzby
+- Added all 15 new users to Xaverov team (total team members: 41)
+- Fixed Firestore IN query limit issue for teams with >30 members in SurveyVerificationPage, ReportsPage, and SingleTeamPage
+- Fixed Settings page to update displayName in both Firebase Auth and Firestore user documents
+- Fixed herianek@seznam.cz user document to include displayName field
 
 ## Archive Scripts
 Scripts used for user creation and team management have been moved to `quasar-club-system/archive/`:
-- `create-users.js` - Script to create Firebase users using Admin SDK
-- `add-users-to-team.js` - Script to add users to specific team
+- `create-users.js` - Script to create initial 24 Firebase users using Admin SDK
+- `add-users-to-team.js` - Script to add initial users to specific team
+- `create-more-users.js` - Script to create additional 15 Firebase users
+- `add-more-users-to-team.js` - Script to add additional users to team
+- `fix-user-displayname.js` - Script to fix displayName field for existing users
 - `create-users-cli.sh` - Alternative CLI-based user creation script
 - `create-users-simple.js` - Simple user creation template
 - `package-scripts.json` - Package file for script dependencies
