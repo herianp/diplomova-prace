@@ -32,3 +32,7 @@ yarn-error.log*
 # Environment variables
 .env
 .env.local*
+
+# Firebase credentials
+firebase-admin-key.json
+firebase-admin-key.json:Zone.Identifier

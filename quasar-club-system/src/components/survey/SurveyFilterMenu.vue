@@ -186,7 +186,7 @@ const datePresets = computed(() => [
     key: 'thisMonth',
     label: t('reports.thisMonth'),
     from: DateTime.now().startOf('month').toISODate(),
-    to: DateTime.now().toISODate()
+    to: DateTime.now().endOf('month').toISODate()
   },
   {
     key: 'lastMonth',
