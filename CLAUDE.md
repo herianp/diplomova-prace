@@ -24,6 +24,21 @@
 ## Recent Activity
 - User requested project analysis to understand structure, technologies, and how to run it
 - Created this memory file as requested
+- Created 24 users in Firebase Auth with emails {name}@test.cz and password 123456
+- Added all 24 users to Xaverov team (ZT1KbriwPZJBGkyX0Uvs)
+- Implemented delete survey functionality for power users in survey verification page
+- Fixed Firestore security rules to allow power users to delete surveys
+- Updated "Tato sezóna" (This Season) quick filter to use date range 13/07/2025 - 30/06/2026
+
+## Archive Scripts
+Scripts used for user creation and team management have been moved to `quasar-club-system/archive/`:
+- `create-users.js` - Script to create Firebase users using Admin SDK
+- `add-users-to-team.js` - Script to add users to specific team
+- `create-users-cli.sh` - Alternative CLI-based user creation script
+- `create-users-simple.js` - Simple user creation template
+- `package-scripts.json` - Package file for script dependencies
+
+These scripts are no longer needed for regular development but kept for reference.
 
 ## Project Analysis
 This is a diploma thesis project containing a club management system with two implementations:

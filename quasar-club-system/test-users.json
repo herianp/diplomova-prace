@@ -1,0 +1,52 @@
+{"users": [
+{
+  "localId": "YRIgVySVmggfNfQLyYN0KLTIyxv2",
+  "email": "jim@test.com",
+  "emailVerified": false,
+  "passwordHash": "zj5O/86NmmLhwZOgucBg/xjDcpHGbUbaDKysN4HZ0+vc9pahLXquZYqnGysWfB4a1rhI4G74x8jLvEFbD53qog==",
+  "salt": "aCwISknNdR4mVQ==",
+  "lastSignedInAt": "1744367097091",
+  "createdAt": "1732787264506",
+  "providerUserInfo": []
+},
+{
+  "localId": "biuNuvTkfZaKIG6TVqlvT46MzIn2",
+  "email": "heri@test.cz",
+  "emailVerified": false,
+  "passwordHash": "Wmp+380Cnx8MSD1Vh9yhU4Bt5HtNVY4z7sovZb0EcW2n10aLjFyHNJe8RhesDxXoZU1083iJrmQyi8wQaZW5pQ==",
+  "salt": "nn9trsvvvErg6g==",
+  "lastSignedInAt": "1741352745993",
+  "createdAt": "1741348082071",
+  "providerUserInfo": []
+},
+{
+  "localId": "hEZcnQtZmOO5GtDKcmi5MlNU4CD3",
+  "email": "peta@test.com",
+  "emailVerified": false,
+  "passwordHash": "fVutOKMu9Aeaq7bCrza+BKqpQlMpIDgZtdHCnDl+vXsVhCu7asokiqg3En8QXzyJmM4QTdNW7C5dfR4O/49d/Q==",
+  "salt": "BV0R99RjPgDjQg==",
+  "lastSignedInAt": "1743068471695",
+  "createdAt": "1732787065562",
+  "providerUserInfo": []
+},
+{
+  "localId": "hVWFsXd8ROgtELRRHndR1BFUEzF3",
+  "email": "herianek@seznam.cz",
+  "emailVerified": false,
+  "passwordHash": "edJdg/GDqv4KBs+BrdP+m1E/d0WdtSaMEBb+FUJ4G/q7ovZJB0qAfuP/q0MhBveuAz9Sr0uuLMhbU6ho+4Wv3g==",
+  "salt": "YsewoBKo7V88Bg==",
+  "displayName": "Petisss",
+  "lastSignedInAt": "1752337116976",
+  "createdAt": "1752258762284",
+  "providerUserInfo": []
+},
+{
+  "localId": "tr8oB9GW7oavr86S1isXFvB0v6F3",
+  "email": "terka@seznam.cz",
+  "emailVerified": false,
+  "passwordHash": "OoPjm73jdaTyx+LH0OMsG7Iom/FU7MetWLzj68lAUUJVeshPocBqaXiz0/VkAxNsQQ0h7NvL89jUJdt+MP9uig==",
+  "salt": "KBGK0OpD+9jdFA==",
+  "lastSignedInAt": "1752337148505",
+  "createdAt": "1752331874910",
+  "providerUserInfo": []
+}]}

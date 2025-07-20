@@ -4,8 +4,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     // Rule for the "surveys" collection
     match /surveys/{surveyId} {
-      // Allow power users full read/write access
+      // Allow power users full read/write/create access
       allow read, write, update, create: if isPowerUserForTeam(getTeamId());
+      
+      // Allow power users to delete surveys (using existing resource for delete operations)
+      allow delete: if isPowerUserForTeam(resource.data.teamId);
       
       //Allow read surveys of the team authenticated members of the team
       allow read: if canTeamExistsAndIsUserAuthenticated(resource.data.teamId) &&

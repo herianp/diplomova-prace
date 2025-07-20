@@ -161,6 +161,16 @@
           @click="goBack"
           outline
         />
+        <!-- Delete Button (Power Users Only) -->
+        <q-btn
+          v-if="isCurrentUserPowerUser"
+          color="negative"
+          icon="delete"
+          :label="$t('survey.verification.deleteSurvey')"
+          @click="confirmDeleteSurvey"
+          outline
+          :loading="deleting"
+        />
         <q-btn
           color="primary"
           icon="save"
@@ -180,6 +190,42 @@
       <q-icon name="group_off" size="4em" color="grey-4" class="q-mb-md" />
       <div class="text-h6">{{ $t('survey.verification.noMembers') }}</div>
     </div>
+
+    <!-- Delete Confirmation Dialog -->
+    <q-dialog v-model="showDeleteDialog" persistent>
+      <q-card>
+        <q-card-section class="row items-center">
+          <q-icon name="warning" color="negative" size="2em" class="q-mr-md" />
+          <span class="text-h6">{{ $t('survey.verification.confirmDelete') }}</span>
+        </q-card-section>
+
+        <q-card-section class="q-pt-none">
+          <div class="text-body1">
+            {{ $t('survey.verification.deleteMessage', { title: survey?.title }) }}
+          </div>
+          <div class="text-body2 text-negative q-mt-md">
+            <q-icon name="warning" class="q-mr-xs" />
+            {{ $t('survey.verification.deleteWarning') }}
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn 
+            flat 
+            :label="$t('common.cancel')" 
+            color="grey-7" 
+            v-close-popup 
+            :disable="deleting"
+          />
+          <q-btn 
+            :label="$t('survey.verification.deleteConfirm')" 
+            color="negative" 
+            @click="deleteSurvey" 
+            :loading="deleting"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
@@ -199,13 +245,15 @@ const route = useRoute()
 const router = useRouter()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
-const { getSurveyById, verifySurvey } = useTeamComposable()
+const { getSurveyById, verifySurvey, deleteSurvey: deleteSurveyFromDB } = useTeamComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 
 // State
 const loading = ref(true)
 const saving = ref(false)
+const deleting = ref(false)
+const showDeleteDialog = ref(false)
 const survey = ref(null)
 const teamMembers = ref([])
 const memberVotes = ref({})
@@ -213,6 +261,10 @@ const memberVotes = ref({})
 // Computed
 const currentUser = computed(() => authStore.user)
 const currentTeam = computed(() => teamStore.currentTeam)
+
+const isCurrentUserPowerUser = computed(() => {
+  return currentTeam.value?.powerusers?.includes(currentUser.value?.uid)
+})
 
 const attendanceOptions = computed(() => [
   { label: t('common.yes'), value: true },
@@ -337,6 +389,38 @@ const saveSurvey = async () => {
     })
   } finally {
     saving.value = false
+  }
+}
+
+const confirmDeleteSurvey = () => {
+  showDeleteDialog.value = true
+}
+
+const deleteSurvey = async () => {
+  try {
+    deleting.value = true
+
+    await deleteSurveyFromDB(survey.value.id)
+
+    $q.notify({
+      type: 'positive',
+      message: t('survey.verification.deleteSuccess'),
+      icon: 'check'
+    })
+
+    // Close dialog and go back
+    showDeleteDialog.value = false
+    goBack()
+
+  } catch (error) {
+    console.error('Error deleting survey:', error)
+    $q.notify({
+      type: 'negative',
+      message: t('survey.verification.deleteError'),
+      icon: 'error'
+    })
+  } finally {
+    deleting.value = false
   }
 }
 

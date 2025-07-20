@@ -180,7 +180,7 @@ const datePresets = computed(() => [
     key: 'season',
     label: t('reports.thisSeason'),
     from: '2025-07-13',
-    to: DateTime.now().toISODate()
+    to: '2026-06-30'
   },
   {
     key: 'thisMonth',
@@ -285,15 +285,7 @@ const applyFilters = () => {
   gap: 0.5rem;
 }
 
-.q-ml-lg {
-  margin-left: 2rem;
-}
-
 @media (max-width: 768px) {
-  .q-ml-lg {
-    margin-left: 1rem;
-  }
-  
   .filter-actions {
     justify-content: center;
   }
