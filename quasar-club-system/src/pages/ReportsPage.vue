@@ -19,125 +19,12 @@
 
     <!-- Reports Content -->
     <div v-else class="reports-content">
-      <!-- Date Filter Section -->
-      <div class="date-filter-section q-mb-lg">
-        <q-card flat bordered class="q-pa-md">
-          <div class="text-h6 q-mb-md">{{ $t('reports.dateFilter') }}</div>
-          <!-- PC Layout: One row -->
-          <div class="row q-gutter-md items-end gt-sm">
-            <!-- Quick Date Presets -->
-            <div class="col">
-              <div class="text-caption text-grey-6 q-mb-xs">{{ $t('reports.quickFilters') }}</div>
-              <div class="row q-gutter-xs">
-                <q-btn
-                  v-for="preset in datePresets"
-                  :key="preset.key"
-                  :label="preset.label"
-                  size="sm"
-                  outline
-                  color="primary"
-                  @click="applyDatePreset(preset)"
-                  dense
-                />
-              </div>
-            </div>
-
-            <!-- Custom Date Range -->
-            <div class="col-auto">
-              <q-input
-                v-model="dateFrom"
-                type="date"
-                :label="$t('reports.dateFrom')"
-                outlined
-                dense
-                style="min-width: 150px"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="event" />
-                </template>
-              </q-input>
-            </div>
-
-            <div class="col-auto">
-              <q-input
-                v-model="dateTo"
-                type="date"
-                :label="$t('reports.dateTo')"
-                outlined
-                dense
-                style="min-width: 150px"
-              >
-                <template v-slot:prepend>
-                  <q-icon name="event" />
-                </template>
-              </q-input>
-            </div>
-          </div>
-
-          <!-- Mobile Layout: Two rows -->
-          <div class="lt-md">
-            <!-- Row 1: Quick Date Presets -->
-            <div class="q-mb-md">
-              <div class="text-caption text-grey-6 q-mb-xs">{{ $t('reports.quickFilters') }}</div>
-              <div class="row q-gutter-xs">
-                <q-btn
-                  v-for="preset in datePresets"
-                  :key="preset.key"
-                  :label="preset.label"
-                  size="sm"
-                  outline
-                  color="primary"
-                  @click="applyDatePreset(preset)"
-                  dense
-                  class="col-auto"
-                />
-              </div>
-            </div>
-
-            <!-- Row 2: Custom Date Range -->
-            <div class="row q-gutter-md">
-              <div class="col">
-                <q-input
-                  v-model="dateFrom"
-                  type="date"
-                  :label="$t('reports.dateFrom')"
-                  outlined
-                  dense
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="event" />
-                  </template>
-                </q-input>
-              </div>
-
-              <div class="col">
-                <q-input
-                  v-model="dateTo"
-                  type="date"
-                  :label="$t('reports.dateTo')"
-                  outlined
-                  dense
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="event" />
-                  </template>
-                </q-input>
-              </div>
-            </div>
-          </div>
-
-          <!-- Active Date Filter Display -->
-          <div v-if="dateFrom || dateTo" class="q-mt-md">
-            <q-chip
-              :label="`${$t('reports.dateRange')}: ${formatDateRange()}`"
-              removable
-              @remove="resetDateFilter"
-              color="secondary"
-              text-color="white"
-            />
-          </div>
-        </q-card>
-      </div>
+      <!-- Filter Menu (same as SurveyPage) -->
+      <SurveyFilterMenu 
+        v-model="filters"
+        @filters-changed="onFiltersChanged"
+        class="q-mb-lg"
+      />
 
       <!-- Team Statistics Section (Not affected by player filter) -->
       <div class="team-stats-section q-mb-lg">
@@ -306,11 +193,11 @@
           </div>
 
           <!-- Team Member Activity -->
-          <div class="col-12 col-md-6">
+          <div class="col-12">
             <q-card flat bordered class="chart-card">
               <q-card-section>
                 <div class="text-h6 q-mb-md text-center">{{ $t('reports.memberActivity') }}</div>
-                <div class="chart-container" style="height: 300px;">
+                <div class="chart-container" style="height: 400px;">
                   <canvas ref="memberActivityChart"></canvas>
                 </div>
               </q-card-section>
@@ -332,6 +219,7 @@ import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
 import { db } from '@/firebase/config.ts'
 import { collection, query, where, getDocs } from 'firebase/firestore'
+import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -390,44 +278,14 @@ const playerMetrics = ref({
   averageParticipation: 0
 })
 
-// Filter state
+// Filter state (same structure as SurveyPage)
 const selectedPlayer = ref(null)
-const dateFrom = ref('2025-07-13') // Season start
-const dateTo = ref(DateTime.now().toISODate()) // Current date
+const filters = ref({
+  searchName: '',
+  dateFrom: '2025-07-13', // Season start
+  dateTo: DateTime.now().toISODate() // Current date
+})
 
-// Date presets
-const datePresets = computed(() => [
-  {
-    key: 'season',
-    label: t('reports.thisSeason'),
-    from: '2025-07-13',
-    to: DateTime.now().toISODate()
-  },
-  {
-    key: 'thisMonth',
-    label: t('reports.thisMonth'),
-    from: DateTime.now().startOf('month').toISODate(),
-    to: DateTime.now().toISODate()
-  },
-  {
-    key: 'lastMonth',
-    label: t('reports.lastMonth'),
-    from: DateTime.now().minus({ months: 1 }).startOf('month').toISODate(),
-    to: DateTime.now().minus({ months: 1 }).endOf('month').toISODate()
-  },
-  {
-    key: 'thisWeek',
-    label: t('reports.thisWeek'),
-    from: DateTime.now().startOf('week').toISODate(),
-    to: DateTime.now().toISODate()
-  },
-  {
-    key: 'lastWeek',
-    label: t('reports.lastWeek'),
-    from: DateTime.now().minus({ weeks: 1 }).startOf('week').toISODate(),
-    to: DateTime.now().minus({ weeks: 1 }).endOf('week').toISODate()
-  }
-])
 
 // Chart instances
 let charts = {}
@@ -453,13 +311,12 @@ const playerOptions = computed(() => {
 const filteredSurveys = computed(() => {
   let filtered = [...surveys.value]
 
-  // Date filter only - do NOT filter by player participation
-  // We want to show ALL surveys in the date range, regardless of player participation
-  if (dateFrom.value || dateTo.value) {
+  // Apply date filter using the unified filter structure
+  if (filters.value.dateFrom || filters.value.dateTo) {
     filtered = filtered.filter(survey => {
       const surveyDate = DateTime.fromISO(survey.date)
-      const fromDate = dateFrom.value ? DateTime.fromISO(dateFrom.value) : null
-      const toDate = dateTo.value ? DateTime.fromISO(dateTo.value) : null
+      const fromDate = filters.value.dateFrom ? DateTime.fromISO(filters.value.dateFrom) : null
+      const toDate = filters.value.dateTo ? DateTime.fromISO(filters.value.dateTo) : null
 
       if (fromDate && surveyDate < fromDate) return false
       if (toDate && surveyDate > toDate) return false
@@ -467,21 +324,20 @@ const filteredSurveys = computed(() => {
     })
   }
 
-  // NOTE: We removed the player filter here because we want to show ALL surveys
-  // in the date range and display the player's participation status for each
+  // Apply name search filter
+  if (filters.value.searchName?.trim()) {
+    const searchTerm = filters.value.searchName.toLowerCase().trim()
+    filtered = filtered.filter(survey => 
+      survey.title.toLowerCase().includes(searchTerm)
+    )
+  }
 
   return filtered
 })
 
-// Filter methods
-const resetDateFilter = () => {
-  dateFrom.value = '2025-07-13'
-  dateTo.value = DateTime.now().toISODate()
-}
-
-const applyDatePreset = (preset) => {
-  dateFrom.value = preset.from
-  dateTo.value = preset.to
+// Filter event handler for SurveyFilterMenu
+const onFiltersChanged = (newFilters) => {
+  filters.value = { ...newFilters }
 }
 
 const getPlayerName = (playerId) => {
@@ -489,11 +345,6 @@ const getPlayerName = (playerId) => {
   return member?.displayName || member?.email || `Member ${playerId.substring(0, 8)}...`
 }
 
-const formatDateRange = () => {
-  const from = dateFrom.value ? DateTime.fromISO(dateFrom.value).toFormat('MMM dd, yyyy') : t('reports.dateFromPlaceholder')
-  const to = dateTo.value ? DateTime.fromISO(dateTo.value).toFormat('MMM dd, yyyy') : t('reports.dateToPlaceholder')
-  return `${from} - ${to}`
-}
 
 // Methods
 const loadTeamMembers = async () => {
@@ -814,7 +665,7 @@ const createMemberActivityChart = () => {
 
   const ctx = memberActivityChart.value.getContext('2d')
 
-  // Calculate member participation rates
+  // Calculate member "Yes" votes only
   const memberStats = {}
 
   // Initialize all members
@@ -822,10 +673,10 @@ const createMemberActivityChart = () => {
     memberStats[memberId] = 0
   })
 
-  // Count votes per member
+  // Count "Yes" votes per member
   filteredSurveys.value.forEach(survey => {
     survey.votes?.forEach(vote => {
-      if (Object.prototype.hasOwnProperty.call(memberStats, vote.userUid)) {
+      if (Object.prototype.hasOwnProperty.call(memberStats, vote.userUid) && vote.vote === true) {
         memberStats[vote.userUid]++
       }
     })
@@ -847,10 +698,10 @@ const createMemberActivityChart = () => {
     data: {
       labels,
       datasets: [{
-        label: t('reports.votesCount'),
+        label: t('reports.attendance'),
         data,
-        backgroundColor: 'rgba(156, 39, 176, 0.7)',
-        borderColor: 'rgba(156, 39, 176, 1)',
+        backgroundColor: 'rgba(76, 175, 80, 0.7)',
+        borderColor: 'rgba(76, 175, 80, 1)',
         borderWidth: 2,
         borderRadius: 4
       }]
@@ -860,7 +711,10 @@ const createMemberActivityChart = () => {
       maintainAspectRatio: false,
       scales: {
         y: {
-          beginAtZero: true
+          beginAtZero: true,
+          ticks: {
+            stepSize: 1
+          }
         }
       },
       plugins: {
@@ -951,14 +805,14 @@ watch(surveys, (newSurveys) => {
   }
 }, { deep: true })
 
-// Watch for date filter changes (affects team metrics and player metrics)
-watch([dateFrom, dateTo], () => {
+// Watch for filter changes (affects team metrics and player metrics)
+watch(filters, () => {
   if (!loading.value) {
     calculateTeamMetrics()
     calculatePlayerMetrics()
     createAllCharts()
   }
-})
+}, { deep: true })
 
 // Watch for player filter changes (affects player metrics and charts)
 watch(selectedPlayer, () => {

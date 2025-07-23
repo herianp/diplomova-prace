@@ -74,7 +74,12 @@
 
   <BaseModal v-model="showModal" :title="$t('survey.update')">
     <template #body>
-      <p>This is modal content. from my slot body</p>
+      <SurveyEditModal 
+        :survey="survey"
+        @updated="handleSurveyUpdated"
+        @deleted="handleSurveyDeleted"
+        @close="showModal = false"
+      />
     </template>
   </BaseModal>
 </template>
@@ -89,6 +94,7 @@ import BaseModal from '@/components/base/BaseModal.vue'
 import VoteStats from '@/components/VoteStats.vue'
 import BaseCard from '@/components/base/BaseCard.vue'
 import SurveyActions from '@/components/SurveyActions.vue'
+import SurveyEditModal from '@/components/survey/SurveyEditModal.vue'
 import { useI18n } from 'vue-i18n'
 import SurveyTag from '@/components/SurveyTag.vue'
 import { useRouter } from 'vue-router'
@@ -158,6 +164,20 @@ function addSurveyVote(surveyId, vote) {
 // Navigation to verification page
 const goToVerification = () => {
   router.push({ name: 'surveyVerification', params: { surveyId: props.survey.id } })
+}
+
+// Handle survey update
+const handleSurveyUpdated = () => {
+  // The survey data will be automatically updated through the store listener
+  // Just close the modal
+  showModal.value = false
+}
+
+// Handle survey deletion
+const handleSurveyDeleted = () => {
+  // The survey will be automatically removed from the list through the store listener
+  // Just close the modal
+  showModal.value = false
 }
 </script>
 

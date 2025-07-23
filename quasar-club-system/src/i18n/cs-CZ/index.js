@@ -10,10 +10,24 @@ export default {
     date: "Datum",
     description: "Popis",
     noDescription: "Nebyl zadán žádný popis",
+    form: {
+      title: "Název",
+      description: "Popis",
+      date: "Datum", 
+      time: "Čas",
+      type: "Typ ankety"
+    },
+    updateSuccess: "Anketa byla úspěšně aktualizována",
+    updateError: "Nepodařilo se aktualizovat anketu",
+    deleteSuccess: "Anketa byla úspěšně smazána",
+    deleteError: "Nepodařilo se smazat anketu",
+    confirmDelete: "Opravdu chcete smazat tuto anketu?",
     type: {
       label: "Typ",
       training: "Trénink",
       match: "Zápas",
+      event: "Událost",
+      other: "Jiné"
     },
     status: {
       active: "Aktivní",
@@ -207,7 +221,11 @@ export default {
     cancel: "Zrušit",
     edit: "Upravit",
     delete: "Smazat",
+    update: "Aktualizovat",
     back: "Zpět"
+  },
+  validation: {
+    required: "Toto pole je povinné"
   },
   notifications: {
     title: "Oznámení",

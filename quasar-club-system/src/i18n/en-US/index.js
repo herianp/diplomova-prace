@@ -10,10 +10,24 @@ export default {
     date: "Date",
     description: "Description",
     noDescription: "No description provided",
+    form: {
+      title: "Title",
+      description: "Description", 
+      date: "Date",
+      time: "Time",
+      type: "Survey Type"
+    },
+    updateSuccess: "Survey updated successfully",
+    updateError: "Failed to update survey",
+    deleteSuccess: "Survey deleted successfully",
+    deleteError: "Failed to delete survey",
+    confirmDelete: "Are you sure you want to delete this survey?",
     type: {
       label: "Type",
       training: "Training",
       match: "Match",
+      event: "Event",
+      other: "Other"
     },
     status: {
       active: "Active",
@@ -207,7 +221,11 @@ export default {
     cancel: "Cancel",
     edit: "Edit",
     delete: "Delete",
+    update: "Update",
     back: "Back"
+  },
+  validation: {
+    required: "This field is required"
   },
   notifications: {
     title: "Notifications",

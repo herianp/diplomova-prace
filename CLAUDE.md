@@ -39,19 +39,40 @@
 - Fixed Firestore IN query limit issue for teams with >30 members in SurveyVerificationPage, ReportsPage, and SingleTeamPage
 - Fixed Settings page to update displayName in both Firebase Auth and Firestore user documents
 - Fixed herianek@seznam.cz user document to include displayName field
+- Created additional users: jakubskopek, tetoo, jirka, miloszrnic (total team members: 44)
+- Updated "Aktivita členů" chart in ReportsPage to show only "Yes" votes and made it full width
+- Unified date filter functionality between ReportsPage and SurveyPage using same SurveyFilterMenu component
+- Added survey edit/delete functionality for power users in SurveyPage modal with Quasar-styled form
 
 ## Archive Scripts
-Scripts used for user creation and team management have been moved to `quasar-club-system/archive/`:
+All user creation and team management scripts have been moved to `quasar-club-system/archive/`:
+
+### User Creation Scripts:
 - `create-users.js` - Script to create initial 24 Firebase users using Admin SDK
-- `add-users-to-team.js` - Script to add initial users to specific team
-- `create-more-users.js` - Script to create additional 15 Firebase users
-- `add-more-users-to-team.js` - Script to add additional users to team
-- `fix-user-displayname.js` - Script to fix displayName field for existing users
+- `create-more-users.js` - Script to create additional 15 Firebase users  
+- `create-final-users.js` - Script to create jakubskopek, tetoo users
+- `create-jirka-user.js` - Script to create jirka user
+- `create-miloszrnic-user.js` - Script to create miloszrnic user
 - `create-users-cli.sh` - Alternative CLI-based user creation script
 - `create-users-simple.js` - Simple user creation template
-- `package-scripts.json` - Package file for script dependencies
 
-These scripts are no longer needed for regular development but kept for reference.
+### Team Management Scripts:
+- `add-users-to-team.js` - Script to add initial users to specific team
+- `add-more-users-to-team.js` - Script to add additional users to team
+- `add-final-users-to-team.js` - Script to add jakubskopek, tetoo to team
+- `add-jirka-to-team.js` - Script to add jirka to team
+- `add-miloszrnic-to-team.js` - Script to add miloszrnic to team
+
+### Utility Scripts:
+- `fix-user-displayname.js` - Script to fix displayName field for existing users
+- `package-scripts.json` - Package file for script dependencies
+- `test-users.json` - Test user data file
+
+### Cleaned Up Files:
+- Removed `firebase-admin-key.json:Zone.Identifier` (Windows zone identifier file)
+- Moved `test-users.json` to archive folder
+
+These scripts are no longer needed for regular development but kept for reference and documentation purposes.
 
 ## Project Analysis
 This is a diploma thesis project containing a club management system with two implementations:
