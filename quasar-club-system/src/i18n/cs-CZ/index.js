@@ -13,7 +13,7 @@ export default {
     form: {
       title: "Název",
       description: "Popis",
-      date: "Datum", 
+      date: "Datum",
       time: "Čas",
       type: "Typ ankety"
     },
@@ -160,7 +160,8 @@ export default {
     totalSurveys: "Celkem anket",
     teamMembers: "Členové týmu",
     myVotes: "Mé hlasy",
-    participation: "Docházka",
+    teamParticipation: "Týmová docházka",
+    personalParticipation: "Osobní docházka",
     recentSurveys: "Nedávné ankety",
     last5Surveys: "Posledních 5 anket s historií vašeho hlasování",
     votingTrends: "Trendy hlasování",

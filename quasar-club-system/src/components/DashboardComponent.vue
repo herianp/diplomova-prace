@@ -5,14 +5,16 @@
       <q-card flat bordered class="q-pa-md">
         <div class="row items-center">
           <div class="col">
-            <h4 class="q-ma-none text-primary">{{ currentTeam?.name || 'No Team Selected' }}</h4>
-            <p class="text-grey-7 q-ma-none">{{ $t('dashboard.teamOverview') }}</p>
+            <h4 class="q-ma-none text-warning">{{ currentTeam?.name || 'No Team Selected' }}</h4>
+            <h6 class="text-grey-7 q-ma-none">{{ $t('dashboard.teamOverview') }}</h6>
           </div>
           <div class="col-auto">
             <q-chip
               :color="isCurrentUserPowerUser ? 'positive' : 'info'"
               text-color="white"
               :label="isCurrentUserPowerUser ? $t('dashboard.powerUser') : $t('dashboard.member')"
+              icon="person"
+              size="lg"
             />
           </div>
         </div>
@@ -21,8 +23,8 @@
 
     <!-- Metrics Cards -->
     <div class="metrics-row q-mb-lg">
-      <div class="row q-gutter-md">
-        <div class="col-12 col-sm-6 col-md-3">
+      <div class="row q-col-gutter-md items-stretch">
+        <div class="col-12 col-sm-6 col-md">
           <MetricCard
             :title="$t('dashboard.totalSurveys')"
             :value="totalSurveys"
@@ -30,7 +32,7 @@
             color="primary"
           />
         </div>
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-md">
           <MetricCard
             :title="$t('dashboard.teamMembers')"
             :value="currentTeam?.members?.length || 0"
@@ -38,7 +40,7 @@
             color="secondary"
           />
         </div>
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-md">
           <MetricCard
             :title="$t('dashboard.myVotes')"
             :value="myTotalVotes"
@@ -46,10 +48,18 @@
             color="accent"
           />
         </div>
-        <div class="col-12 col-sm-6 col-md-3">
+        <div class="col-12 col-sm-6 col-md">
           <MetricCard
-            :title="$t('dashboard.participation')"
-            :value="participationRate + '%'"
+            :title="$t('dashboard.personalParticipation')"
+            :value="personalParticipationRate + '%'"
+            icon="trending_up"
+            color="positive"
+          />
+        </div>
+        <div class="col-12 col-sm-6 col-md">
+          <MetricCard
+            :title="$t('dashboard.teamParticipation')"
+            :value="teamParticipationRate + '%'"
             icon="trending_up"
             color="positive"
           />
@@ -154,10 +164,24 @@ const myYesVotes = computed(() => {
   }, 0)
 })
 
-const participationRate = computed(() => {
+const personalParticipationRate = computed(() => {
   if (totalSurveys.value === 0) return 0
   return Math.round((myYesVotes.value / totalSurveys.value) * 100)
 })
+
+const teamParticipationRate = computed(() => {
+  if (totalSurveys.value === 0) return 0
+
+  const playersCount = currentTeam.value?.members?.length || 0;
+
+  const totalYesVotes = surveys.value.reduce((total, survey) => {
+    const yesVotes = survey.votes?.filter(vote => vote.vote === true).length || 0
+    return total + yesVotes
+  }, 0)
+
+  return Math.round((totalYesVotes / (playersCount * totalSurveys.value)) * 100)
+})
+
 
 // Methods
 const refreshData = async () => {

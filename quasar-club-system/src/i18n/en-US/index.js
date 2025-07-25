@@ -12,7 +12,7 @@ export default {
     noDescription: "No description provided",
     form: {
       title: "Title",
-      description: "Description", 
+      description: "Description",
       date: "Date",
       time: "Time",
       type: "Survey Type"
@@ -160,7 +160,8 @@ export default {
     totalSurveys: "Total Surveys",
     teamMembers: "Team Members",
     myVotes: "My Votes",
-    participation: "Attendance",
+    teamParticipation: "Týmová docházka",
+    personalParticipation: "Osobní docházka",
     recentSurveys: "Recent Surveys",
     last5Surveys: "Last 5 surveys with your voting history",
     votingTrends: "Voting Trends",
@@ -263,7 +264,7 @@ export default {
   messages: {
     title: "Messages",
     teamChat: "Team Chat",
-    noTeam: "No Team Selected", 
+    noTeam: "No Team Selected",
     selectTeamFirst: "Please select a team to start messaging",
     loading: "Loading messages...",
     noMessages: "No messages yet",
@@ -283,7 +284,7 @@ export default {
     loading: "Loading analytics data...",
     loadError: "Failed to load reports data",
     totalSurveys: "Total Surveys",
-    totalMembers: "Total Members", 
+    totalMembers: "Total Members",
     avgParticipation: "Avg Participation",
     activeSurveys: "Active Surveys",
     surveyParticipation: "Survey Participation Rate",
