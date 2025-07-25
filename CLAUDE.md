@@ -46,6 +46,7 @@
 - Added SurveyFilterMenu to DashboardPage with same filtering functionality as SurveyPage
 - Set default filter to "this season" (13/07/2025 - 30/06/2026) in dashboard
 - Applied filters to ALL dashboard metrics including active team members count
+- Created ReportsComponent and refactored ReportsPage to use it (consistent with DashboardPage structure)
 
 ## Archive Scripts
 All user creation and team management scripts have been moved to `quasar-club-system/archive/`:
