@@ -4,7 +4,7 @@
       <q-icon name="timeline" size="2rem" color="grey-5" />
       <p class="text-grey-6 q-mt-sm">{{ $t('dashboard.noVotingData') }}</p>
     </div>
-    
+
     <div v-else class="chart-container">
       <div class="chart-legend q-mb-md">
         <div class="legend-item">
@@ -20,10 +20,10 @@
           <span>{{ $t('dashboard.didNotVote') }}</span>
         </div>
       </div>
-      
+
       <div class="chart-bars">
-        <div 
-          v-for="(item, index) in chartData" 
+        <div
+          v-for="(item, index) in chartData"
           :key="index"
           class="chart-bar-container"
         >
@@ -31,10 +31,10 @@
             <div class="survey-title-short">{{ truncateTitle(item.title) }}</div>
             <div class="survey-date-short">{{ formatShortDate(item.date) }}</div>
           </div>
-          
+
           <div class="bar-wrapper">
             <div class="chart-bar">
-              <div 
+              <div
                 class="bar-segment positive"
                 :style="{ width: item.positivePercentage + '%' }"
                 v-if="item.positivePercentage > 0"
@@ -43,7 +43,7 @@
                   {{ item.positiveVotes }}
                 </span>
               </div>
-              <div 
+              <div
                 class="bar-segment negative"
                 :style="{ width: item.negativePercentage + '%' }"
                 v-if="item.negativePercentage > 0"
@@ -52,7 +52,7 @@
                   {{ item.negativeVotes }}
                 </span>
               </div>
-              <div 
+              <div
                 class="bar-segment abstain"
                 :style="{ width: item.abstainPercentage + '%' }"
                 v-if="item.abstainPercentage > 0"
@@ -62,14 +62,13 @@
                 </span>
               </div>
             </div>
-            
-            <div class="user-vote-indicator" v-if="item.userVote !== null">
-              <q-icon 
-                :name="item.userVote ? 'thumb_up' : 'thumb_down'"
-                :color="item.userVote ? 'positive' : 'negative'"
-                size="sm"
-              />
-            </div>
+
+            <q-icon
+              :name="item.userVote ? 'thumb_up' : 'thumb_down'"
+              :color="item.userVote ? 'positive' : 'negative'"
+              size="sm"
+              class="user-vote-icon"
+            />
           </div>
         </div>
       </div>
@@ -95,16 +94,16 @@ const teamStore = useTeamStore()
 
 const chartData = computed(() => {
   if (!props.surveys.length) return []
-  
+
   return props.surveys.map(survey => {
     const totalMembers = teamStore.currentTeam?.members?.length || 1
     const positiveVotes = survey.votes?.filter(vote => vote.vote === true).length || 0
     const negativeVotes = survey.votes?.filter(vote => vote.vote === false).length || 0
     const totalVotes = positiveVotes + negativeVotes
     const abstainVotes = totalMembers - totalVotes
-    
+
     const userVote = survey.votes?.find(vote => vote.userUid === props.userUid)
-    
+
     return {
       title: survey.title,
       date: survey.date,
@@ -205,9 +204,17 @@ const formatShortDate = (dateString) => {
 .bar-wrapper {
   flex: 1;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-vote-icon {
+  flex-shrink: 0;
 }
 
 .chart-bar {
+  flex: 1;
   display: flex;
   height: 24px;
   background: #f5f5f5;
@@ -255,16 +262,16 @@ const formatShortDate = (dateString) => {
     align-items: flex-start;
     gap: 0.5rem;
   }
-  
+
   .survey-info {
     min-width: auto;
     width: 100%;
   }
-  
+
   .bar-wrapper {
     width: 100%;
   }
-  
+
   .user-vote-indicator {
     position: static;
     transform: none;

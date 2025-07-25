@@ -108,7 +108,8 @@
 
     <!-- Charts Section -->
     <div class="charts-section">
-      <div class="row q-gutter-md">
+      <div class="row q-col-gutter-md">
+        <!-- Graph: Trends -->
         <div class="col-12 col-md-6">
           <q-card flat bordered>
             <q-card-section>
@@ -117,6 +118,8 @@
             </q-card-section>
           </q-card>
         </div>
+
+        <!-- Graph: Type of survey -->
         <div class="col-12 col-md-6">
           <q-card flat bordered>
             <q-card-section>
@@ -303,6 +306,7 @@ onMounted(() => {
 .charts-section {
   animation: fadeInUp 1s ease-out;
 }
+
 
 @keyframes fadeInUp {
   from {
