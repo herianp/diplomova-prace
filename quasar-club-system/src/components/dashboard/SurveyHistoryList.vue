@@ -1,13 +1,13 @@
 <template>
-  <div class="survey-history-list">
+  <div>
     <div v-if="surveys.length === 0" class="no-surveys">
       <q-icon name="poll" size="3rem" color="grey-5" />
       <p class="text-grey-6 q-mt-md">{{ $t('dashboard.noSurveys') }}</p>
     </div>
-    
+
     <div v-else>
-      <div 
-        v-for="survey in surveys" 
+      <div
+        v-for="survey in surveys"
         :key="survey.id"
         class="survey-item q-mb-md"
       >
@@ -17,7 +17,7 @@
               <div class="col">
                 <div class="survey-title">{{ survey.title }}</div>
                 <div class="survey-meta">
-                  <q-chip 
+                  <q-chip
                     :color="getSurveyTypeColor(survey.type)"
                     text-color="white"
                     size="sm"
@@ -29,7 +29,7 @@
                   {{ survey.description }}
                 </div>
               </div>
-              
+
               <div class="col-auto">
                 <div class="voting-section">
                   <div class="vote-stats">
@@ -42,7 +42,7 @@
                       <span>{{ getNegativeVotes(survey) }}</span>
                     </div>
                   </div>
-                  
+
                   <div class="my-vote">
                     <q-chip
                       v-if="getUserVote(survey) !== null"
@@ -121,11 +121,6 @@ const formatDate = (date, time) => {
 </script>
 
 <style scoped>
-.survey-history-list {
-  max-height: 600px;
-  overflow-y: auto;
-}
-
 .no-surveys {
   text-align: center;
   padding: 2rem;
@@ -210,7 +205,7 @@ const formatDate = (date, time) => {
     flex-direction: column;
     align-items: flex-start;
   }
-  
+
   .voting-section {
     flex-direction: row;
     align-items: center;
@@ -218,7 +213,7 @@ const formatDate = (date, time) => {
     justify-content: space-between;
     margin-top: 1rem;
   }
-  
+
   .survey-description {
     max-width: 100%;
   }

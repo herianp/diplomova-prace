@@ -21,6 +21,15 @@
       </q-card>
     </div>
 
+    <!-- Survey Filters -->
+    <div class="survey-filters q-mb-lg">
+      <SurveyFilterMenu
+        v-model="filters"
+        @filters-changed="onFiltersChanged"
+      />
+    </div>
+
+
     <!-- Metrics Cards -->
     <div class="metrics-row q-mb-lg">
       <div class="row q-col-gutter-md items-stretch">
@@ -35,7 +44,7 @@
         <div class="col-12 col-sm-6 col-md">
           <MetricCard
             :title="$t('dashboard.teamMembers')"
-            :value="currentTeam?.members?.length || 0"
+            :value="activeTeamMembers"
             icon="group"
             color="secondary"
           />
@@ -69,9 +78,9 @@
 
     <!-- Recent Surveys History -->
     <div class="recent-surveys q-mb-lg">
-      <q-card flat bordered>
-        <q-card-section>
-          <div class="row items-center q-mb-md">
+      <q-card flat bordered class="full-width">
+        <q-card-section class="q-pa-none">
+          <div class="row items-center q-pa-md">
             <div class="col">
               <h5 class="q-ma-none">{{ $t('dashboard.recentSurveys') }}</h5>
               <p class="text-grey-7 q-ma-none">{{ $t('dashboard.last5Surveys') }}</p>
@@ -87,10 +96,12 @@
             </div>
           </div>
 
-          <SurveyHistoryList
-            :surveys="recentSurveys"
-            :current-user-uid="currentUser?.uid"
-          />
+          <div class="q-px-md q-pb-md overflow-auto">
+            <SurveyHistoryList
+              :surveys="filteredRecentSurveys"
+              :current-user-uid="currentUser?.uid"
+            />
+          </div>
         </q-card-section>
       </q-card>
     </div>
@@ -102,7 +113,7 @@
           <q-card flat bordered>
             <q-card-section>
               <h6 class="q-ma-none q-mb-md">{{ $t('dashboard.votingTrends') }}</h6>
-              <VotingChart :surveys="recentSurveys" :user-uid="currentUser?.uid" />
+              <VotingChart :surveys="filteredRecentSurveys" :user-uid="currentUser?.uid" />
             </q-card-section>
           </q-card>
         </div>
@@ -110,7 +121,7 @@
           <q-card flat bordered>
             <q-card-section>
               <h6 class="q-ma-none q-mb-md">{{ $t('dashboard.surveyTypes') }}</h6>
-              <SurveyTypesChart :surveys="surveys" />
+              <SurveyTypesChart :surveys="filteredSurveys" />
             </q-card-section>
           </q-card>
         </div>
@@ -127,38 +138,99 @@ import MetricCard from '@/components/dashboard/MetricCard.vue'
 import SurveyHistoryList from '@/components/dashboard/SurveyHistoryList.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
+import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 
 const isLoading = ref(false)
+
+// Filter state with "this season" as default
+const filters = ref({
+  searchName: '',
+  dateFrom: '2025-07-13', // Season start
+  dateTo: '2026-06-30'    // Season end
+})
 
 // Computed properties
 const currentTeam = computed(() => teamStore.currentTeam)
 const currentUser = computed(() => authStore.user)
 const surveys = computed(() => teamStore.surveys)
 
-const totalSurveys = computed(() => surveys.value.length)
+// Filtered surveys based on search and date filters
+const filteredSurveys = computed(() => {
+  let filtered = [...surveys.value]
+
+  // 1. Apply name search filter
+  if (filters.value.searchName.trim()) {
+    const searchTerm = filters.value.searchName.toLowerCase().trim()
+    filtered = filtered.filter(survey =>
+      survey.title.toLowerCase().includes(searchTerm)
+    )
+  }
+
+  // 2. Apply date range filter (always apply since we have default season dates)
+  filtered = filtered.filter(survey => {
+    const surveyDate = survey.date
+
+    // If both dates are set, check if survey is within range
+    if (filters.value.dateFrom && filters.value.dateTo) {
+      return surveyDate >= filters.value.dateFrom && surveyDate <= filters.value.dateTo
+    }
+
+    // If only dateFrom is set, check if survey is on or after that date
+    if (filters.value.dateFrom) {
+      return surveyDate >= filters.value.dateFrom
+    }
+
+    // If only dateTo is set, check if survey is on or before that date
+    if (filters.value.dateTo) {
+      return surveyDate <= filters.value.dateTo
+    }
+
+    return true
+  })
+
+  // 4. Sort: oldest first (ascending order)
+  return filtered.sort((a, b) => a.date.localeCompare(b.date))
+})
+
+const totalSurveys = computed(() => filteredSurveys.value.length)
 
 const isCurrentUserPowerUser = computed(() => {
   return currentTeam.value?.powerusers?.includes(currentUser.value?.uid) || false
 })
 
-const recentSurveys = computed(() => {
-  return surveys.value
+// Count team members who participated in filtered surveys
+const activeTeamMembers = computed(() => {
+  if (!filteredSurveys.value.length) return 0
+
+  const participatingMembers = new Set()
+
+  filteredSurveys.value.forEach(survey => {
+    survey.votes?.forEach(vote => {
+      participatingMembers.add(vote.userUid)
+    })
+  })
+
+  return participatingMembers.size
+})
+
+const filteredRecentSurveys = computed(() => {
+  return filteredSurveys.value
     .slice()
     .sort((a, b) => parseInt(b.createdDate) - parseInt(a.createdDate))
     .slice(0, 5)
 })
 
 const myTotalVotes = computed(() => {
-  return surveys.value.reduce((total, survey) => {
+  return filteredSurveys.value.reduce((total, survey) => {
     const userVote = survey.votes?.find(vote => vote.userUid === currentUser.value?.uid)
     return userVote ? total + 1 : total
   }, 0)
 })
 
 const myYesVotes = computed(() => {
-  return surveys.value.reduce((total, survey) => {
+  return filteredSurveys.value.reduce((total, survey) => {
     const userVote = survey.votes?.find(vote => vote.userUid === currentUser.value?.uid)
     return (userVote && userVote.vote === true) ? total + 1 : total
   }, 0)
@@ -170,20 +242,22 @@ const personalParticipationRate = computed(() => {
 })
 
 const teamParticipationRate = computed(() => {
-  if (totalSurveys.value === 0) return 0
+  if (totalSurveys.value === 0 || activeTeamMembers.value === 0) return 0
 
-  const playersCount = currentTeam.value?.members?.length || 0;
-
-  const totalYesVotes = surveys.value.reduce((total, survey) => {
+  const totalYesVotes = filteredSurveys.value.reduce((total, survey) => {
     const yesVotes = survey.votes?.filter(vote => vote.vote === true).length || 0
     return total + yesVotes
   }, 0)
 
-  return Math.round((totalYesVotes / (playersCount * totalSurveys.value)) * 100)
+  return Math.round((totalYesVotes / (activeTeamMembers.value * totalSurveys.value)) * 100)
 })
 
 
 // Methods
+const onFiltersChanged = (newFilters) => {
+  filters.value = { ...newFilters }
+}
+
 const refreshData = async () => {
   isLoading.value = true
   try {

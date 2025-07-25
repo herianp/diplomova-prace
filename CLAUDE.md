@@ -43,6 +43,9 @@
 - Updated "Aktivita členů" chart in ReportsPage to show only "Yes" votes and made it full width
 - Unified date filter functionality between ReportsPage and SurveyPage using same SurveyFilterMenu component
 - Added survey edit/delete functionality for power users in SurveyPage modal with Quasar-styled form
+- Added SurveyFilterMenu to DashboardPage with same filtering functionality as SurveyPage
+- Set default filter to "this season" (13/07/2025 - 30/06/2026) in dashboard
+- Applied filters to ALL dashboard metrics including active team members count
 
 ## Archive Scripts
 All user creation and team management scripts have been moved to `quasar-club-system/archive/`:
