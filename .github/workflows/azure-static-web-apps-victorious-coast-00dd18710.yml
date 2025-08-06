@@ -1,16 +1,4 @@
 name: Azure Static Web Apps CI/CD
-
-on:
-  push:
-    branches:
-      - production
-  pull_request:
-    types: [opened, synchronize, reopened, closed]
-    branches:
-      - production
-
-
-name: Azure Static Web Apps CI/CD
 on:
   push:
     branches:
@@ -75,5 +63,6 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_COAST_00DD18710 }}
           action: "close"
+
 
 
