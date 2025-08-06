@@ -31,50 +31,7 @@
 
 
     <!-- Metrics Cards -->
-    <div class="metrics-row q-mb-lg">
-      <div class="row q-col-gutter-md items-stretch">
-        <div class="col-12 col-sm-6 col-md">
-          <MetricCard
-            :title="$t('dashboard.totalSurveys')"
-            :value="totalSurveys"
-            icon="poll"
-            color="primary"
-          />
-        </div>
-        <div class="col-12 col-sm-6 col-md">
-          <MetricCard
-            :title="$t('dashboard.teamMembers')"
-            :value="activeTeamMembers"
-            icon="group"
-            color="secondary"
-          />
-        </div>
-        <div class="col-12 col-sm-6 col-md">
-          <MetricCard
-            :title="$t('dashboard.myVotes')"
-            :value="myTotalVotes"
-            icon="how_to_vote"
-            color="accent"
-          />
-        </div>
-        <div class="col-12 col-sm-6 col-md">
-          <MetricCard
-            :title="$t('dashboard.personalParticipation')"
-            :value="personalParticipationRate + '%'"
-            icon="trending_up"
-            color="positive"
-          />
-        </div>
-        <div class="col-12 col-sm-6 col-md">
-          <MetricCard
-            :title="$t('dashboard.teamParticipation')"
-            :value="teamParticipationRate + '%'"
-            icon="trending_up"
-            color="positive"
-          />
-        </div>
-      </div>
-    </div>
+    <DashboardMetrics :filtered-surveys="filteredSurveys" />
 
     <!-- Recent Surveys History -->
     <div class="recent-surveys q-mb-lg">
@@ -137,7 +94,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthStore } from '@/stores/authStore'
-import MetricCard from '@/components/dashboard/MetricCard.vue'
+import DashboardMetrics from '@/components/dashboard/DashboardMetrics.vue'
 import SurveyHistoryList from '@/components/dashboard/SurveyHistoryList.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
@@ -197,25 +154,8 @@ const filteredSurveys = computed(() => {
   return filtered.sort((a, b) => a.date.localeCompare(b.date))
 })
 
-const totalSurveys = computed(() => filteredSurveys.value.length)
-
 const isCurrentUserPowerUser = computed(() => {
   return currentTeam.value?.powerusers?.includes(currentUser.value?.uid) || false
-})
-
-// Count team members who participated in filtered surveys
-const activeTeamMembers = computed(() => {
-  if (!filteredSurveys.value.length) return 0
-
-  const participatingMembers = new Set()
-
-  filteredSurveys.value.forEach(survey => {
-    survey.votes?.forEach(vote => {
-      participatingMembers.add(vote.userUid)
-    })
-  })
-
-  return participatingMembers.size
 })
 
 const filteredRecentSurveys = computed(() => {
@@ -223,36 +163,6 @@ const filteredRecentSurveys = computed(() => {
     .slice()
     .sort((a, b) => parseInt(b.createdDate) - parseInt(a.createdDate))
     .slice(0, 5)
-})
-
-const myTotalVotes = computed(() => {
-  return filteredSurveys.value.reduce((total, survey) => {
-    const userVote = survey.votes?.find(vote => vote.userUid === currentUser.value?.uid)
-    return userVote ? total + 1 : total
-  }, 0)
-})
-
-const myYesVotes = computed(() => {
-  return filteredSurveys.value.reduce((total, survey) => {
-    const userVote = survey.votes?.find(vote => vote.userUid === currentUser.value?.uid)
-    return (userVote && userVote.vote === true) ? total + 1 : total
-  }, 0)
-})
-
-const personalParticipationRate = computed(() => {
-  if (totalSurveys.value === 0) return 0
-  return Math.round((myYesVotes.value / totalSurveys.value) * 100)
-})
-
-const teamParticipationRate = computed(() => {
-  if (totalSurveys.value === 0 || activeTeamMembers.value === 0) return 0
-
-  const totalYesVotes = filteredSurveys.value.reduce((total, survey) => {
-    const yesVotes = survey.votes?.filter(vote => vote.vote === true).length || 0
-    return total + yesVotes
-  }, 0)
-
-  return Math.round((totalYesVotes / (activeTeamMembers.value * totalSurveys.value)) * 100)
 })
 
 
@@ -295,9 +205,6 @@ onMounted(() => {
   color: rgba(255, 255, 255, 0.8) !important;
 }
 
-.metrics-row {
-  animation: fadeInUp 0.6s ease-out;
-}
 
 .recent-surveys {
   animation: fadeInUp 0.8s ease-out;
