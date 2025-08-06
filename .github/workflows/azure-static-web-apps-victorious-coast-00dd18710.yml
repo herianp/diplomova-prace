@@ -9,6 +9,17 @@ on:
     branches:
       - production
 
+
+name: Azure Static Web Apps CI/CD
+on:
+  push:
+    branches:
+      - production
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches:
+      - production
+
 jobs:
   build_and_deploy_job:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
@@ -19,19 +30,39 @@ jobs:
         with:
           submodules: true
           lfs: false
-      - name: Build And Deploy
-        id: builddeploy
+      
+      # Add Node.js setup for better control over the build environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'  # Adjust based on your project requirements
+      
+      # Install dependencies explicitly
+      - name: Install dependencies
+        run: |
+          cd ./quasar-club-system
+          yarn install --frozen-lockfile
+      
+      # Build the application with environment variables
+      - name: Build application
+        run: |
+          cd ./quasar-club-system
+          yarn quasar build -m spa  # Build for SPA mode since output is dist/spa
+        env:
+          # Firebase configuration - these should be stored as GitHub secrets
+          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+      
+      - name: Deploy to Azure Static Web Apps
+        id: deploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_COAST_00DD18710 }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "./quasar-club-system" # App source code path
-          api_location: "" # Api source code path - optional
-          output_location: "dist/spa" # Built app content directory - optional
-          ###### End of Repository/Build Configurations ######
+          app_location: "./quasar-club-system"
+          api_location: ""
+          output_location: "dist/spa"
+          skip_app_build: true  # Important: Skip the automatic build since we built it manually
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -44,4 +75,5 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_COAST_00DD18710 }}
           action: "close"
+
 
