@@ -3,15 +3,15 @@
     <h2 v-if="!isMobile" style="text-align: center" class="q-ma-none q-pa-none">{{ $t('survey.title') }}</h2>
 
     <!-- Filter Menu -->
-    <SurveyFilterMenu 
+    <SurveyFilterMenu
       v-model="filters"
       @filters-changed="onFiltersChanged"
       class="q-ma-lg"
     />
 
     <!-- Create Survey Menu -->
-    <SurveyCreateMenu 
-      :is-power-user="isPowerUser"
+    <SurveyCreateMenu
+      :is-power-user="isCurrentUserPowerUser"
       @survey-created="handleSurveySubmit"
       class="q-ma-lg"
     />
@@ -47,11 +47,13 @@ import SurveyCreateMenu from '@/components/survey/SurveyCreateMenu.vue'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
-const { currentUser } = useAuthComposable()
+const { isCurrentUserPowerUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const i18n = useI18n()
 const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
 const { addSurvey } = useTeamComposable()
+
+const currentTeam = computed(() => teamStore.currentTeam)
 
 // Filter state
 const filters = ref({
@@ -62,35 +64,35 @@ const filters = ref({
 
 const surveys = computed(() => {
   let filteredSurveys = [...teamStore.surveys]
-  
+
   // 1. Apply name search filter
   if (filters.value.searchName.trim()) {
     const searchTerm = filters.value.searchName.toLowerCase().trim()
-    filteredSurveys = filteredSurveys.filter(survey => 
+    filteredSurveys = filteredSurveys.filter(survey =>
       survey.title.toLowerCase().includes(searchTerm)
     )
   }
-  
+
   // 2. Apply date range filter
   if (filters.value.dateFrom || filters.value.dateTo) {
     filteredSurveys = filteredSurveys.filter(survey => {
       const surveyDate = survey.date
-      
+
       // If both dates are set, check if survey is within range
       if (filters.value.dateFrom && filters.value.dateTo) {
         return surveyDate >= filters.value.dateFrom && surveyDate <= filters.value.dateTo
       }
-      
+
       // If only dateFrom is set, check if survey is on or after that date
       if (filters.value.dateFrom) {
         return surveyDate >= filters.value.dateFrom
       }
-      
+
       // If only dateTo is set, check if survey is on or before that date
       if (filters.value.dateTo) {
         return surveyDate <= filters.value.dateTo
       }
-      
+
       return true
     })
   } else {
@@ -99,13 +101,10 @@ const surveys = computed(() => {
     const cutoffDate = now.minus({ days: 1 }).toISODate()
     filteredSurveys = filteredSurveys.filter(survey => survey.date >= cutoffDate)
   }
-  
+
   // 4. Sort: oldest first (ascending order)
   return filteredSurveys.sort((a, b) => a.date.localeCompare(b.date))
 })
-
-const currentTeam = computed(() => teamStore.currentTeam)
-const isPowerUser = computed(() => currentTeam.value?.powerusers.includes(currentUser.value.uid))
 
 function onFiltersChanged(newFilters) {
   filters.value = { ...newFilters }

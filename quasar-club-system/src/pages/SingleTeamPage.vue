@@ -5,16 +5,10 @@
     </div>
 
     <div v-else-if="team" class="team-content">
-      <!-- Team Header -->
-      <div class="team-header q-mb-xl text-center">
-        <h2 class="text-h3 q-ma-none text-primary">{{ team.name }}</h2>
-        <div v-if="team.description" class="text-h6 text-grey-7 q-mt-sm">
-          {{ team.description }}
-        </div>
-        <div class="text-body2 text-grey-6 q-mt-sm">
-          {{ $t('team.single.membersCount', { count: teamMembers.length }) }}
-        </div>
-      </div>
+      <HeaderBanner
+        :title="team.name"
+        :description="$t('team.manageTeamDescription', { teamName: team.name, memberCount: team.members.length })"
+      />
 
       <div class="row q-col-gutter-lg">
         <!-- Team Members Section (Available to all users) -->
@@ -240,6 +234,7 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase/config.ts'
 import { useNotifications } from '@/composable/useNotifications.js'
+import HeaderBanner from '@/components/HeaderBanner.vue'
 
 const route = useRoute()
 const { currentUser } = useAuthComposable()
@@ -302,28 +297,28 @@ const loadTeamMembers = async () => {
       teamMembers.value = []
       return
     }
-    
+
     const allUsers = []
-    
+
     // Split members into chunks of 30 (Firestore IN query limit)
     const chunkSize = 30
     for (let i = 0; i < members.length; i += chunkSize) {
       const chunk = members.slice(i, i + chunkSize)
-      
+
       const usersQuery = query(
         collection(db, 'users'),
         where('__name__', 'in', chunk)
       )
       const usersSnapshot = await getDocs(usersQuery)
-      
+
       const chunkUsers = usersSnapshot.docs.map(doc => ({
         uid: doc.id,
         ...doc.data()
       }))
-      
+
       allUsers.push(...chunkUsers)
     }
-    
+
     teamMembers.value = allUsers
   } catch (error) {
     console.error('Error loading team members:', error)

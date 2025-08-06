@@ -86,6 +86,7 @@ export default {
     switchTeam: "Switch Team",
     members: "members",
     manage: "Manage Team",
+    manageTeamDescription: "Manage Team {teamName}, Number of member is {memberCount}",
     manageDescription: "Invite members, manage permissions",
     createNew: "Create New Team",
     createDescription: "Start a new team",

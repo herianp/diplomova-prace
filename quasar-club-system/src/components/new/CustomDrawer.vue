@@ -14,17 +14,6 @@
     <q-space />
 
     <q-list class="bottom-links">
-      <q-item clickable v-ripple>
-        <q-item-section avatar>
-          <q-avatar size="40px">
-            <img src="https://cdn.quasar.dev/img/avatar.png" alt="img" />
-          </q-avatar>
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{ user.name }}</q-item-label>
-          <q-item-label caption>{{ user.email }}</q-item-label>
-        </q-item-section>
-      </q-item>
 
       <q-separator />
 
@@ -46,23 +35,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { RouteEnum } from '@/enums/routesEnum.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
-import { useAuthStore } from '@/stores/authStore.ts'
 
 const router = useRouter();
 const { logoutUser } = useAuthComposable();
-const authStore = useAuthStore();
 
 const drawerOpen = ref(true);
-
-// Get user data from auth store
-const user = computed(() => ({
-  name: authStore.user?.displayName || authStore.user?.email || "User",
-  email: authStore.user?.email || "No email"
-}));
 
 // Top navigation links
 const topLinks = [
