@@ -1,0 +1,63 @@
+# Azure Static Web Apps deployment ignore file
+# Only deploy the built application, not source files or dependencies
+
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+
+# Source files (only deploy built files from dist/)
+src/
+public/
+
+# Development files
+.env*
+.vscode/
+.idea/
+
+# Build artifacts (keep only dist/spa)
+.quasar/
+dist/pwa/
+dist/ssr/
+dist/electron/
+dist/cordova/
+dist/capacitor/
+
+# Archive and scripts
+archive/
+scripts/
+
+# Firebase files (not needed for static deployment)
+firebase*.json
+firestore.*
+storage.rules
+*.cjs
+
+# Development configuration
+quasar.config.js
+vite.config.*
+eslint.config.*
+jsconfig.json
+
+# Documentation
+*.md
+README*
+
+# Git files
+.git/
+.gitignore
+
+# Testing
+test/
+tests/
+*.test.*
+*.spec.*
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+.cache/

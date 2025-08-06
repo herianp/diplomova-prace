@@ -31,6 +31,31 @@ export default defineConfig((ctx) => {
           ...viteConf.resolve.alias,
           "@": fileURLToPath(new URL("./src", import.meta.url))
         };
+        
+        // Build optimizations for smaller size
+        if (viteConf.command === 'build') {
+          viteConf.build = {
+            ...viteConf.build,
+            chunkSizeWarningLimit: 1000,
+            rollupOptions: {
+              output: {
+                // Manual chunks to optimize loading
+                manualChunks: {
+                  // Firebase chunk
+                  firebase: ['firebase/app', 'firebase/auth', 'firebase/firestore'],
+                  // Charts chunk
+                  charts: ['chart.js'],
+                  // Vue core
+                  vue: ['vue', 'vue-router', 'pinia'],
+                  // Quasar core
+                  quasar: ['quasar'],
+                  // Date utilities
+                  luxon: ['luxon']
+                }
+              }
+            }
+          };
+        }
       },
       vitePlugins: [
         ['@intlify/unplugin-vue-i18n/vite', {
