@@ -5,7 +5,7 @@
       round
       dense
       icon="notifications"
-      :color="hasUnread ? 'amber' : 'grey-7'"
+      :color="hasUnread ? 'amber' : 'white'"
       @click="toggleDropdown"
     >
       <!-- Notification Badge -->
@@ -19,8 +19,8 @@
     </q-btn>
 
     <!-- Manual Dropdown Menu -->
-    <div 
-      v-if="showDropdown" 
+    <div
+      v-if="showDropdown"
       class="notification-popup"
       style="position: absolute; top: 100%; right: 0; z-index: 9999; background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 400px;"
     >
@@ -56,7 +56,7 @@
           </div>
 
           <div v-else>
-            
+
             <div
               v-for="notification in notifications"
               :key="notification.id"

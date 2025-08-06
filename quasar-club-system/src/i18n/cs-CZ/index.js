@@ -86,6 +86,7 @@ export default {
     switchTeam: "Přepnout tým",
     members: "členů",
     manage: "Spravovat tým",
+    manageTeamDescription: "Správa týmu {teamName}, počet členů {memberCount}",
     manageDescription: "Pozvat členy, spravovat oprávnění",
     createNew: "Vytvořit nový tým",
     createDescription: "Začít nový tým",

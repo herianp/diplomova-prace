@@ -5,32 +5,13 @@
     </div>
 
     <div v-else-if="survey && teamMembers.length" class="verification-content">
-      <!-- Header -->
-      <div class="page-header q-mb-xl">
-        <div class="row items-center justify-between">
-          <div class="col">
-            <h2 class="text-h4 q-ma-none text-white">
-              {{ $t('survey.verification.title') }}
-            </h2>
-            <div class="text-h5 text-white text-weight-medium q-mt-sm">
-              {{ survey.title }}
-            </div>
-            <div class="text-body1 text-white q-mt-xs opacity-90">
-              {{ $t('survey.verification.reviewAttendance') }}
-            </div>
-          </div>
-          <div class="col-auto">
-            <q-btn
-              color="white"
-              text-color="orange"
-              icon="arrow_back"
-              :label="$t('common.back')"
-              @click="goBack"
-              unelevated
-            />
-          </div>
-        </div>
-      </div>
+      <HeaderBanner
+        :title="$t('survey.verification.title')"
+        :survey-title="survey.title"
+        :description="$t('survey.verification.reviewAttendance')"
+        @go-back="handleGoBack"
+        :goBackOption="true"
+      />
 
       <!-- Survey Info -->
       <q-card flat bordered class="q-mb-lg">
@@ -158,7 +139,7 @@
           color="grey-7"
           icon="cancel"
           :label="$t('common.cancel')"
-          @click="goBack"
+          @click="handleGoBack"
           outline
         />
         <!-- Delete Button (Power Users Only) -->
@@ -210,17 +191,17 @@
         </q-card-section>
 
         <q-card-actions align="right">
-          <q-btn 
-            flat 
-            :label="$t('common.cancel')" 
-            color="grey-7" 
-            v-close-popup 
+          <q-btn
+            flat
+            :label="$t('common.cancel')"
+            color="grey-7"
+            v-close-popup
             :disable="deleting"
           />
-          <q-btn 
-            :label="$t('survey.verification.deleteConfirm')" 
-            color="negative" 
-            @click="deleteSurvey" 
+          <q-btn
+            :label="$t('survey.verification.deleteConfirm')"
+            color="negative"
+            @click="deleteSurvey"
             :loading="deleting"
           />
         </q-card-actions>
@@ -240,6 +221,7 @@ import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
 import { collection, query, where, getDocs } from 'firebase/firestore'
 import { db } from '@/firebase/config'
+import HeaderBanner from '@/components/HeaderBanner.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -315,26 +297,26 @@ const loadTeamMembers = async () => {
 
     const members = currentTeam.value.members
     const allUsers = []
-    
+
     // Split members into chunks of 30 (Firestore IN query limit)
     const chunkSize = 30
     for (let i = 0; i < members.length; i += chunkSize) {
       const chunk = members.slice(i, i + chunkSize)
-      
+
       const usersQuery = query(
         collection(db, 'users'),
         where('__name__', 'in', chunk)
       )
       const usersSnapshot = await getDocs(usersQuery)
-      
+
       const chunkUsers = usersSnapshot.docs.map(doc => ({
         uid: doc.id,
         ...doc.data()
       }))
-      
+
       allUsers.push(...chunkUsers)
     }
-    
+
     teamMembers.value = allUsers
   } catch (error) {
     console.error('Error loading team members:', error)
@@ -387,7 +369,7 @@ const saveSurvey = async () => {
     })
 
     // Go back to previous page
-    goBack()
+    handleGoBack()
 
   } catch (error) {
     console.error('Error saving survey:', error)
@@ -419,7 +401,7 @@ const deleteSurvey = async () => {
 
     // Close dialog and go back
     showDeleteDialog.value = false
-    goBack()
+    handleGoBack()
 
   } catch (error) {
     console.error('Error deleting survey:', error)
@@ -433,7 +415,7 @@ const deleteSurvey = async () => {
   }
 }
 
-const goBack = () => {
+const handleGoBack = () => {
   router.go(-1)
 }
 
@@ -446,15 +428,6 @@ onMounted(() => {
 .survey-verification-page {
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.page-header {
-  background: linear-gradient(135deg, #ff6f00 0%, #ff8f00 50%, #ffa000 100%);
-  color: white;
-  padding: 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-  box-shadow: 0 4px 12px rgba(255, 111, 0, 0.3);
 }
 
 .attendance-toggle .q-btn {
@@ -471,10 +444,6 @@ onMounted(() => {
 @media (max-width: 768px) {
   .survey-verification-page {
     padding: 1rem;
-  }
-
-  .page-header {
-    padding: 1.5rem;
   }
 
   .row {

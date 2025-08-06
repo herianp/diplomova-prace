@@ -83,7 +83,6 @@ const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 
 const isLoading = ref(false)
 
-// Filter state with "this season" as default
 const filters = ref({
   searchName: '',
   dateFrom: '2025-07-13', // Season start
