@@ -1,5 +1,5 @@
 <template>
-  <div class="survey-create-menu" v-if="isPowerUser">
+  <div class="team-create-menu" v-if="isPowerUser">
     <q-expansion-item
       v-model="expanded"
       icon="add_circle"
@@ -14,7 +14,6 @@
             <span class="text-grey-7">{{ $t('team.create') }}</span>
           </div>
 
-          <!-- Survey Form -->
           <TeamForm
             @submit="handleCreateTeam"
             @cancel="handleCancel"
@@ -58,7 +57,7 @@ const handleCancel = () => {
 </script>
 
 <style scoped>
-.survey-create-menu {
+.team-create-menu {
   margin-bottom: 1rem;
 }
 
@@ -81,11 +80,11 @@ const handleCancel = () => {
   font-size: 0.875rem;
 }
 
-.survey-create-menu .q-expansion-item__header {
+.team-create-menu .q-expansion-item__header {
   padding: 12px 16px;
 }
 
-.survey-create-menu .q-expansion-item__content {
+.team-create-menu .q-expansion-item__content {
   padding: 0;
 }
 

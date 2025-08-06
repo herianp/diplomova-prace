@@ -4,7 +4,6 @@
 
     <TeamCreateMenu
       :is-power-user="isCurrentUserPowerUser"
-      @survey-created="handleCreateTeam"
       class="q-ma-lg"
     />
 
@@ -21,33 +20,17 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import TeamCard from '@/components/new/TeamCard.vue'
-import { useTeamComposable } from '@/composable/useTeamComposable.js'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import TeamCreateMenu from '@/components/team/TeamCreateMenu.vue'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
-const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
-const { createTeam } = useTeamComposable()
-
-const showModal = ref(false)
-
+const { isCurrentUserPowerUser } = useAuthComposable()
 const teams = computed(() => teamStore.teams)
-
-async function handleCreateTeam(payload) {
-  try {
-    await createTeam(payload.title, currentUser.value.uid);
-  } catch (err) {
-    console.log(`err ${err}`);
-  }
-
-  console.log('Submitted data:', payload)
-  showModal.value = false
-}
 
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
