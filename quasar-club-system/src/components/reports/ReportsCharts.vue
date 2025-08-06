@@ -328,12 +328,24 @@ const createMemberActivityChart = () => {
     })
   })
 
-  const memberIds = Object.keys(memberStats)
-  const labels = memberIds.map(id => {
-    const member = props.teamMembers.find(m => m.uid === id)
-    return member?.displayName || member?.email || `Member ${id.substring(0, 6)}...`
-  })
-  const data = Object.values(memberStats)
+  // 1. Combine member data and labels for sorting
+  const combinedData = Object.keys(memberStats).map(memberId => {
+    const member = props.teamMembers.find(m => m.uid === memberId);
+    const displayName = member?.displayName || member?.email || `Member ${memberId.substring(0, 6)}...`;
+    const voteCount = memberStats[memberId];
+    return {
+      id: memberId,
+      displayName: displayName,
+      voteCount: voteCount
+    };
+  });
+
+  // 2. Sort the combined data by voteCount in descending order
+  combinedData.sort((a, b) => b.voteCount - a.voteCount);
+
+  // 3. Separate the sorted data back into labels and data arrays for Chart.js
+  const labels = combinedData.map(item => item.displayName);
+  const data = combinedData.map(item => item.voteCount);
 
   if (charts.activity) {
     charts.activity.destroy()

@@ -36,6 +36,7 @@
         :current-team="currentTeam"
         :team-members="teamMembers"
         :selected-player="selectedPlayer"
+        class="q-mr-lg"
       />
     </div>
   </div>
