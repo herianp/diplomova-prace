@@ -38,7 +38,7 @@ jobs:
           yarn quasar build -m spa  # Build for SPA mode since output is dist/spa
         env:
           # Firebase configuration - these should be stored as GitHub secrets
-          VITE_FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
       
       - name: Deploy to Azure Static Web Apps
         id: deploy
@@ -50,7 +50,9 @@ jobs:
           app_location: "./quasar-club-system"
           api_location: ""
           output_location: "dist/spa"
-          skip_app_build: true  # Important: Skip the automatic build since we built it manually
+        env:
+          # Pass Firebase env vars here too
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -63,6 +65,8 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_VICTORIOUS_COAST_00DD18710 }}
           action: "close"
+
+
 
 
 
