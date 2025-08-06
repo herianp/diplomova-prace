@@ -107,7 +107,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
-import { useAuthStore } from '@/stores/authStore.ts'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { useScreenComposable } from '@/composable/useScreenComposable.js'
 import { useQuasar } from 'quasar'
@@ -123,10 +122,11 @@ import {
   serverTimestamp
 } from 'firebase/firestore'
 import { db } from '@/firebase/config.ts'
+import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
-const authStore = useAuthStore()
 const teamStore = useTeamStore()
 const { isMobile } = useScreenComposable()
+const { currentUser } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 
@@ -139,7 +139,6 @@ const messagesContainer = ref(null)
 let unsubscribe = null
 
 // Computed
-const currentUser = computed(() => authStore.user)
 const currentTeam = computed(() => teamStore.currentTeam)
 const isPowerUser = computed(() =>
   currentTeam.value?.powerusers?.includes(currentUser.value?.uid)

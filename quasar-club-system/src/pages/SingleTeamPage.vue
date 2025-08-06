@@ -221,7 +221,7 @@
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useRoute } from 'vue-router'
-import { useAuthStore } from '@/stores/authStore.ts'
+import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
@@ -242,7 +242,7 @@ import { db } from '@/firebase/config.ts'
 import { useNotifications } from '@/composable/useNotifications.js'
 
 const route = useRoute()
-const authStore = useAuthStore()
+const { currentUser } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
@@ -263,7 +263,6 @@ const inviteForm = reactive({
 })
 
 // Computed
-const currentUser = computed(() => authStore.user)
 const teamId = computed(() => route.params.teamId)
 const isCurrentUserPowerUser = computed(() => {
   return team.value?.powerusers?.includes(currentUser.value?.uid)

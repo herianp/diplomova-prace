@@ -34,7 +34,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { DateTime } from 'luxon'
 import { useTeamStore } from '@/stores/teamStore.ts'
-import { useAuthStore } from '@/stores/authStore.ts'
+import { useAuthComposable } from '@/composable/useAuthComposable'
 import SurveyCard from '@/components/new/SurveyCard.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
@@ -47,7 +47,7 @@ import SurveyCreateMenu from '@/components/survey/SurveyCreateMenu.vue'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
-const authStore = useAuthStore()
+const { currentUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const i18n = useI18n()
 const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
@@ -104,9 +104,8 @@ const surveys = computed(() => {
   return filteredSurveys.sort((a, b) => a.date.localeCompare(b.date))
 })
 
-const user = computed(() => authStore.user)
 const currentTeam = computed(() => teamStore.currentTeam)
-const isPowerUser = computed(() => currentTeam.value?.powerusers.includes(user.value.uid))
+const isPowerUser = computed(() => currentTeam.value?.powerusers.includes(currentUser.value.uid))
 
 function onFiltersChanged(newFilters) {
   filters.value = { ...newFilters }

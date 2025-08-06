@@ -34,34 +34,12 @@
     <DashboardMetrics :filtered-surveys="filteredSurveys" />
 
     <!-- Recent Surveys History -->
-    <div class="recent-surveys q-mb-lg">
-      <q-card flat bordered class="full-width">
-        <q-card-section class="q-pa-none">
-          <div class="row items-center q-pa-md">
-            <div class="col">
-              <h5 class="q-ma-none">{{ $t('dashboard.recentSurveys') }}</h5>
-              <p class="text-grey-7 q-ma-none">{{ $t('dashboard.last5Surveys') }}</p>
-            </div>
-            <div class="col-auto">
-              <q-btn
-                flat
-                round
-                icon="refresh"
-                @click="refreshData"
-                :loading="isLoading"
-              />
-            </div>
-          </div>
-
-          <div class="q-px-md q-pb-md overflow-auto">
-            <SurveyHistoryList
-              :surveys="filteredRecentSurveys"
-              :current-user-uid="currentUser?.uid"
-            />
-          </div>
-        </q-card-section>
-      </q-card>
-    </div>
+    <RecentSurveysGraph
+      :surveys="filteredRecentSurveys"
+      :current-user-uid="currentUser?.uid"
+      :is-loading="isLoading"
+      @refresh="refreshData"
+    />
 
     <!-- Charts Section -->
     <div class="charts-section">
@@ -93,14 +71,15 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthComposable } from '@/composable/useAuthComposable'
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics.vue'
-import SurveyHistoryList from '@/components/dashboard/SurveyHistoryList.vue'
+import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
+
 const teamStore = useTeamStore()
-const authStore = useAuthStore()
+const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 
 const isLoading = ref(false)
 
@@ -113,7 +92,6 @@ const filters = ref({
 
 // Computed properties
 const currentTeam = computed(() => teamStore.currentTeam)
-const currentUser = computed(() => authStore.user)
 const surveys = computed(() => teamStore.surveys)
 
 // Filtered surveys based on search and date filters
@@ -154,9 +132,6 @@ const filteredSurveys = computed(() => {
   return filtered.sort((a, b) => a.date.localeCompare(b.date))
 })
 
-const isCurrentUserPowerUser = computed(() => {
-  return currentTeam.value?.powerusers?.includes(currentUser.value?.uid) || false
-})
 
 const filteredRecentSurveys = computed(() => {
   return filteredSurveys.value
@@ -206,9 +181,6 @@ onMounted(() => {
 }
 
 
-.recent-surveys {
-  animation: fadeInUp 0.8s ease-out;
-}
 
 .charts-section {
   animation: fadeInUp 1s ease-out;

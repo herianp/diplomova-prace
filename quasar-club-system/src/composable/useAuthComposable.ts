@@ -21,6 +21,12 @@ export function useAuthComposable() {
 
   const currentUser = computed(() => authStore.user)
 
+  // Check if current user is a power user in the current team
+  const isCurrentUserPowerUser = computed(() => {
+    const teamStore = useTeamStore()
+    return teamStore.currentTeam?.powerusers?.includes(currentUser.value?.uid) || false
+  })
+
   // 🔄 Listen to auth state
   const authStateListener = () => {
     return onAuthStateChanged(auth, user => {
@@ -92,6 +98,7 @@ export function useAuthComposable() {
 
   return {
     currentUser,
+    isCurrentUserPowerUser,
     authStateListener,
     loginUser,
     logoutUser,

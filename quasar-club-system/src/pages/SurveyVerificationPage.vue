@@ -233,7 +233,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTeamStore } from '@/stores/teamStore'
-import { useAuthStore } from '@/stores/authStore'
+import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useTeamComposable } from '@/composable/useTeamComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
@@ -244,7 +244,7 @@ import { db } from '@/firebase/config'
 const route = useRoute()
 const router = useRouter()
 const teamStore = useTeamStore()
-const authStore = useAuthStore()
+const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { getSurveyById, verifySurvey, deleteSurvey: deleteSurveyFromDB } = useTeamComposable()
 const $q = useQuasar()
 const { t } = useI18n()
@@ -259,12 +259,7 @@ const teamMembers = ref([])
 const memberVotes = ref({})
 
 // Computed
-const currentUser = computed(() => authStore.user)
 const currentTeam = computed(() => teamStore.currentTeam)
-
-const isCurrentUserPowerUser = computed(() => {
-  return currentTeam.value?.powerusers?.includes(currentUser.value?.uid)
-})
 
 const attendanceOptions = computed(() => [
   { label: t('common.yes'), value: true },
