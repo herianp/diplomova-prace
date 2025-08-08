@@ -88,7 +88,7 @@ import {
   getDoc
 } from 'firebase/firestore'
 import { db } from '@/firebase/config.ts'
-import { useNotifications } from '@/composable/useNotifications.js'
+import { useNotifications } from '@/composable/useNotificationsComposable.js'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
 import TeamInvitationComponent from '@/components/team/TeamInvitationComponent.vue'

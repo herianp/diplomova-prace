@@ -3,7 +3,7 @@ import { useTeamFirebase } from '@/services/teamFirebase'
 
 export function useTeamUseCases() {
   const teamStore = useTeamStore()
-  const { getTeamsByUserId, getTeamById } = useTeamFirebase()
+  const teamFirebase = useTeamFirebase()
 
   const setTeamListener = (userId: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -13,7 +13,7 @@ export function useTeamUseCases() {
       }
 
       // Set up new listener
-      const unsubscribe = getTeamsByUserId(userId, (teamsList) => {
+      const unsubscribe = teamFirebase.getTeamsByUserId(userId, (teamsList) => {
         teamStore.setTeams(teamsList)
         console.log("Teams updated: ", teamsList)
 
@@ -31,9 +31,25 @@ export function useTeamUseCases() {
     })
   }
 
+  const createTeam = async (teamName: string, userId: string): Promise<void> => {
+    return teamFirebase.createTeam(teamName, userId)
+  }
+
+  const deleteTeam = async (teamId: string): Promise<void> => {
+    return teamFirebase.deleteTeam(teamId)
+  }
+
+  const getTeamById = async (teamId: string) => {
+    return teamFirebase.getTeamById(teamId)
+  }
+
   const getTeamByIdAndSetCurrentTeam = async (teamId: string) => {
-    const team = await getTeamById(teamId)
+    const team = await teamFirebase.getTeamById(teamId)
     teamStore.setCurrentTeam(team)
+  }
+
+  const addCashboxTransaction = async (teamId: string, transactionData: any): Promise<void> => {
+    return teamFirebase.addCashboxTransaction(teamId, transactionData)
   }
 
   const clearTeamData = () => {
@@ -42,7 +58,11 @@ export function useTeamUseCases() {
 
   return {
     setTeamListener,
+    createTeam,
+    deleteTeam,
+    getTeamById,
     getTeamByIdAndSetCurrentTeam,
+    addCashboxTransaction,
     clearTeamData
   }
 }

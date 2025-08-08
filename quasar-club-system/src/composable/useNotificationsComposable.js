@@ -2,7 +2,7 @@ import { addDoc, collection } from 'firebase/firestore'
 import { db } from '@/firebase/config.ts'
 
 export const useNotifications = () => {
-  
+
   const createNotification = async (notification) => {
     try {
       await addDoc(collection(db, 'notifications'), {

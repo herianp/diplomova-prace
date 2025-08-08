@@ -28,7 +28,7 @@
 <script setup>
 import { ref } from 'vue'
 import TeamForm from '@/components/modal/TeamForm.vue'
-import { useTeamComposable } from '@/composable/useTeamComposable.js'
+import { useTeamUseCases } from '@/composable/useTeamUseCases.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
 defineProps({
@@ -40,7 +40,7 @@ defineProps({
 
 const expanded = ref(false)
 const isSubmitting = ref(false)
-const { createTeam } = useTeamComposable()
+const { createTeam } = useTeamUseCases()
 const { currentUser } = useAuthComposable()
 
 async function handleCreateTeam(payload) {

@@ -89,7 +89,7 @@ import { computed, ref } from 'vue'
 import { DateTime } from 'luxon'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useTeamStore } from '@/stores/teamStore.ts'
-import { useTeamComposable } from '@/composable/useTeamComposable.ts'
+import { useDateHelpers } from '@/composable/useDateHelpers.ts'
 import BaseModal from '@/components/base/BaseModal.vue'
 import VoteStats from '@/components/VoteStats.vue'
 import BaseCard from '@/components/base/BaseCard.vue'
@@ -112,7 +112,7 @@ const authStore = useAuthStore()
 const teamStore = useTeamStore()
 const router = useRouter()
 const i18n = useI18n()
-const { getDisplayedDateTime } = useTeamComposable(i18n.locale.value)
+const { getDisplayedDateTime } = useDateHelpers(i18n.locale.value)
 
 const showModal = ref(false)
 

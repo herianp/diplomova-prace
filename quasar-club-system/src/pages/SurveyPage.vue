@@ -39,7 +39,6 @@ import { useAuthComposable } from '@/composable/useAuthComposable'
 import SurveyCard from '@/components/new/SurveyCard.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
-import { useTeamComposable } from '@/composable/useTeamComposable.js'
 import { useI18n } from 'vue-i18n'
 import { useScreenComposable } from '@/composable/useScreenComposable.js'
 import SurveyCardMobile from '@/components/new/SurveyCardMobile.vue'
@@ -48,12 +47,11 @@ import SurveyCreateMenu from '@/components/survey/SurveyCreateMenu.vue'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
-const { setSurveysListener } = useSurveyUseCases()
+const { setSurveysListener, addSurvey } = useSurveyUseCases()
 const { isCurrentUserPowerUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const i18n = useI18n()
 const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
-const { addSurvey } = useTeamComposable()
 
 const currentTeam = computed(() => teamStore.currentTeam)
 

@@ -28,10 +28,19 @@ export function useDateHelpers(locale = 'en') {
     return new Date(year, month - 1, day, hour, minute)
   }
 
+  const getDisplayedDateTime = (date: string, time: string): string => {
+    console.log(`date ${date}, time ${time}`)
+    const dateTime = getDateByDateAndTime(date, time)
+    const dayName = getDayName(dateTime)
+    const formatDate = getFormatDate(dateTime)
+    return `${dayName}, ${formatDate}`
+  }
+
   return {
     formatDayAndMonth,
     getDayName,
     getDateByDateAndTime,
-    getFormatDate
+    getFormatDate,
+    getDisplayedDateTime
   }
 }
