@@ -55,7 +55,7 @@ import ReportsTeamStats from '@/components/reports/ReportsTeamStats.vue'
 import ReportsPlayerFilter from '@/components/reports/ReportsPlayerFilter.vue'
 import ReportsPlayerStats from '@/components/reports/ReportsPlayerStats.vue'
 import ReportsCharts from '@/components/reports/ReportsCharts.vue'
-import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
 import { useSurveyMetrics } from '@/composable/useSurveyMetrics'
 import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
@@ -100,7 +100,7 @@ const surveys = computed(() => teamStore.surveys || [])
 // Use the new composables for computed properties
 const filteredSurveys = createFilteredSurveys(surveys, filters)
 
-const playerOptions = computed(() => 
+const playerOptions = computed(() =>
   createPlayerOptions(teamMembers.value, t('reports.allPlayers'))
 )
 

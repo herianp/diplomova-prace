@@ -29,7 +29,6 @@
       />
     </div>
 
-
     <!-- Metrics Cards -->
     <DashboardMetrics :filtered-surveys="filteredSurveys" />
 
@@ -77,7 +76,7 @@ import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
-import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
 
