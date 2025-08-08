@@ -325,6 +325,8 @@ export default {
     lastMonth: "Minulý měsíc",
     thisWeek: "Tento týden",
     lastWeek: "Minulý týden",
+    last7Days: "Posledních 7 dní",
+    last30Days: "Posledních 30 dní",
     teamStatistics: "Statistiky týmu",
     avgTeamParticipation: "Průměrná týmová docházka",
     playerFilter: "Filtr hráče",

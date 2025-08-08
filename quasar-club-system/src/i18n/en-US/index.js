@@ -325,6 +325,8 @@ export default {
     lastMonth: "Last Month",
     thisWeek: "This Week",
     lastWeek: "Last Week",
+    last7Days: "Last 7 Days",
+    last30Days: "Last 30 Days",
     teamStatistics: "Team Statistics",
     avgTeamParticipation: "Avg Team Attendance",
     playerFilter: "Player Filter",

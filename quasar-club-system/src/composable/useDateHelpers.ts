@@ -1,5 +1,12 @@
 ﻿import { DateTime } from "luxon";
 
+interface DatePreset {
+  key: string
+  label: string
+  from: string
+  to: string
+}
+
 export function useDateHelpers(locale = 'en') {
 
   /**
@@ -10,7 +17,6 @@ export function useDateHelpers(locale = 'en') {
     const date = DateTime.fromISO(dateString).setLocale(locale);
     return `${date.day}. ${date.toFormat("LLLL")}`; // "5. prosinec"
   };
-
 
   const getDayName = (jsDate: Date): string => {
     const luxonDate = DateTime.fromJSDate(jsDate).setLocale(locale)
@@ -36,11 +42,134 @@ export function useDateHelpers(locale = 'en') {
     return `${dayName}, ${formatDate}`
   }
 
+  /**
+   * Get current date in ISO format
+   */
+  const getCurrentDate = (): string => {
+    return DateTime.now().toISODate()
+  }
+
+  /**
+   * Format date string to display format
+   */
+  const formatDateForDisplay = (dateString: string): string => {
+    const date = DateTime.fromISO(dateString).setLocale(locale)
+    return date.toFormat('d. LLLL yyyy')
+  }
+
+  /**
+   * Get date range presets for filtering
+   */
+  const getDatePresets = (t?: (key: string) => string): DatePreset[] => {
+    const translateKey = t || ((key: string) => key)
+
+    return [
+      {
+        key: 'season',
+        label: translateKey('reports.thisSeason'),
+        from: '2025-07-13',
+        to: '2026-06-30'
+      },
+      {
+        key: 'thisMonth',
+        label: translateKey('reports.thisMonth'),
+        from: DateTime.now().startOf('month').toISODate(),
+        to: DateTime.now().endOf('month').toISODate()
+      },
+      {
+        key: 'lastMonth',
+        label: translateKey('reports.lastMonth'),
+        from: DateTime.now().minus({ months: 1 }).startOf('month').toISODate(),
+        to: DateTime.now().minus({ months: 1 }).endOf('month').toISODate()
+      },
+      {
+        key: 'thisWeek',
+        label: translateKey('reports.thisWeek'),
+        from: DateTime.now().startOf('week').toISODate(),
+        to: DateTime.now().toISODate()
+      },
+      {
+        key: 'lastWeek',
+        label: translateKey('reports.lastWeek'),
+        from: DateTime.now().minus({ weeks: 1 }).startOf('week').toISODate(),
+        to: DateTime.now().minus({ weeks: 1 }).endOf('week').toISODate()
+      },
+      {
+        key: 'last7Days',
+        label: translateKey('reports.last7Days'),
+        from: DateTime.now().minus({ days: 7 }).toISODate(),
+        to: DateTime.now().toISODate()
+      },
+      {
+        key: 'last30Days',
+        label: translateKey('reports.last30Days'),
+        from: DateTime.now().minus({ days: 30 }).toISODate(),
+        to: DateTime.now().toISODate()
+      }
+    ]
+  }
+
+  /**
+   * Get seasonal date range (default for football season)
+   */
+  const getSeasonDateRange = () => {
+    return {
+      from: '2025-07-13',
+      to: '2026-06-30'
+    }
+  }
+
+  /**
+   * Check if a date is within a range
+   */
+  const isDateInRange = (date: string, fromDate?: string, toDate?: string): boolean => {
+    if (!fromDate && !toDate) return true
+
+    const targetDate = DateTime.fromISO(date)
+
+    if (fromDate && toDate) {
+      const from = DateTime.fromISO(fromDate)
+      const to = DateTime.fromISO(toDate)
+      return targetDate >= from && targetDate <= to
+    }
+
+    if (fromDate) {
+      const from = DateTime.fromISO(fromDate)
+      return targetDate >= from
+    }
+
+    if (toDate) {
+      const to = DateTime.fromISO(toDate)
+      return targetDate <= to
+    }
+
+    return true
+  }
+
+  /**
+   * Get relative date string (e.g., "2 days ago", "in 3 days")
+   */
+  const getRelativeDate = (dateString: string): string => {
+    const date = DateTime.fromISO(dateString).setLocale(locale)
+    const now = DateTime.now().setLocale(locale)
+
+    return date.toRelative({ base: now }) || date.toFormat('d. LLLL yyyy')
+  }
+
   return {
     formatDayAndMonth,
     getDayName,
     getDateByDateAndTime,
     getFormatDate,
-    getDisplayedDateTime
+    getDisplayedDateTime,
+    getCurrentDate,
+    formatDateForDisplay,
+    getDatePresets,
+    getSeasonDateRange,
+    isDateInRange,
+    getRelativeDate
   }
 }
+
+// Export types
+export type { DatePreset }
