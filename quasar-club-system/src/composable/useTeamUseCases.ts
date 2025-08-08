@@ -20,7 +20,6 @@ export function useTeamUseCases() {
         // Set first team as current if available
         if (teamsList.length > 0) {
           teamStore.setCurrentTeam(teamsList[0])
-          console.log("Current team set to: ", teamsList[0])
         }
 
         resolve()
