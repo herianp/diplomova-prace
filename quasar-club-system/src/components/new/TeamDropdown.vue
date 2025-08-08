@@ -52,7 +52,7 @@ import { useTeamStore } from '@/stores/teamStore.ts'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
-import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 
 const teamStore = useTeamStore()
 const router = useRouter()
