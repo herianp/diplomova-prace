@@ -1,10 +1,13 @@
 import { ref } from 'vue';
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
+import { useI18n } from 'vue-i18n'
 
 export function useFormComposable() {
+  const i18n = useI18n()
+  
   const { deleteSurvey, addSurvey, setSurveysListener } = useSurveyUseCases()
-  const { getDateByDateAndTime } = useDateHelpers()
+  const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
 
   const title = ref('');
   const description = ref('');
