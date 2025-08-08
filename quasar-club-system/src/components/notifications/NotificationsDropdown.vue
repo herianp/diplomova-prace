@@ -167,34 +167,53 @@ const hasUnread = computed(() => unreadCount.value > 0)
 
 // Methods
 const loadNotifications = () => {
-  if (!currentUser.value?.uid) return
+  if (!currentUser.value?.uid) {
+    loading.value = false
+    return
+  }
 
   // Clean up previous subscription
   if (unsubscribe) {
     unsubscribe()
   }
 
-  const notificationsQuery = query(
-    collection(db, 'notifications'),
-    where('userId', '==', currentUser.value.uid),
-    limit(10)
-  )
+  // Add a small delay to ensure Firebase auth is fully ready
+  setTimeout(() => {
+    if (!currentUser.value?.uid) {
+      loading.value = false
+      return
+    }
 
-  unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-    notifications.value = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })).sort((a, b) => {
-      // Sort by createdAt descending (newest first)
-      const aTime = a.createdAt?.seconds || 0
-      const bTime = b.createdAt?.seconds || 0
-      return bTime - aTime
-    })
-    loading.value = false
-  }, (error) => {
-    console.error('Error loading notifications:', error)
-    loading.value = false
-  })
+    try {
+      const notificationsQuery = query(
+        collection(db, 'notifications'),
+        where('userId', '==', currentUser.value.uid),
+        limit(10)
+      )
+
+      unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
+        notifications.value = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })).sort((a, b) => {
+          // Sort by createdAt descending (newest first)
+          const aTime = a.createdAt?.seconds || 0
+          const bTime = b.createdAt?.seconds || 0
+          return bTime - aTime
+        })
+        loading.value = false
+      }, (error) => {
+        console.error('Error loading notifications:', error)
+        // If there's a permission error, just set loading to false and empty notifications
+        notifications.value = []
+        loading.value = false
+      })
+    } catch (error) {
+      console.error('Error setting up notifications listener:', error)
+      notifications.value = []
+      loading.value = false
+    }
+  }, 200) // 200ms delay to ensure auth is ready
 }
 
 const handleNotificationClick = async (notification) => {
@@ -345,18 +364,29 @@ const toggleDropdown = () => {
 }
 
 // Watch for user changes and reload notifications
-watch(currentUser, (newUser) => {
-  if (newUser?.uid) {
+watch(currentUser, (newUser, oldUser) => {
+  if (newUser?.uid && newUser.uid !== oldUser?.uid) {
     loadNotifications()
-  } else {
+  } else if (!newUser?.uid) {
     notifications.value = []
     loading.value = false
+    if (unsubscribe) {
+      unsubscribe()
+      unsubscribe = null
+    }
   }
-}, { immediate: true })
+})
 
 onMounted(() => {
+  // Only load notifications if user is already authenticated
+  // Otherwise wait for the watcher to trigger
   if (currentUser.value?.uid) {
-    loadNotifications()
+    // Add a delay to ensure auth is stable
+    setTimeout(() => {
+      if (currentUser.value?.uid) {
+        loadNotifications()
+      }
+    }, 300)
   }
 })
 

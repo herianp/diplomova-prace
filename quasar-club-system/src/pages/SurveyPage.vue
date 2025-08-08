@@ -130,10 +130,15 @@ async function handleSurveySubmit(payload) {
 
 onMounted(async () => {
   onAuthStateChanged(auth, (user) => {
-    if (user) {
-      setSurveysListener(teamStore.currentTeam.id)
+    if (user && teamStore.currentTeam?.id) {
+      // Add delay to ensure Firebase auth and team setup is complete
+      setTimeout(() => {
+        if (teamStore.currentTeam?.id) {
+          setSurveysListener(teamStore.currentTeam.id)
+        }
+      }, 300)
     } else {
-      console.error('No authenticated user found.')
+      console.error('No authenticated user found or no current team.')
     }
   })
 })

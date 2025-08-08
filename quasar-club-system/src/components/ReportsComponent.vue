@@ -45,6 +45,7 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useTeamStore } from '@/stores/teamStore.ts'
+import { useAuthStore } from '@/stores/authStore.ts'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
@@ -59,6 +60,7 @@ import ReportsCharts from '@/components/reports/ReportsCharts.vue'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
 
 const teamStore = useTeamStore()
+const authStore = useAuthStore()
 const $q = useQuasar()
 const { t } = useI18n()
 const { setSurveysListener } = useSurveyUseCases()
@@ -116,8 +118,8 @@ const filteredSurveys = computed(() => {
       const toDate = filters.value.dateTo ? DateTime.fromISO(filters.value.dateTo) : null
 
       if (fromDate && surveyDate < fromDate) return false
-      if (toDate && surveyDate > toDate) return false
-      return true
+      return !(toDate && surveyDate > toDate);
+
     })
   }
 
@@ -280,15 +282,20 @@ const loadData = async () => {
     await loadTeamMembers()
 
     // Only load surveys if they're not already loaded for this team
-    if (surveys.value.length === 0) {
-      await setSurveysListener(currentTeam.value.id)
+    if (surveys.value.length === 0 && authStore.user?.uid) {
+      // Add delay to ensure Firebase auth is ready
+      setTimeout(async () => {
+        if (currentTeam.value?.id && authStore.user?.uid) {
+          await setSurveysListener(currentTeam.value.id)
 
-      // Wait a bit for surveys to load
-      setTimeout(() => {
-        calculateTeamMetrics()
-        calculatePlayerMetrics()
-        loading.value = false
-      }, 500)
+          // Wait a bit for surveys to load
+          setTimeout(() => {
+            calculateTeamMetrics()
+            calculatePlayerMetrics()
+            loading.value = false
+          }, 500)
+        }
+      }, 300)
     } else {
       // Surveys already loaded, just calculate metrics
       calculateTeamMetrics()

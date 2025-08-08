@@ -78,8 +78,10 @@ import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
+import { useAuthStore } from '@/stores/authStore.js'
 
 const teamStore = useTeamStore()
+const authStore = useAuthStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
 
@@ -150,9 +152,13 @@ const onFiltersChanged = (newFilters) => {
 const refreshData = async () => {
   isLoading.value = true
   try {
-    // Refresh surveys data
-    if (currentTeam.value?.id) {
-      setSurveysListener(currentTeam.value.id)
+    // Refresh surveys data - add delay to ensure auth is ready
+    if (currentTeam.value?.id && authStore.user?.uid) {
+      setTimeout(() => {
+        if (currentTeam.value?.id && authStore.user?.uid) {
+          setSurveysListener(currentTeam.value.id)
+        }
+      }, 400)
     }
   } catch (error) {
     console.error('Error refreshing dashboard data:', error)
@@ -162,7 +168,10 @@ const refreshData = async () => {
 }
 
 onMounted(() => {
-  refreshData()
+  // Wait for auth and team setup before loading dashboard data
+  setTimeout(() => {
+    refreshData()
+  }, 500)
 })
 </script>
 

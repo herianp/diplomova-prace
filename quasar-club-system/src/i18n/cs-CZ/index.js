@@ -206,6 +206,12 @@ export default {
       wrongPassword: "Současné heslo je nesprávné",
       weakPassword: "Heslo je příliš slabé"
     },
+    language: {
+      title: "Nastavení jazyka",
+      description: "Vyberte preferovaný jazyk aplikace",
+      select: "Vybrat jazyk",
+      changed: "Jazyk byl úspěšně změněn"
+    },
     account: {
       title: "Akce účtu",
       description: "Spravujte nastavení účtu a odhlaste se",

@@ -27,6 +27,14 @@ export function useSurveyFirebase() {
     return onSnapshot(surveysQuery, (snapshot) => {
       const surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       callback(surveys)
+    }, (error) => {
+      console.error('Error in surveys listener:', error)
+      // If there's a permission error, call callback with empty array
+      // This prevents the app from crashing and allows it to continue functioning
+      if (error.code === 'permission-denied') {
+        console.warn('Permission denied for surveys - calling callback with empty array')
+        callback([])
+      }
     })
   }
 

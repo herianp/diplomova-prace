@@ -174,6 +174,37 @@
           </q-card-section>
         </q-card>
 
+        <!-- Language Preferences Card -->
+        <q-card flat bordered class="q-mb-lg bg-grey-1">
+          <q-card-section class="bg-blue text-white">
+            <div class="text-h6">
+              <q-icon name="language" class="q-mr-sm" />
+              {{ $t('settings.language.title') }}
+            </div>
+          </q-card-section>
+          
+          <q-card-section class="q-pa-md">
+            <div class="text-body2 text-grey-7 q-mb-md">
+              {{ $t('settings.language.description') }}
+            </div>
+            
+            <q-select
+              v-model="selectedLanguage"
+              :options="languageOptions"
+              :label="$t('settings.language.select')"
+              outlined
+              dense
+              emit-value
+              map-options
+              @update:model-value="changeLanguage"
+            >
+              <template v-slot:prepend>
+                <q-icon name="translate" />
+              </template>
+            </q-select>
+          </q-card-section>
+        </q-card>
+
         <!-- Account Actions Card -->
         <q-card flat bordered class="bg-grey-1">
           <q-card-section class="bg-negative text-white">
@@ -247,7 +278,7 @@ const authStore = useAuthStore()
 const { refreshUser, logoutUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const $q = useQuasar()
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const auth = getAuth()
 
 // State
@@ -274,6 +305,13 @@ const passwordForm = reactive({
   newPassword: '',
   confirmPassword: ''
 })
+
+// Language settings
+const selectedLanguage = ref(locale.value)
+const languageOptions = [
+  { label: 'Čeština', value: 'cs-CZ' },
+  { label: 'English', value: 'en-US' }
+]
 
 // Computed
 const isPasswordFormValid = computed(() => {
@@ -380,6 +418,20 @@ const changePassword = async () => {
 
 const confirmSignOut = () => {
   showSignOutDialog.value = true
+}
+
+const changeLanguage = (newLanguage) => {
+  locale.value = newLanguage
+  selectedLanguage.value = newLanguage
+  
+  // Save to localStorage for persistence
+  localStorage.setItem('language', newLanguage)
+  
+  $q.notify({
+    type: 'positive',
+    message: t('settings.language.changed'),
+    icon: 'language'
+  })
 }
 
 const signOut = async () => {
