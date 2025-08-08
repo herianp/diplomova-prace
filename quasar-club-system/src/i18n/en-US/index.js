@@ -206,6 +206,12 @@ export default {
       wrongPassword: "Current password is incorrect",
       weakPassword: "Password is too weak"
     },
+    language: {
+      title: "Language Preferences",
+      description: "Choose your preferred language for the application",
+      select: "Select Language",
+      changed: "Language changed successfully"
+    },
     account: {
       title: "Account Actions",
       description: "Manage your account settings and sign out",
@@ -319,6 +325,8 @@ export default {
     lastMonth: "Last Month",
     thisWeek: "This Week",
     lastWeek: "Last Week",
+    last7Days: "Last 7 Days",
+    last30Days: "Last 30 Days",
     teamStatistics: "Team Statistics",
     avgTeamParticipation: "Avg Team Attendance",
     playerFilter: "Player Filter",

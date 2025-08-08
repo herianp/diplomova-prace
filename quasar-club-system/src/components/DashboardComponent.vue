@@ -29,7 +29,6 @@
       />
     </div>
 
-
     <!-- Metrics Cards -->
     <DashboardMetrics :filtered-surveys="filteredSurveys" />
 
@@ -77,80 +76,41 @@ import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
+import { useAuthStore } from '@/stores/authStore.js'
+import { useSurveyFilters } from '@/composable/useSurveyFilters'
 
 const teamStore = useTeamStore()
+const authStore = useAuthStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
+const { setSurveysListener } = useSurveyUseCases()
+const { filters, createFilteredSurveys, createRecentFilteredSurveys, updateFilters } = useSurveyFilters()
 
 const isLoading = ref(false)
-
-const filters = ref({
-  searchName: '',
-  dateFrom: '2025-07-13', // Season start
-  dateTo: '2026-06-30'    // Season end
-})
 
 // Computed properties
 const currentTeam = computed(() => teamStore.currentTeam)
 const surveys = computed(() => teamStore.surveys)
 
-// Filtered surveys based on search and date filters
-const filteredSurveys = computed(() => {
-  let filtered = [...surveys.value]
-
-  // 1. Apply name search filter
-  if (filters.value.searchName.trim()) {
-    const searchTerm = filters.value.searchName.toLowerCase().trim()
-    filtered = filtered.filter(survey =>
-      survey.title.toLowerCase().includes(searchTerm)
-    )
-  }
-
-  // 2. Apply date range filter (always apply since we have default season dates)
-  filtered = filtered.filter(survey => {
-    const surveyDate = survey.date
-
-    // If both dates are set, check if survey is within range
-    if (filters.value.dateFrom && filters.value.dateTo) {
-      return surveyDate >= filters.value.dateFrom && surveyDate <= filters.value.dateTo
-    }
-
-    // If only dateFrom is set, check if survey is on or after that date
-    if (filters.value.dateFrom) {
-      return surveyDate >= filters.value.dateFrom
-    }
-
-    // If only dateTo is set, check if survey is on or before that date
-    if (filters.value.dateTo) {
-      return surveyDate <= filters.value.dateTo
-    }
-
-    return true
-  })
-
-  // 4. Sort: oldest first (ascending order)
-  return filtered.sort((a, b) => a.date.localeCompare(b.date))
-})
-
-
-const filteredRecentSurveys = computed(() => {
-  return filteredSurveys.value
-    .slice()
-    .sort((a, b) => parseInt(b.createdDate) - parseInt(a.createdDate))
-    .slice(0, 5)
-})
-
+// Use the new composable for filtered surveys
+const filteredSurveys = createFilteredSurveys(surveys, filters)
+const filteredRecentSurveys = createRecentFilteredSurveys(surveys, 5, filters)
 
 // Methods
 const onFiltersChanged = (newFilters) => {
-  filters.value = { ...newFilters }
+  updateFilters(newFilters)
 }
 
 const refreshData = async () => {
   isLoading.value = true
   try {
-    // Refresh surveys data
-    if (currentTeam.value?.id) {
-      teamStore.setSurveysListener(currentTeam.value.id)
+    // Refresh surveys data - add delay to ensure auth is ready
+    if (currentTeam.value?.id && authStore.user?.uid) {
+      setTimeout(() => {
+        if (currentTeam.value?.id && authStore.user?.uid) {
+          setSurveysListener(currentTeam.value.id)
+        }
+      }, 400)
     }
   } catch (error) {
     console.error('Error refreshing dashboard data:', error)
@@ -160,7 +120,10 @@ const refreshData = async () => {
 }
 
 onMounted(() => {
-  refreshData()
+  // Wait for auth and team setup before loading dashboard data
+  setTimeout(() => {
+    refreshData()
+  }, 500)
 })
 </script>
 

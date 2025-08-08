@@ -20,22 +20,23 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
-import { useTeamStore } from '@/stores/teamStore.ts'
+import { onMounted } from 'vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import TeamCard from '@/components/new/TeamCard.vue'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import TeamCreateMenu from '@/components/team/TeamCreateMenu.vue'
+import { useTeamUseCases } from '@/composable/useTeamUseCases.js'
+import { useTeamStore } from '@/stores/teamStore.js'
 
 const auth = getAuth()
-const teamStore = useTeamStore()
 const { isCurrentUserPowerUser } = useAuthComposable()
-const teams = computed(() => teamStore.teams)
+const { setTeamListener } = useTeamUseCases()
+const { teams } = useTeamStore()
 
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      teamStore.setTeamListener(user.uid);
+      setTeamListener(user.uid);
     } else {
       console.error("No authenticated user found.");
     }

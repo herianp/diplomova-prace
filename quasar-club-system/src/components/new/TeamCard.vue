@@ -34,12 +34,14 @@ import BaseCard from '@/components/base/BaseCard.vue'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useRouter } from 'vue-router'
-import { useTeamComposable } from '@/composable/useTeamComposable.js'
+import { useTeamUseCases } from '@/composable/useTeamUseCases.ts'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 const router = useRouter();
-const { deleteTeam } = useTeamComposable();
+const { deleteTeam } = useTeamUseCases();
+const { setSurveysListener } = useSurveyUseCases()
 
 const props = defineProps({
   team: {
@@ -54,7 +56,7 @@ const isAdmin = computed(() => authStore.isAdmin)
 
 function openTeam(teamId) {
   console.log('teamId', teamId)
-  teamStore.setSurveysListener(teamId)
+  setSurveysListener(teamId)
   const team = teamStore.teams.find(t => t.id === teamId)
   teamStore.setCurrentTeam(team)
   router.push(`/survey`)

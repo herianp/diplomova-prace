@@ -1,61 +1,38 @@
-﻿import { computed } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { auth, db } from '@/firebase/config'
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  User
-} from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
 import { RouteEnum } from '@/enums/routesEnum'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
+import { useAuthUseCases } from '@/composable/useAuthUseCases'
 
-// Composable
 export function useAuthComposable() {
   const router = useRouter()
-  const authStore = useAuthStore();
-  const { clearData } = useTeamStore();
+  const authStore = useAuthStore()
+  const teamStore = useTeamStore()
+  const authUseCases = useAuthUseCases()
 
   const currentUser = computed(() => authStore.user)
+  const isLoading = computed(() => authStore.isLoading)
 
-  // Check if current user is a power user in the current team
   const isCurrentUserPowerUser = computed(() => {
-    const teamStore = useTeamStore()
     return teamStore.currentTeam?.powerusers?.includes(currentUser.value?.uid) || false
   })
 
-  // 🔄 Listen to auth state
-  const authStateListener = () => {
-    return onAuthStateChanged(auth, user => {
-      authStore.setUser(user);
-    })
-  }
-
-  // 🔐 Login
+  // Delegate to use cases with navigation logic
   const loginUser = async (email: string, password: string) => {
     try {
-      authStore.setLoading(true);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password)
-      authStore.setUser(userCredential.user);
-      router.push(RouteEnum.DASHBOARD.path);
+      await authUseCases.signIn(email, password)
+      router.push(RouteEnum.DASHBOARD.path)
     } catch (error: any) {
       console.error(`Login Error: ${error.code} - ${error.message}`)
       throw error
-    } finally {
-      authStore.setLoading(false);
     }
   }
 
-  // 🚪 Logout
   const logoutUser = async () => {
     try {
-      await signOut(auth)
-      authStore.setUser(null)
-      clearData();
-      router.push(RouteEnum.LOGIN.path);
+      await authUseCases.signOut()
+      router.push(RouteEnum.LOGIN.path)
       console.log('User signed out successfully')
     } catch (error: any) {
       console.error(`Logout Error: ${error.message}`)
@@ -63,45 +40,32 @@ export function useAuthComposable() {
     }
   }
 
-  // 🆕 Register new user
   const registerUser = async (email: string, password: string, name?: string) => {
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password)
-      const user = userCredential.user
-
-      await createUserInFirestore(user, name)
-      authStore.setUser(user);
-      router.push(RouteEnum.DASHBOARD.path);
+      await authUseCases.signUp(email, password, name)
+      router.push(RouteEnum.DASHBOARD.path)
     } catch (error: any) {
       console.error(`Registration Error: ${error.code} - ${error.message}`)
       throw error
     }
   }
 
-  // 🧾 Create Firestore user
-  const createUserInFirestore = async (user: User, name?: string) => {
-    const userDoc = {
-      uid: user.uid,
-      email: user.email,
-      name: name || '',
-      createdAt: new Date(),
-    }
+  const initializeAuth = () => {
+    authUseCases.initializeAuth()
+  }
 
-    try {
-      await setDoc(doc(db, 'users', user.uid), userDoc)
-      console.log('User registered and added to Firestore:', userDoc)
-    } catch (error) {
-      console.error('Error adding user to Firestore:', error)
-      throw error
-    }
+  const refreshUser = async () => {
+    await authUseCases.refreshCurrentUser()
   }
 
   return {
     currentUser,
+    isLoading,
     isCurrentUserPowerUser,
-    authStateListener,
     loginUser,
     logoutUser,
     registerUser,
+    initializeAuth,
+    refreshUser,
   }
 }
