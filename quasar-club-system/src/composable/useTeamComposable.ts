@@ -1,127 +1,66 @@
-﻿import { db } from '@/firebase/config'
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  onSnapshot,
-  query,
-  updateDoc,
-  where,
-  getDoc,
-  getDocs,
-} from 'firebase/firestore'
 import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
 import { useDateHelpers } from '@/composable/useDateHelpers'
 import { useNotifications } from '@/composable/useNotifications'
+import { useTeamFirebase } from '@/services/teamFirebase'
+import { useSurveyFirebase } from '@/services/surveyFirebase'
+import { getDoc, doc } from 'firebase/firestore'
+import { db } from '@/firebase/config'
 
 export function useTeamComposable(locale = 'en') {
   const { getDayName, getDateByDateAndTime, getFormatDate } = useDateHelpers(locale)
   const { createSurveyNotification } = useNotifications()
-  const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
+  const teamFirebase = useTeamFirebase()
+  const surveyFirebase = useSurveyFirebase()
 
   const createTeam = async (teamName: string, userId: string) => {
-    try {
-      const newTeam = {
-        name: teamName,
-        creator: userId,
-        powerusers: [userId],
-        members: [userId],
-        invitationCode: generateInvitationCode(),
-        surveys: [],
-      }
-      await addDoc(collection(db, 'teams'), newTeam)
-      console.log('Team created:', newTeam)
-    } catch (error) {
-      console.error('Error creating team:', error)
-      throw error
-    }
+    return teamFirebase.createTeam(teamName, userId)
   }
 
-  async function deleteTeam(teamId: string) {
-    try {
-      await deleteDoc(doc(db, "teams", teamId));
-      console.log(`Team ${teamId} deleted.`);
-    } catch (error) {
-      console.error("Error deleting survey:", error);
-      throw error;
-    }
+  const deleteTeam = async (teamId: string) => {
+    return teamFirebase.deleteTeam(teamId)
   }
 
   const getTeamsByUserId = (userId: string, callback: (teams: any[]) => void) => {
-    const teamsQuery = query(collection(db, 'teams'), where('members', 'array-contains', userId))
-
-    return onSnapshot(teamsQuery, (snapshot) => {
-      const teams = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      callback(teams)
-    })
-  }
-
-  const getSurveysByTeamId = (teamId: string, callback: (surveys: any[]) => void) => {
-    const surveysQuery = query(collection(db, 'surveys'), where('teamId', '==', teamId))
-
-    return onSnapshot(surveysQuery, (snapshot) => {
-      const surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
-      callback(surveys)
-    })
+    return teamFirebase.getTeamsByUserId(userId, callback)
   }
 
   const getTeamById = async (teamId: string) => {
-    try {
-      const teamRef = doc(db, 'teams', teamId)
-      const teamDoc = await getDoc(teamRef)
+    return teamFirebase.getTeamById(teamId)
+  }
 
-      if (!teamDoc.exists()) return null
+  const addCashboxTransaction = async (teamId: string, transactionData: any) => {
+    return teamFirebase.addCashboxTransaction(teamId, transactionData)
+  }
 
-      const teamData = teamDoc.data()
-      const cashboxTransactionsRef = collection(teamRef, 'cashboxTransactions')
-      const cashboxTransactionsSnap = await getDocs(cashboxTransactionsRef)
+  // Survey operations - delegate to survey firebase with business logic
+  const getSurveysByTeamId = (teamId: string, callback: (surveys: any[]) => void) => {
+    return surveyFirebase.getSurveysByTeamId(teamId, callback)
+  }
 
-      const cashboxTransactions = cashboxTransactionsSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-
-      return { ...teamData, cashboxTransactions }
-    } catch (error) {
-      console.error('Error getting team document:', error)
-      throw error
-    }
+  const getSurveyById = async (surveyId: string): Promise<ISurvey | null> => {
+    return surveyFirebase.getSurveyById(surveyId)
   }
 
   const deleteSurvey = async (surveyId: string) => {
-    try {
-      await deleteDoc(doc(db, 'surveys', surveyId))
-      console.log(`Survey ${surveyId} deleted.`)
-    } catch (error) {
-      console.error('Error deleting survey:', error)
-      throw error
-    }
+    return surveyFirebase.deleteSurvey(surveyId)
   }
 
   const addSurvey = async (newSurvey: ISurvey) => {
     try {
-      // Create the survey
-      const surveyRef = await addDoc(collection(db, 'surveys'), {
-        ...newSurvey,
-        createdDate: new Date().getTime().toString(),
-        votes: [],
-      })
-
-      // Get team data to access members
+      // Get team data to access members for notifications
       const teamDoc = await getDoc(doc(db, 'teams', newSurvey.teamId))
+      let teamMembers: string[] = []
+
       if (teamDoc.exists()) {
         const teamData = teamDoc.data()
-        const teamMembers = teamData.members || []
+        teamMembers = teamData.members || []
+      }
 
-        // Create survey data for notifications
-        const surveyData = {
-          id: surveyRef.id,
-          title: newSurvey.title,
-          teamId: newSurvey.teamId
-        }
+      // Add survey via firebase
+      const surveyData = await surveyFirebase.addSurvey(newSurvey, teamMembers)
 
-        // Create notifications for all team members
+      // Create notifications for all team members (business logic)
+      if (teamMembers.length > 0) {
         await createSurveyNotification(surveyData, teamMembers)
         console.log('Survey notifications created for', teamMembers.length, 'members')
       }
@@ -134,36 +73,11 @@ export function useTeamComposable(locale = 'en') {
   }
 
   const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>) => {
-    try {
-      await updateDoc(doc(db, 'surveys', surveyId), updatedSurvey)
-      console.log(`Survey ${surveyId} updated.`)
-    } catch (error) {
-      console.error('Error updating survey:', error)
-      throw error
-    }
+    return surveyFirebase.updateSurvey(surveyId, updatedSurvey)
   }
 
   const addVote = async (surveyId: string, userUid: string, newVote: boolean, votes: IVote[]) => {
-    try {
-      const surveyRef = doc(db, 'surveys', surveyId)
-      const existingVote = votes.find((vote) => vote.userUid === userUid)
-
-      let updatedVotes = votes
-
-      if (existingVote) {
-        if (existingVote.vote === newVote) return
-        updatedVotes = votes.map((vote) =>
-          vote.userUid === userUid ? { ...vote, vote: newVote } : vote,
-        )
-      } else {
-        updatedVotes.push({ userUid, vote: newVote })
-      }
-
-      await updateDoc(surveyRef, { votes: updatedVotes })
-    } catch (error) {
-      console.error('Error adding vote:', error)
-      throw error
-    }
+    return surveyFirebase.addVote(surveyId, userUid, newVote, votes)
   }
 
   const addSurveyVote = async (
@@ -173,36 +87,22 @@ export function useTeamComposable(locale = 'en') {
     votes: IVote[],
     isUserVoteExists: IVote,
   ) => {
-    try {
-      const surveyRef = doc(db, 'surveys', surveyId)
-
-      if (isUserVoteExists) {
-        if (isUserVoteExists.vote === newVote) return
-
-        const updatedVotes = votes.map((vote) =>
-          vote.userUid === userUid ? { ...vote, vote: newVote } : vote,
-        )
-        await updateDoc(surveyRef, { votes: updatedVotes })
-      } else {
-        const updatedVotes = [...votes, { userUid, vote: newVote }]
-        await updateDoc(surveyRef, { votes: updatedVotes })
-      }
-    } catch (error) {
-      console.error('Error updating survey vote:', error)
-      throw error
-    }
+    return surveyFirebase.addSurveyVote(surveyId, userUid, newVote, votes, isUserVoteExists)
   }
 
-  const addCashboxTransaction = async (teamId: string, transactionData: any) => {
-    try {
-      const cashboxTransactionsRef = collection(doc(db, 'teams', teamId), 'cashboxTransactions')
-      await addDoc(cashboxTransactionsRef, transactionData)
-    } catch (error) {
-      console.error('Error adding cashbox transaction:', error)
-      throw error
-    }
+  const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
+    return surveyFirebase.updateSurveyStatus(surveyId, status, verifiedBy)
   }
 
+  const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]) => {
+    return surveyFirebase.verifySurvey(surveyId, verifiedBy, updatedVotes)
+  }
+
+  const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
+    return surveyFirebase.updateSurveyVotes(surveyId, votes)
+  }
+
+  // UI/Business logic functions (keep here as they combine multiple concerns)
   const getDisplayedDateTime = (date: string, time: string): string => {
     console.log(`date ${date}, time ${time}`)
     const dateTime = getDateByDateAndTime(date, time)
@@ -211,85 +111,25 @@ export function useTeamComposable(locale = 'en') {
     return `${dayName}, ${formatDate}`
   }
 
-  // Survey Status Management Functions
-  const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
-    try {
-      const updateData: any = { status }
-
-      if (status === SurveyStatus.CLOSED && verifiedBy) {
-        updateData.verifiedAt = new Date()
-        updateData.verifiedBy = verifiedBy
-      }
-
-      await updateDoc(doc(db, 'surveys', surveyId), updateData)
-      console.log(`Survey ${surveyId} status updated to ${status}`)
-    } catch (error) {
-      console.error('Error updating survey status:', error)
-      throw error
-    }
-  }
-
-  const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]) => {
-    try {
-      const updateData: any = {
-        status: SurveyStatus.CLOSED,
-        verifiedAt: new Date(),
-        verifiedBy: verifiedBy
-      }
-
-      if (updatedVotes) {
-        updateData.votes = updatedVotes
-      }
-
-      await updateDoc(doc(db, 'surveys', surveyId), updateData)
-      console.log(`Survey ${surveyId} verified by ${verifiedBy}`)
-    } catch (error) {
-      console.error('Error verifying survey:', error)
-      throw error
-    }
-  }
-
-  const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
-    try {
-      await updateDoc(doc(db, 'surveys', surveyId), { votes })
-      console.log(`Survey ${surveyId} votes updated`)
-    } catch (error) {
-      console.error('Error updating survey votes:', error)
-      throw error
-    }
-  }
-
-  const getSurveyById = async (surveyId: string): Promise<ISurvey | null> => {
-    try {
-      const surveyRef = doc(db, 'surveys', surveyId)
-      const surveyDoc = await getDoc(surveyRef)
-
-      if (!surveyDoc.exists()) return null
-
-      return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
-    } catch (error) {
-      console.error('Error getting survey:', error)
-      throw error
-    }
-  }
-
   return {
+    // Team operations
     createTeam,
+    deleteTeam,
     getTeamsByUserId,
-    getSurveysByTeamId,
     getTeamById,
+    addCashboxTransaction,
+    // Survey operations
+    getSurveysByTeamId,
+    getSurveyById,
     deleteSurvey,
     addSurvey,
     updateSurvey,
     addVote,
     addSurveyVote,
-    addCashboxTransaction,
-    getDisplayedDateTime,
-    deleteTeam,
-    // Survey Status Management
     updateSurveyStatus,
     verifySurvey,
     updateSurveyVotes,
-    getSurveyById,
+    // UI/Business logic
+    getDisplayedDateTime,
   }
 }

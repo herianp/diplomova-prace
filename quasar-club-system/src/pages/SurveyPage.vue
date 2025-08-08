@@ -34,6 +34,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { DateTime } from 'luxon'
 import { useTeamStore } from '@/stores/teamStore.ts'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import SurveyCard from '@/components/new/SurveyCard.vue'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
@@ -47,6 +48,7 @@ import SurveyCreateMenu from '@/components/survey/SurveyCreateMenu.vue'
 
 const auth = getAuth()
 const teamStore = useTeamStore()
+const { setSurveysListener } = useSurveyUseCases()
 const { isCurrentUserPowerUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const i18n = useI18n()
@@ -131,7 +133,7 @@ async function handleSurveySubmit(payload) {
 onMounted(async () => {
   onAuthStateChanged(auth, (user) => {
     if (user) {
-      teamStore.setSurveysListener(teamStore.currentTeam.id)
+      setSurveysListener(teamStore.currentTeam.id)
     } else {
       console.error('No authenticated user found.')
     }
