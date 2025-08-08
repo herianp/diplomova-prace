@@ -1,7 +1,7 @@
 import { ref, computed, watch } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthStore } from '@/stores/authStore'
-import { useTeamComposable } from '@/composable/useTeamComposable'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 import { 
   isSurveyExpired, 
   getSurveyStatus, 
@@ -16,7 +16,7 @@ import { ISurvey, SurveyStatus } from '@/interfaces/interfaces'
 export function useSurveyStatusManager() {
   const teamStore = useTeamStore()
   const authStore = useAuthStore()
-  const { updateSurveyStatus } = useTeamComposable()
+  const { updateSurveyStatus } = useSurveyUseCases()
   
   // State
   const isProcessingExpiration = ref(false)

@@ -142,9 +142,10 @@
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { DateTime } from 'luxon'
+import { useDateHelpers } from '@/composable/useDateHelpers'
 
 const { t } = useI18n()
+const { getDatePresets } = useDateHelpers()
 
 // Props
 const props = defineProps({
@@ -174,39 +175,8 @@ const localFilters = reactive({
   dateTo: props.modelValue.dateTo || ''
 })
 
-// Date presets
-const datePresets = computed(() => [
-  {
-    key: 'season',
-    label: t('reports.thisSeason'),
-    from: '2025-07-13',
-    to: '2026-06-30'
-  },
-  {
-    key: 'thisMonth',
-    label: t('reports.thisMonth'),
-    from: DateTime.now().startOf('month').toISODate(),
-    to: DateTime.now().endOf('month').toISODate()
-  },
-  {
-    key: 'lastMonth',
-    label: t('reports.lastMonth'),
-    from: DateTime.now().minus({ months: 1 }).startOf('month').toISODate(),
-    to: DateTime.now().minus({ months: 1 }).endOf('month').toISODate()
-  },
-  {
-    key: 'thisWeek',
-    label: t('reports.thisWeek'),
-    from: DateTime.now().startOf('week').toISODate(),
-    to: DateTime.now().toISODate()
-  },
-  {
-    key: 'lastWeek',
-    label: t('reports.lastWeek'),
-    from: DateTime.now().minus({ weeks: 1 }).startOf('week').toISODate(),
-    to: DateTime.now().minus({ weeks: 1 }).endOf('week').toISODate()
-  }
-])
+// Date presets using the new helper
+const datePresets = computed(() => getDatePresets(t))
 
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {

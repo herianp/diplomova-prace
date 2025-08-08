@@ -1,7 +1,6 @@
 import { defineStore } from "pinia";
-import { reactive, ref } from "vue";
+import { ref, computed } from "vue";
 import { ISurvey } from '@/interfaces/interfaces'
-import { useTeamComposable } from '../composable/useTeamComposable'
 
 const getInitialTeam = () => ({
   creator: '1',
@@ -13,108 +12,86 @@ const getInitialTeam = () => ({
   surveys: [],
 });
 
-export const useTeamStore = defineStore("team", {
-  state: () => ({
-    teams: reactive([]),
-    surveys: ref<ISurvey[]>([]),
-    editedSurvey: ref(null),
-    currentTeam: getInitialTeam(),
+export const useTeamStore = defineStore("team", () => {
+  // State
+  const teams = ref([]);
+  const surveys = ref<ISurvey[]>([]);
+  const editedSurvey = ref(null);
+  const currentTeam = ref(getInitialTeam());
 
-    // Firestore listeners
-    unsubscribeTeams: ref<(() => void) | null>(null),
-    unsubscribeSurveys: ref<(() => void) | null>(null),
-  }),
+  // Firestore listeners - managed by use cases
+  const unsubscribeTeams = ref<(() => void) | null>(null);
+  const unsubscribeSurveys = ref<(() => void) | null>(null);
 
-  getters: {
-    getPositiveVotes: (state) => (surveyId: string) => {
-      return state.surveys.find(survey => survey.id === surveyId).votes.filter(vote => vote.vote).length;
-    },
-    getNegativeVotes: (state) => (surveyId: string) => {
-      return state.surveys.find(survey => survey.id === surveyId).votes.filter(vote => !vote.vote).length;
-    },
-  },
+  // Getters
+  const getPositiveVotes = computed(() => (surveyId: string) => {
+    return surveys.value.find(survey => survey.id === surveyId)?.votes.filter(vote => vote.vote).length || 0;
+  });
 
-  actions: {
-    // ✅ listening for Teams, return promise, because we need await in beforeEach
-    setTeamListener(userId: string): Promise<void> {
-      const { getTeamsByUserId } = useTeamComposable();
+  const getNegativeVotes = computed(() => (surveyId: string) => {
+    return surveys.value.find(survey => survey.id === surveyId)?.votes.filter(vote => !vote.vote).length || 0;
+  });
 
-      return new Promise((resolve) => {
-        if (this.unsubscribeTeams) {
-          this.unsubscribeTeams(); // 🛑 Stop previous listener
-        }
+  // Pure state mutations (no business logic)
+  const setTeams = (teamsList: any[]) => {
+    teams.value = teamsList;
+  };
 
-        this.unsubscribeTeams = getTeamsByUserId(userId, (teams) => {
-          this.teams = teams;
-          console.log("Teams updated: ", this.teams);
+  const setSurveys = (surveysList: ISurvey[]) => {
+    surveys.value = surveysList;
+  };
 
-          if (teams.length > 0) {
-            this.setCurrentTeam(this.teams[0]);
-            console.log("Current team set to: ", this.currentTeam);
-          }
+  const setCurrentTeam = (team: any) => {
+    currentTeam.value = team;
+  };
 
-          resolve(); // ✅ Resolve the Promise when teams are set
-        });
-      });
-    },
+  const setEditedSurvey = (survey: ISurvey | null) => {
+    editedSurvey.value = survey;
+  };
 
-    // ✅ listening for surveys
-    setSurveysListener(teamId: string) {
-      const { getSurveysByTeamId } = useTeamComposable();
+  const setTeamsUnsubscribe = (unsubscribeFn: (() => void) | null) => {
+    unsubscribeTeams.value = unsubscribeFn;
+  };
 
-      if (this.unsubscribeSurveys) {
-        this.unsubscribeSurveys(); // 🛑 Stop previous listener
-      }
+  const setSurveysUnsubscribe = (unsubscribeFn: (() => void) | null) => {
+    unsubscribeSurveys.value = unsubscribeFn;
+  };
 
-      getSurveysByTeamId(teamId, (surveys) => {
-        this.surveys = surveys;
-      });
-    },
-
-    async getTeamByIdAndSetCurrentTeam(teamId: string) {
-      const { getTeamById } = useTeamComposable();
-
-      this.currentTeam = await getTeamById(teamId);
-    },
-
-    async addVote(surveyId: string, userUid: string, newVote: boolean) {
-      const { addVote } = useTeamComposable();
-
-      const survey = this.surveys.find((s) => s.id === surveyId);
-      if (survey) await addVote(surveyId, userUid, newVote, survey.votes);
-    },
-
-    async addSurveyVote(surveyId: string, userUid: string, newVote: boolean) {
-      const { addSurveyVote } = useTeamComposable();
-
-      const survey = this.surveys.find(s => s.id === surveyId);
-      if (survey) {
-        const isUserVoteExists = survey.votes.find(v => v.userUid === userUid);
-        const votes = survey.votes || [];
-
-        await addSurveyVote(surveyId, userUid, newVote, votes, isUserVoteExists);
-      }
-    },
-
-    clearData() {
-      if (this.unsubscribeTeams) {
-        this.unsubscribeTeams();
-        this.unsubscribeTeams = null;
-      }
-
-      if (this.unsubscribeSurveys) {
-        this.unsubscribeSurveys();
-        this.unsubscribeSurveys = null;
-      }
-
-      this.teams = [];
-      this.surveys = [];
-      this.currentTeam = null;
-    },
-
-    //Setters
-    setCurrentTeam(team: any) {
-      this.currentTeam = team;
+  const clearData = () => {
+    if (unsubscribeTeams.value) {
+      unsubscribeTeams.value();
+      unsubscribeTeams.value = null;
     }
-  },
+
+    if (unsubscribeSurveys.value) {
+      unsubscribeSurveys.value();
+      unsubscribeSurveys.value = null;
+    }
+
+    teams.value = [];
+    surveys.value = [];
+    currentTeam.value = null;
+    editedSurvey.value = null;
+  };
+
+  return {
+    // State
+    teams,
+    surveys,
+    editedSurvey,
+    currentTeam,
+    unsubscribeTeams,
+    unsubscribeSurveys,
+    // Getters
+    getPositiveVotes,
+    getNegativeVotes,
+    // Pure state mutations
+    setTeams,
+    setSurveys,
+    setCurrentTeam,
+    setEditedSurvey,
+    setTeamsUnsubscribe,
+    setSurveysUnsubscribe,
+    clearData
+  };
 });

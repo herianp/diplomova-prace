@@ -16,7 +16,7 @@
 - Always check Context7 documentation first using mcp__context7__ tools when working with libraries
 
 ## Project Context
-- Working directory: /home/petah/projects/diplomova-prace
+- Working directory: /home/petah/projects/diplomova-prace/quasar-club-system
 - Git repository: Yes
 - Platform: Linux (WSL2)
 - Main branch: master
@@ -47,44 +47,17 @@
 - Set default filter to "this season" (13/07/2025 - 30/06/2026) in dashboard
 - Applied filters to ALL dashboard metrics including active team members count
 - Created ReportsComponent and refactored ReportsPage to use it (consistent with DashboardPage structure)
+- Added language switcher to Settings page with localStorage persistence and i18n integration
 
 ## Archive Scripts
 All user creation and team management scripts have been moved to `quasar-club-system/archive/`:
 
-### User Creation Scripts:
-- `create-users.js` - Script to create initial 24 Firebase users using Admin SDK
-- `create-more-users.js` - Script to create additional 15 Firebase users  
-- `create-final-users.js` - Script to create jakubskopek, tetoo users
-- `create-jirka-user.js` - Script to create jirka user
-- `create-miloszrnic-user.js` - Script to create miloszrnic user
-- `create-users-cli.sh` - Alternative CLI-based user creation script
-- `create-users-simple.js` - Simple user creation template
-
-### Team Management Scripts:
-- `add-users-to-team.js` - Script to add initial users to specific team
-- `add-more-users-to-team.js` - Script to add additional users to team
-- `add-final-users-to-team.js` - Script to add jakubskopek, tetoo to team
-- `add-jirka-to-team.js` - Script to add jirka to team
-- `add-miloszrnic-to-team.js` - Script to add miloszrnic to team
-
-### Utility Scripts:
-- `fix-user-displayname.js` - Script to fix displayName field for existing users
-- `package-scripts.json` - Package file for script dependencies
-- `test-users.json` - Test user data file
-
-### Cleaned Up Files:
-- Removed `firebase-admin-key.json:Zone.Identifier` (Windows zone identifier file)
-- Moved `test-users.json` to archive folder
-
-These scripts are no longer needed for regular development but kept for reference and documentation purposes.
-
 ## Project Analysis
 This is a diploma thesis project containing a club management system with two implementations:
 
-1. **club-system**: Basic Vue.js implementation with Vite
-2. **quasar-club-system**: Advanced implementation using Quasar framework
+1. **quasar-club-system**: Advanced implementation using Quasar framework
 
-The project appears to be a club/sports team management system with features for:
+The project is football team management system with features for:
 - User authentication (login/register)
 - Team management
 - Survey system with voting
@@ -114,29 +87,45 @@ The project appears to be a club/sports team management system with features for
 - TypeScript support
 
 ## How to Run
-### club-system:
-```bash
-cd club-system
-npm install
-npm run dev
-```
-
-### quasar-club-system (Recommended):
+### quasar-club-system
 ```bash
 cd quasar-club-system
-npm install
-npm run dev
+yarn install
+quasar dev
 ```
 
 Build for production:
 ```bash
-npm run build
+quasar build
 ```
 
 Linting:
 ```bash
 npm run lint
 ```
+
+## Data Architecture (Clean Architecture)
+
+### **Layer Structure:**
+1. **Components** → UI-focused Vue components
+2. **UI Composables** → Component-specific logic delegation 
+3. **Use Cases** → Business logic orchestration
+4. **Firebase Services** → Pure Firebase operations
+5. **Pinia Stores** → Pure state management (no business logic)
+
+### **Key Files:**
+- **Stores**: `authStore.ts`, `teamStore.ts` (Setup Store pattern, state only)
+- **Services**: `authFirebase.ts`, `teamFirebase.ts`, `surveyFirebase.ts` (Firebase operations)
+- **Use Cases**: `useAuthUseCases.ts`, `useTeamUseCases.ts`, `useSurveyUseCases.ts` (business logic)
+- **UI Composables**: `useAuthComposable.ts`, `useTeamComposable.ts` (UI delegation)
+
+### **Flow:**
+Components → UI Composables → Use Cases → Firebase Services → Stores (state updates)
+
+### **Authentication Timing:**
+- Auth listener setup with timing buffers (100-300ms delays)
+- Team/notification listeners wait for auth completion
+- Error handling for permission-denied scenarios
 
 ## Available Tools & Services
 ### Context7 MCP Server

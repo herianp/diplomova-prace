@@ -11,175 +11,31 @@
       />
 
       <div class="row q-col-gutter-lg">
-        <!-- Team Members Section (Available to all users) -->
-        <div class="col-12 col-lg-8">
-          <q-card flat bordered class="bg-grey-1">
-            <q-card-section class="bg-primary text-white">
-              <div class="text-h6">
-                <q-icon name="group" class="q-mr-sm" />
-                {{ $t('team.single.members.title') }}
-              </div>
-            </q-card-section>
-
-            <q-card-section class="q-pa-md">
-              <div v-if="teamMembers.length === 0" class="text-center text-grey-6 q-py-xl">
-                <q-icon name="group_off" size="4em" class="q-mb-md" />
-                <div class="text-h6">{{ $t('team.single.members.empty') }}</div>
-              </div>
-
-              <div v-else class="row q-col-gutter-md">
-                <div
-                  v-for="member in teamMembers"
-                  :key="member.uid"
-                  class="col-12 col-sm-6 col-md-4"
-                >
-                  <q-card flat bordered class="member-card">
-                    <q-card-section class="text-center q-pa-md">
-                      <q-avatar size="60px" color="primary" text-color="white" class="q-mb-md">
-                        <q-icon v-if="!member.photoURL" name="person" size="30px" />
-                        <img v-else :src="member.photoURL" alt="Profile" />
-                      </q-avatar>
-
-                      <div class="text-h6 q-mb-xs">{{ member.displayName || member.email }}</div>
-                      <div class="text-caption text-grey-6 q-mb-sm">{{ member.email }}</div>
-
-                      <!-- Power User Badge -->
-                      <q-chip
-                        v-if="isPowerUser(member.uid)"
-                        color="orange"
-                        text-color="white"
-                        dense
-                        :label="$t('team.single.powerUser')"
-                        icon="admin_panel_settings"
-                      />
-
-                      <!-- Member Actions (for power users) -->
-                      <div v-if="isCurrentUserPowerUser && member.uid !== currentUser.uid" class="q-mt-sm">
-                        <q-btn
-                          v-if="!isPowerUser(member.uid)"
-                          flat
-                          dense
-                          color="orange"
-                          icon="upgrade"
-                          :label="$t('team.single.members.makePowerUser')"
-                          @click="promoteToPowerUser(member)"
-                          size="sm"
-                        />
-                        <q-btn
-                          flat
-                          dense
-                          color="negative"
-                          icon="person_remove"
-                          :label="$t('team.single.members.remove')"
-                          @click="confirmRemoveMember(member)"
-                          size="sm"
-                          class="q-ml-xs"
-                        />
-                      </div>
-                    </q-card-section>
-                  </q-card>
-                </div>
-              </div>
-            </q-card-section>
-          </q-card>
-        </div>
+        <TeamPlayerCardsComponent
+          :team-members="teamMembers"
+          :pending-invitations="pendingInvitations"
+          :invite-form="inviteForm"
+          :sending-invite="sendingInvite"
+          :team="team"
+          @confirm-remove-member="confirmRemoveMember"
+          @promote-to-power-user="promoteToPowerUser"
+        />
 
         <!-- Team Management Section (Power Users Only) -->
         <div v-if="isCurrentUserPowerUser" class="col-12 col-lg-4">
-          <q-card flat bordered class="bg-grey-1 q-mb-lg">
-            <q-card-section class="bg-orange text-white">
-              <div class="text-h6">
-                <q-icon name="person_add" class="q-mr-sm" />
-                {{ $t('team.single.invite.title') }}
-              </div>
-            </q-card-section>
-
-            <q-card-section class="q-pa-md">
-              <div class="text-body2 text-grey-7 q-mb-md">
-                {{ $t('team.single.invite.description') }}
-              </div>
-
-              <!-- Invite Form -->
-              <q-form @submit="sendInvitation" class="q-gutter-md">
-                <q-input
-                  v-model="inviteForm.email"
-                  type="email"
-                  :label="$t('team.single.invite.email')"
-                  outlined
-                  dense
-                  :rules="[
-                    val => !!val || $t('team.single.invite.emailRequired'),
-                    val => /.+@.+\..+/.test(val) || $t('team.single.invite.emailInvalid')
-                  ]"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="email" />
-                  </template>
-                </q-input>
-
-                <q-input
-                  v-model="inviteForm.message"
-                  type="textarea"
-                  :label="$t('team.single.invite.message')"
-                  outlined
-                  dense
-                  rows="3"
-                  :placeholder="$t('team.single.invite.messagePlaceholder')"
-                >
-                  <template v-slot:prepend>
-                    <q-icon name="message" />
-                  </template>
-                </q-input>
-
-                <div class="row justify-end">
-                  <q-btn
-                    type="submit"
-                    color="orange"
-                    icon="send"
-                    :label="$t('team.single.invite.send')"
-                    :loading="sendingInvite"
-                  />
-                </div>
-              </q-form>
-            </q-card-section>
-          </q-card>
+          <TeamInvitationComponent
+            :invite-form="inviteForm"
+            :sending-invite="sendingInvite"
+            @send-invitation="sendInvitation"
+            @update-email="updateInviteEmail"
+            @update-message="updateInviteMessage"
+          />
 
           <!-- Pending Invitations -->
-          <q-card v-if="pendingInvitations.length > 0" flat bordered class="bg-grey-1">
-            <q-card-section class="bg-amber text-white">
-              <div class="text-h6">
-                <q-icon name="schedule" class="q-mr-sm" />
-                {{ $t('team.single.pendingInvites.title') }}
-              </div>
-            </q-card-section>
-
-            <q-card-section class="q-pa-md">
-              <div v-for="invitation in pendingInvitations" :key="invitation.id" class="invitation-item q-mb-md">
-                <div class="row items-center no-wrap">
-                  <div class="col">
-                    <div class="text-body1">{{ invitation.email }}</div>
-                    <div class="text-caption text-grey-6">
-                      {{ $t('team.single.pendingInvites.sentOn') }}: {{ formatDate(invitation.createdAt) }}
-                    </div>
-                  </div>
-                  <div class="col-auto">
-                    <q-btn
-                      flat
-                      round
-                      dense
-                      color="negative"
-                      icon="cancel"
-                      @click="cancelInvitation(invitation)"
-                      size="sm"
-                    >
-                      <q-tooltip>{{ $t('team.single.pendingInvites.cancel') }}</q-tooltip>
-                    </q-btn>
-                  </div>
-                </div>
-                <q-separator class="q-mt-sm" />
-              </div>
-            </q-card-section>
-          </q-card>
+          <TeamInvitationPendingComponent
+            :pending-invitations="pendingInvitations"
+            @cancel-invitation="cancelInvitation"
+          />
         </div>
       </div>
     </div>
@@ -218,7 +74,6 @@ import { useRoute } from 'vue-router'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import { DateTime } from 'luxon'
 import {
   collection,
   query,
@@ -233,8 +88,11 @@ import {
   getDoc
 } from 'firebase/firestore'
 import { db } from '@/firebase/config.ts'
-import { useNotifications } from '@/composable/useNotifications.js'
+import { useNotifications } from '@/composable/useNotificationsComposable.js'
 import HeaderBanner from '@/components/HeaderBanner.vue'
+import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
+import TeamInvitationComponent from '@/components/team/TeamInvitationComponent.vue'
+import TeamInvitationPendingComponent from '@/components/team/TeamInvitationPendingComponent.vue'
 
 const route = useRoute()
 const { currentUser } = useAuthComposable()
@@ -259,14 +117,7 @@ const inviteForm = reactive({
 
 // Computed
 const teamId = computed(() => route.params.teamId)
-const isCurrentUserPowerUser = computed(() => {
-  return team.value?.powerusers?.includes(currentUser.value?.uid)
-})
-
-// Methods
-const isPowerUser = (uid) => {
-  return team.value?.powerusers?.includes(uid)
-}
+const { isCurrentUserPowerUser }  = useAuthComposable();
 
 const loadTeam = async () => {
   try {
@@ -513,8 +364,12 @@ const promoteToPowerUser = async (member) => {
   }
 }
 
-const formatDate = (date) => {
-  return DateTime.fromJSDate(date.toDate()).toLocaleString(DateTime.DATETIME_SHORT)
+const updateInviteEmail = (value) => {
+  inviteForm.email = value
+}
+
+const updateInviteMessage = (value) => {
+  inviteForm.message = value
 }
 
 onMounted(() => {
@@ -528,23 +383,6 @@ onMounted(() => {
   margin: 0 auto;
 }
 
-.team-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  padding: 2rem;
-  border-radius: 12px;
-  margin-bottom: 2rem;
-}
-
-.member-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.member-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
 .invitation-item:last-child .q-separator {
   display: none;
 }
@@ -552,10 +390,6 @@ onMounted(() => {
 @media (max-width: 768px) {
   .single-team-page {
     padding: 1rem;
-  }
-
-  .team-header {
-    padding: 1.5rem;
   }
 }
 </style>

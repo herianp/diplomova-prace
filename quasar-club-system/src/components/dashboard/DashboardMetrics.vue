@@ -49,6 +49,7 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/authStore'
 import MetricCard from '@/components/dashboard/MetricCard.vue'
+import { useSurveyMetrics } from '@/composable/useSurveyMetrics'
 
 const props = defineProps({
   filteredSurveys: {
@@ -58,54 +59,30 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
+const { 
+  calculateTotalSurveys, 
+  calculateActiveTeamMembers, 
+  calculatePersonalMetrics, 
+  calculateTeamParticipationRate 
+} = useSurveyMetrics()
 
 const currentUser = computed(() => authStore.user)
 
-const totalSurveys = computed(() => props.filteredSurveys.length)
+// Use the new composable functions
+const totalSurveys = computed(() => calculateTotalSurveys(props.filteredSurveys))
 
-const activeTeamMembers = computed(() => {
-  if (!props.filteredSurveys.length) return 0
+const activeTeamMembers = computed(() => calculateActiveTeamMembers(props.filteredSurveys))
 
-  const participatingMembers = new Set()
+const personalMetrics = computed(() => 
+  calculatePersonalMetrics(props.filteredSurveys, currentUser.value?.uid)
+)
 
-  props.filteredSurveys.forEach(survey => {
-    survey.votes?.forEach(vote => {
-      participatingMembers.add(vote.userUid)
-    })
-  })
+const myTotalVotes = computed(() => personalMetrics.value.myTotalVotes)
+const personalParticipationRate = computed(() => personalMetrics.value.personalParticipationRate)
 
-  return participatingMembers.size
-})
-
-const myTotalVotes = computed(() => {
-  return props.filteredSurveys.reduce((total, survey) => {
-    const userVote = survey.votes?.find(vote => vote.userUid === currentUser.value?.uid)
-    return userVote ? total + 1 : total
-  }, 0)
-})
-
-const myYesVotes = computed(() => {
-  return props.filteredSurveys.reduce((total, survey) => {
-    const userVote = survey.votes?.find(vote => vote.userUid === currentUser.value?.uid)
-    return (userVote && userVote.vote === true) ? total + 1 : total
-  }, 0)
-})
-
-const personalParticipationRate = computed(() => {
-  if (totalSurveys.value === 0) return 0
-  return Math.round((myYesVotes.value / totalSurveys.value) * 100)
-})
-
-const teamParticipationRate = computed(() => {
-  if (totalSurveys.value === 0 || activeTeamMembers.value === 0) return 0
-
-  const totalYesVotes = props.filteredSurveys.reduce((total, survey) => {
-    const yesVotes = survey.votes?.filter(vote => vote.vote === true).length || 0
-    return total + yesVotes
-  }, 0)
-
-  return Math.round((totalYesVotes / (activeTeamMembers.value * totalSurveys.value)) * 100)
-})
+const teamParticipationRate = computed(() => 
+  calculateTeamParticipationRate(props.filteredSurveys, activeTeamMembers.value)
+)
 </script>
 
 <style scoped>
