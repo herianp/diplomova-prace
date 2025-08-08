@@ -26,10 +26,12 @@ import TeamCard from '@/components/new/TeamCard.vue'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import TeamCreateMenu from '@/components/team/TeamCreateMenu.vue'
 import { useTeamUseCases } from '@/composable/useTeamUseCases.js'
+import { useTeamStore } from '@/stores/teamStore.js'
 
 const auth = getAuth()
 const { isCurrentUserPowerUser } = useAuthComposable()
 const { setTeamListener } = useTeamUseCases()
+const { teams } = useTeamStore()
 
 onMounted(() => {
   onAuthStateChanged(auth, (user) => {

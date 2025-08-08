@@ -234,18 +234,17 @@
 
 <script setup>
 import { ref, computed, reactive } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore.ts'
+import { useAuthComposable } from '@/composable/useAuthComposable.ts'
 import { useScreenComposable } from '@/composable/useScreenComposable.js'
 import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '@/firebase/config.ts'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import { RouteEnum } from '@/enums/routesEnum.ts'
 
-const router = useRouter()
 const authStore = useAuthStore()
+const { refreshUser, logoutUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const $q = useQuasar()
 const { t } = useI18n()
@@ -312,7 +311,7 @@ const saveProfile = async () => {
     })
     
     // Update the auth store
-    await authStore.refreshUser()
+    await refreshUser()
     
     $q.notify({
       type: 'positive',
@@ -385,9 +384,8 @@ const confirmSignOut = () => {
 
 const signOut = async () => {
   try {
-    await authStore.signOut()
+    await logoutUser()
     showSignOutDialog.value = false
-    router.push(RouteEnum.LOGIN.path)
     
     $q.notify({
       type: 'positive',

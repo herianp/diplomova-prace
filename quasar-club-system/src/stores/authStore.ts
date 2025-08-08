@@ -1,59 +1,57 @@
 import { defineStore } from 'pinia'
-import { authStateListener } from "@/services/authService";
-import { RouteEnum } from "@/enums/routesEnum";
-import { useTeamStore } from "@/stores/teamStore";
 import { ref } from 'vue'
-import { getAuth, signOut as firebaseSignOut } from 'firebase/auth'
+import { User } from 'firebase/auth'
 
 const getInitialUser = () => ({
   uid: '1',
 });
 
-export const useAuthStore = defineStore("auth", {
-  state: () => ({
-    user: getInitialUser(),
-    isLoading: ref(false), // Global loading state
-    isAdmin: ref(true), // Global loading state
-  }),
+export const useAuthStore = defineStore("auth", () => {
+  const user = ref<User | null>(getInitialUser())
+  const isLoading = ref(false)
+  const isAdmin = ref(true)
 
-  getters: {},
-  actions: {
-    init() {
-      // check if user is already signed in, user is filled in after refresh
-      authStateListener((user) => {
-        if (user) {
-          console.log(`User signed in: ${user.uid}`);
-          this.user = user;
-        } else {
-          console.log("User signed out.");
-          this.user = null;
-          this.router.push(RouteEnum.HOME.path);
-          useTeamStore().clearData();
-        }
-      });
-    },
+  // Auth state listener unsubscribe function
+  const authUnsubscribe = ref<(() => void) | null>(null)
 
-    //setters
-    setUser(user: any) {
-      this.user = user;
-    },
-    setLoading(user: any) {
-      this.isLoading = user;
-    },
+  // Pure state mutations (no business logic)
+  const setUser = (newUser: User | null) => {
+    user.value = newUser
+  }
 
-    async refreshUser() {
-      const auth = getAuth()
-      if (auth.currentUser) {
-        await auth.currentUser.reload()
-        this.user = auth.currentUser
-      }
-    },
+  const setLoading = (loading: boolean) => {
+    isLoading.value = loading
+  }
 
-    async signOut() {
-      const auth = getAuth()
-      await firebaseSignOut(auth)
-      this.user = null
-      useTeamStore().clearData()
-    },
+  const setAdmin = (admin: boolean) => {
+    isAdmin.value = admin
+  }
+
+  const setAuthUnsubscribe = (unsubscribeFn: (() => void) | null) => {
+    authUnsubscribe.value = unsubscribeFn
+  }
+
+  const cleanup = () => {
+    if (authUnsubscribe.value) {
+      authUnsubscribe.value()
+      authUnsubscribe.value = null
+    }
+    user.value = null
+    isLoading.value = false
+    isAdmin.value = false
+  }
+
+  return {
+    // State
+    user,
+    isLoading,
+    isAdmin,
+    authUnsubscribe,
+    // Pure state mutations
+    setUser,
+    setLoading,
+    setAdmin,
+    setAuthUnsubscribe,
+    cleanup
   }
 })
