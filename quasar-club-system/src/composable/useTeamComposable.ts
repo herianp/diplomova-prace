@@ -107,25 +107,25 @@ export function useTeamComposable(locale = 'en') {
         createdDate: new Date().getTime().toString(),
         votes: [],
       })
-      
+
       // Get team data to access members
       const teamDoc = await getDoc(doc(db, 'teams', newSurvey.teamId))
       if (teamDoc.exists()) {
         const teamData = teamDoc.data()
         const teamMembers = teamData.members || []
-        
+
         // Create survey data for notifications
         const surveyData = {
           id: surveyRef.id,
           title: newSurvey.title,
           teamId: newSurvey.teamId
         }
-        
+
         // Create notifications for all team members
         await createSurveyNotification(surveyData, teamMembers)
         console.log('Survey notifications created for', teamMembers.length, 'members')
       }
-      
+
       console.log('Survey added:', newSurvey)
     } catch (error) {
       console.error('Error adding survey:', error)
@@ -215,12 +215,12 @@ export function useTeamComposable(locale = 'en') {
   const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
     try {
       const updateData: any = { status }
-      
+
       if (status === SurveyStatus.CLOSED && verifiedBy) {
         updateData.verifiedAt = new Date()
         updateData.verifiedBy = verifiedBy
       }
-      
+
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
       console.log(`Survey ${surveyId} status updated to ${status}`)
     } catch (error) {
@@ -236,11 +236,11 @@ export function useTeamComposable(locale = 'en') {
         verifiedAt: new Date(),
         verifiedBy: verifiedBy
       }
-      
+
       if (updatedVotes) {
         updateData.votes = updatedVotes
       }
-      
+
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
       console.log(`Survey ${surveyId} verified by ${verifiedBy}`)
     } catch (error) {
@@ -263,9 +263,9 @@ export function useTeamComposable(locale = 'en') {
     try {
       const surveyRef = doc(db, 'surveys', surveyId)
       const surveyDoc = await getDoc(surveyRef)
-      
+
       if (!surveyDoc.exists()) return null
-      
+
       return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
     } catch (error) {
       console.error('Error getting survey:', error)
