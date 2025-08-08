@@ -52,6 +52,7 @@ import { useTeamStore } from '@/stores/teamStore.ts'
 import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
 
 const teamStore = useTeamStore()
 const router = useRouter()
@@ -59,10 +60,11 @@ const router = useRouter()
 const userTeams = computed(() => teamStore.teams)
 const currentTeam = computed(() => teamStore.currentTeam)
 const { isCurrentUserPowerUser } = useAuthComposable()
+const { setSurveysListener } = useSurveyUseCases()
 
 const selectTeam = (team) => {
   teamStore.currentTeam = team
-  teamStore.setSurveysListener(team.id) // ✅ Call new listener for surveys for selected team
+  setSurveysListener(team.id) // ✅ Call new listener for surveys for selected team
 }
 
 const manageCurrentTeam = () => {

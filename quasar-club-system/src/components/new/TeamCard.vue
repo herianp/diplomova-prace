@@ -35,11 +35,13 @@ import { useTeamStore } from '@/stores/teamStore.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useRouter } from 'vue-router'
 import { useTeamComposable } from '@/composable/useTeamComposable.js'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
 
 const teamStore = useTeamStore();
 const authStore = useAuthStore();
 const router = useRouter();
 const { deleteTeam } = useTeamComposable();
+const { setSurveysListener } = useSurveyUseCases()
 
 const props = defineProps({
   team: {
@@ -54,7 +56,7 @@ const isAdmin = computed(() => authStore.isAdmin)
 
 function openTeam(teamId) {
   console.log('teamId', teamId)
-  teamStore.setSurveysListener(teamId)
+  setSurveysListener(teamId)
   const team = teamStore.teams.find(t => t.id === teamId)
   teamStore.setCurrentTeam(team)
   router.push(`/survey`)

@@ -4,7 +4,7 @@ import routes from './routes'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { RouteEnum } from '@/enums/routesEnum.ts'
-import { useTeamStore } from '@/stores/teamStore.ts'
+import { useTeamUseCases } from '@/composable/useTeamUseCases.js'
 
 export default defineRouter(function () {
   const createHistory = process.env.SERVER
@@ -20,8 +20,9 @@ export default defineRouter(function () {
   // Authentication Guard
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore();
-    const teamStore = useTeamStore();
     const auth = getAuth();
+    const { setTeamListener } = useTeamUseCases()
+
 
     // Wait for the authentication state
     if (!authStore.isInitialized) {
@@ -29,7 +30,7 @@ export default defineRouter(function () {
         onAuthStateChanged(auth, async (user) => {
           authStore.user = user; // Update user in Pinia store
           if (user) {
-            await teamStore.setTeamListener(user.uid); // ✅ Restore Firestore listener
+            await setTeamListener(user.uid); // ✅ Restore Firestore listener
           }
           resolve();
         });

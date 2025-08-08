@@ -1,12 +1,12 @@
 import { ref } from 'vue';
 import {useTeamComposable} from "@/composable/useTeamComposable.ts";
-import {useTeamStore} from "@/stores/teamStore.ts";
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
 
 export function useFormComposable() {
-    const teamStore = useTeamStore();
-    const { deleteSurvey, addSurvey } = useTeamComposable();
+  const { deleteSurvey, addSurvey } = useTeamComposable();
+  const { setSurveysListener } = useSurveyUseCases()
 
-    const title = ref('');
+  const title = ref('');
     const description = ref('');
     const date = ref('');
     const time = ref('');
@@ -32,7 +32,7 @@ export function useFormComposable() {
                 teamId: teamId,
             });
 
-            await teamStore.setSurveysListener(teamId);
+            await setSurveysListener(teamId);
         } catch (err) {
             console.log(`err ${err}`);
             error.value = 'Failed to submit data';

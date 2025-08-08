@@ -56,10 +56,12 @@ import ReportsTeamStats from '@/components/reports/ReportsTeamStats.vue'
 import ReportsPlayerFilter from '@/components/reports/ReportsPlayerFilter.vue'
 import ReportsPlayerStats from '@/components/reports/ReportsPlayerStats.vue'
 import ReportsCharts from '@/components/reports/ReportsCharts.vue'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
 
 const teamStore = useTeamStore()
 const $q = useQuasar()
 const { t } = useI18n()
+const { setSurveysListener } = useSurveyUseCases()
 
 // State
 const loading = ref(true)
@@ -279,7 +281,7 @@ const loadData = async () => {
 
     // Only load surveys if they're not already loaded for this team
     if (surveys.value.length === 0) {
-      await teamStore.setSurveysListener(currentTeam.value.id)
+      await setSurveysListener(currentTeam.value.id)
 
       // Wait a bit for surveys to load
       setTimeout(() => {

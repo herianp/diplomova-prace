@@ -77,9 +77,11 @@ import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases.js'
 
 const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
+const { setSurveysListener } = useSurveyUseCases()
 
 const isLoading = ref(false)
 
@@ -150,7 +152,7 @@ const refreshData = async () => {
   try {
     // Refresh surveys data
     if (currentTeam.value?.id) {
-      teamStore.setSurveysListener(currentTeam.value.id)
+      setSurveysListener(currentTeam.value.id)
     }
   } catch (error) {
     console.error('Error refreshing dashboard data:', error)
