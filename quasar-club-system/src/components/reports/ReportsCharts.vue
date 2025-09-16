@@ -67,6 +67,7 @@ import {
   Legend,
   ArcElement
 } from 'chart.js'
+import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 // Register Chart.js components
 ChartJS.register(
@@ -352,6 +353,7 @@ const createMemberActivityChart = () => {
   }
 
   charts.activity = new ChartJS(ctx, {
+    plugins: [ChartDataLabels],
     type: 'bar',
     data: {
       labels,
