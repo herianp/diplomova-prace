@@ -1,0 +1,60 @@
+# This workflow builds and deploys your Quasar app to AWS S3
+# and invalidates the CloudFront cache.
+
+name: Deploy Quasar App to AWS S3 and CloudFront
+
+# 1. Trigger: Run this workflow on a push to the 'production' branch
+on:
+  push:
+    branches: [ production ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest # Use the latest available GitHub-hosted runner
+
+    steps:
+      # 2. Checkout: Get your repository's code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 3. Setup Node.js: Install Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Matching your Azure file
+          cache: 'yarn' # Cache yarn dependencies for faster builds
+
+      # 4. Install Dependencies
+      - name: Install Dependencies
+        run: |
+          cd ./quasar-club-system
+          yarn install --frozen-lockfile
+
+      # 5. Build: Run your Quasar build script
+      - name: Build Quasar App
+        run: |
+          cd ./quasar-club-system
+          yarn quasar build -m spa
+        env:
+          # Pass in your Firebase key from secrets
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
+
+      # 6. Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1 # CloudFront is global, S3 region is less critical
+
+      # 7. Deploy to S3: Sync your build output (dist/spa)
+      - name: Deploy static files to S3
+        run: |
+          aws s3 sync ./quasar-club-system/dist/spa s3://${{ secrets.AWS_S3_BEYOND_NAME }} --delete
+
+      # 8. Invalidate CloudFront Cache
+      - name: Invalidate CloudFront Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.AWS_CLOUDFRONT_DIST_ID }} \
+            --paths "/*"
