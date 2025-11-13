@@ -23,6 +23,7 @@ jobs:
         with:
           node-version: '18' # Matching your Azure file
           cache: 'yarn' # Cache yarn dependencies for faster builds
+          cache-dependency-path: './quasar-club-system/yarn.lock' # <-- ADD THIS LINE to tell the cache where your lock file is
 
       # 4. Install Dependencies
       - name: Install Dependencies
