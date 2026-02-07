@@ -11,14 +11,7 @@ import {
   getDoc,
   Unsubscribe,
 } from 'firebase/firestore'
-import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
-
-interface SurveyNotificationData {
-  id: string
-  title: string
-  teamId: string
-  teamMembers: string[]
-}
+import { ISurvey, IVote, SurveyStatus, ISurveyNotificationData } from '@/interfaces/interfaces'
 
 export function useSurveyFirebase() {
   const getSurveysByTeamId = (teamId: string, callback: (surveys: ISurvey[]) => void): Unsubscribe => {
@@ -62,7 +55,7 @@ export function useSurveyFirebase() {
     }
   }
 
-  const addSurvey = async (newSurvey: ISurvey, teamMembers: string[] = []): Promise<SurveyNotificationData> => {
+  const addSurvey = async (newSurvey: ISurvey, teamMembers: string[] = []): Promise<ISurveyNotificationData> => {
     try {
       // Create the survey
       const surveyRef = await addDoc(collection(db, 'surveys'), {
@@ -142,7 +135,7 @@ export function useSurveyFirebase() {
 
   const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
     try {
-      const updateData: any = { status }
+      const updateData: Partial<ISurvey> = { status }
 
       if (status === SurveyStatus.CLOSED && verifiedBy) {
         updateData.verifiedAt = new Date()
@@ -159,7 +152,7 @@ export function useSurveyFirebase() {
 
   const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]) => {
     try {
-      const updateData: any = {
+      const updateData: Partial<ISurvey> = {
         status: SurveyStatus.CLOSED,
         verifiedAt: new Date(),
         verifiedBy: verifiedBy

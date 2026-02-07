@@ -1,4 +1,4 @@
-import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
+import { ISurvey, IVote, SurveyStatus, ICashboxTransaction } from '@/interfaces/interfaces'
 import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 
@@ -20,7 +20,7 @@ export function useTeamComposable() {
     return teamUseCases.getTeamById(teamId)
   }
 
-  const addCashboxTransaction = async (teamId: string, transactionData: any) => {
+  const addCashboxTransaction = async (teamId: string, transactionData: ICashboxTransaction) => {
     return teamUseCases.addCashboxTransaction(teamId, transactionData)
   }
 

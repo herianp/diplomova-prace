@@ -1,25 +1,7 @@
-import { ref, computed } from 'vue'
+import { ref, computed, Ref } from 'vue'
 import { db } from '@/firebase/config.ts'
 import { collection, query, where, getDocs } from 'firebase/firestore'
-
-interface TeamMember {
-  uid: string
-  displayName?: string
-  email?: string
-  [key: string]: any
-}
-
-interface Team {
-  id: string
-  name: string
-  members: string[]
-  [key: string]: any
-}
-
-interface PlayerOption {
-  label: string
-  value: string | null
-}
+import { ITeamMember, ITeam, IPlayerOption, ISurvey, IVote, IMemberStats } from '@/interfaces/interfaces'
 
 export function useTeamMemberUtils() {
   const loading = ref(false)
@@ -29,7 +11,7 @@ export function useTeamMemberUtils() {
    * Load team members with Firestore IN query limit handling
    * Firestore IN query limit is 30, so we need to chunk the requests
    */
-  const loadTeamMembers = async (memberIds: string[]): Promise<TeamMember[]> => {
+  const loadTeamMembers = async (memberIds: string[]): Promise<ITeamMember[]> => {
     if (!memberIds?.length) {
       return []
     }
@@ -38,7 +20,7 @@ export function useTeamMemberUtils() {
     error.value = null
 
     try {
-      const allUsers: TeamMember[] = []
+      const allUsers: ITeamMember[] = []
       const chunkSize = 30 // Firestore IN query limit
 
       // Split members into chunks of 30
@@ -54,7 +36,7 @@ export function useTeamMemberUtils() {
         const chunkUsers = usersSnapshot.docs.map(doc => ({
           uid: doc.id,
           ...doc.data()
-        })) as TeamMember[]
+        })) as ITeamMember[]
 
         allUsers.push(...chunkUsers)
       }
@@ -72,14 +54,14 @@ export function useTeamMemberUtils() {
   /**
    * Get display name for a team member
    */
-  const getMemberDisplayName = (member: TeamMember): string => {
+  const getMemberDisplayName = (member: ITeamMember): string => {
     return member.displayName || member.email || `Member ${member.uid.substring(0, 8)}...`
   }
 
   /**
    * Get display name for a member by UID from a list of members
    */
-  const getPlayerName = (playerId: string, members: TeamMember[]): string => {
+  const getPlayerName = (playerId: string, members: ITeamMember[]): string => {
     const member = members.find(m => m.uid === playerId)
     return member ? getMemberDisplayName(member) : `Member ${playerId.substring(0, 8)}...`
   }
@@ -87,7 +69,7 @@ export function useTeamMemberUtils() {
   /**
    * Create player options for select dropdown
    */
-  const createPlayerOptions = (members: TeamMember[], allPlayersLabel = 'All Players'): PlayerOption[] => {
+  const createPlayerOptions = (members: ITeamMember[], allPlayersLabel = 'All Players'): IPlayerOption[] => {
     if (!members.length) return []
 
     return [
@@ -102,7 +84,7 @@ export function useTeamMemberUtils() {
   /**
    * Filter team members by search term
    */
-  const filterMembers = (members: TeamMember[], searchTerm: string): TeamMember[] => {
+  const filterMembers = (members: ITeamMember[], searchTerm: string): ITeamMember[] => {
     if (!searchTerm.trim()) return members
 
     const term = searchTerm.toLowerCase().trim()
@@ -118,7 +100,7 @@ export function useTeamMemberUtils() {
   /**
    * Sort team members by display name
    */
-  const sortMembersByName = (members: TeamMember[]): TeamMember[] => {
+  const sortMembersByName = (members: ITeamMember[]): ITeamMember[] => {
     return [...members].sort((a, b) => {
       const nameA = getMemberDisplayName(a).toLowerCase()
       const nameB = getMemberDisplayName(b).toLowerCase()
@@ -129,13 +111,13 @@ export function useTeamMemberUtils() {
   /**
    * Get active team members (members who have participated in surveys)
    */
-  const getActiveMembers = (allMembers: TeamMember[], surveys: any[]): TeamMember[] => {
+  const getActiveMembers = (allMembers: ITeamMember[], surveys: ISurvey[]): ITeamMember[] => {
     if (!surveys.length) return []
 
     const activeUserIds = new Set<string>()
-    
+
     surveys.forEach(survey => {
-      survey.votes?.forEach((vote: any) => {
+      survey.votes?.forEach((vote: IVote) => {
         activeUserIds.add(vote.userUid)
       })
     })
@@ -146,7 +128,7 @@ export function useTeamMemberUtils() {
   /**
    * Create computed properties for team members
    */
-  const createMemberComputeds = (members: any) => {
+  const createMemberComputeds = (members: Ref<ITeamMember[]>) => {
     const sortedMembers = computed(() => 
       sortMembersByName(members.value || [])
     )
@@ -169,28 +151,28 @@ export function useTeamMemberUtils() {
   /**
    * Validate team member data
    */
-  const validateMember = (member: Partial<TeamMember>): boolean => {
+  const validateMember = (member: Partial<ITeamMember>): boolean => {
     return !!(member.uid && (member.displayName || member.email))
   }
 
   /**
    * Check if a member is in the team
    */
-  const isMemberInTeam = (memberId: string, team: Team): boolean => {
+  const isMemberInTeam = (memberId: string, team: ITeam): boolean => {
     return team.members?.includes(memberId) || false
   }
 
   /**
    * Get member statistics from surveys
    */
-  const getMemberStats = (memberId: string, surveys: any[]) => {
+  const getMemberStats = (memberId: string, surveys: ISurvey[]): IMemberStats => {
     let totalSurveys = 0
     let yesVotes = 0
     let noVotes = 0
     let unvoted = 0
 
     surveys.forEach(survey => {
-      const vote = survey.votes?.find((v: any) => v.userUid === memberId)
+      const vote = survey.votes?.find((v: IVote) => v.userUid === memberId)
       totalSurveys++
       
       if (vote) {
@@ -222,7 +204,7 @@ export function useTeamMemberUtils() {
   /**
    * Search team members with debounce-ready function
    */
-  const searchMembers = (members: TeamMember[], searchQuery: string, limit?: number) => {
+  const searchMembers = (members: ITeamMember[], searchQuery: string, limit?: number) => {
     const filtered = filterMembers(members, searchQuery)
     const sorted = sortMembersByName(filtered)
     
@@ -247,5 +229,5 @@ export function useTeamMemberUtils() {
   }
 }
 
-// Export types for use in other files
-export type { TeamMember, Team, PlayerOption }
+// Re-export types for convenience
+export type { ITeamMember, ITeam, IPlayerOption } from '@/interfaces/interfaces'

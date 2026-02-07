@@ -9,7 +9,7 @@ const getInitialUser = () => ({
 export const useAuthStore = defineStore("auth", () => {
   const user = ref<User | null>(getInitialUser())
   const isLoading = ref(false)
-  const isAdmin = ref(true)
+  const isAdmin = ref(false)
 
   // Auth state listener unsubscribe function
   const authUnsubscribe = ref<(() => void) | null>(null)

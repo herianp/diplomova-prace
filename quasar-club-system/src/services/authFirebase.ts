@@ -9,14 +9,7 @@ import {
   Unsubscribe
 } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
-
-interface UserData {
-  uid: string;
-  email: string | null;
-  name?: string;
-  displayName?: string;
-  createdAt: Date;
-}
+import { IUser } from "@/interfaces/interfaces";
 
 export function useAuthFirebase() {
   const authStateListener = (callback: (user: User | null) => void): Unsubscribe => {
@@ -58,7 +51,7 @@ export function useAuthFirebase() {
   };
 
   const createUserInFirestore = async (user: User, name?: string): Promise<void> => {
-    const userDoc: UserData = {
+    const userDoc: IUser = {
       uid: user.uid,
       email: user.email,
       name: name || "",
@@ -89,11 +82,11 @@ export function useAuthFirebase() {
     return null;
   };
 
-  const getUserFromFirestore = async (uid: string): Promise<UserData | null> => {
+  const getUserFromFirestore = async (uid: string): Promise<IUser | null> => {
     try {
       const userDoc = await getDoc(doc(db, "users", uid));
       if (userDoc.exists()) {
-        return userDoc.data() as UserData;
+        return userDoc.data() as IUser;
       }
       return null;
     } catch (error) {

@@ -11,22 +11,7 @@ import {
   getDocs,
   Unsubscribe,
 } from 'firebase/firestore'
-
-interface TeamData {
-  id?: string
-  name: string
-  creator: string
-  powerusers: string[]
-  members: string[]
-  invitationCode: string
-  surveys: string[]
-  cashboxTransactions?: any[]
-}
-
-interface CashboxTransaction {
-  id?: string
-  [key: string]: any
-}
+import { ITeam, ICashboxTransaction } from '@/interfaces/interfaces'
 
 export function useTeamFirebase() {
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -59,7 +44,7 @@ export function useTeamFirebase() {
     }
   }
 
-  const getTeamsByUserId = (userId: string, callback: (teams: TeamData[]) => void): Unsubscribe => {
+  const getTeamsByUserId = (userId: string, callback: (teams: ITeam[]) => void): Unsubscribe => {
     const teamsQuery = query(collection(db, 'teams'), where('members', 'array-contains', userId))
 
     return onSnapshot(teamsQuery, (snapshot) => {
@@ -68,7 +53,7 @@ export function useTeamFirebase() {
     })
   }
 
-  const getTeamById = async (teamId: string): Promise<TeamData | null> => {
+  const getTeamById = async (teamId: string): Promise<ITeam | null> => {
     try {
       const teamRef = doc(db, 'teams', teamId)
       const teamDoc = await getDoc(teamRef)
@@ -91,7 +76,7 @@ export function useTeamFirebase() {
     }
   }
 
-  const addCashboxTransaction = async (teamId: string, transactionData: CashboxTransaction): Promise<void> => {
+  const addCashboxTransaction = async (teamId: string, transactionData: ICashboxTransaction): Promise<void> => {
     try {
       const cashboxTransactionsRef = collection(doc(db, 'teams', teamId), 'cashboxTransactions')
       await addDoc(cashboxTransactionsRef, transactionData)

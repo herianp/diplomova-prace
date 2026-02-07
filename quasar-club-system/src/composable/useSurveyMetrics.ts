@@ -1,55 +1,20 @@
-import { computed } from 'vue'
+import { computed, Ref } from 'vue'
 import { DateTime } from 'luxon'
-
-interface Survey {
-  id: string
-  title: string
-  date: string
-  time: string
-  votes?: Vote[]
-  type?: string
-  [key: string]: any
-}
-
-interface Vote {
-  userUid: string
-  vote: boolean
-  [key: string]: any
-}
-
-interface TeamMetrics {
-  totalSurveys: number
-  totalMembers: number
-  averageParticipation: number
-  activeSurveys: number
-}
-
-interface PlayerMetrics {
-  yesVotes: number
-  noVotes: number
-  unvoted: number
-  averageParticipation: number
-}
-
-interface PersonalMetrics {
-  myTotalVotes: number
-  myYesVotes: number
-  personalParticipationRate: number
-}
+import { ISurvey, IVote, ITeamMetrics, IPlayerMetrics, IPersonalMetrics } from '@/interfaces/interfaces'
 
 export function useSurveyMetrics() {
 
   /**
    * Calculate total number of surveys
    */
-  const calculateTotalSurveys = (surveys: Survey[]): number => {
+  const calculateTotalSurveys = (surveys: ISurvey[]): number => {
     return surveys.length
   }
 
   /**
    * Calculate number of active team members who have voted
    */
-  const calculateActiveTeamMembers = (surveys: Survey[]): number => {
+  const calculateActiveTeamMembers = (surveys: ISurvey[]): number => {
     if (!surveys.length) return 0
 
     const participatingMembers = new Set<string>()
@@ -66,7 +31,7 @@ export function useSurveyMetrics() {
   /**
    * Calculate personal voting metrics for a specific user
    */
-  const calculatePersonalMetrics = (surveys: Survey[], userUid?: string): PersonalMetrics => {
+  const calculatePersonalMetrics = (surveys: ISurvey[], userUid?: string): IPersonalMetrics => {
     if (!userUid || !surveys.length) {
       return {
         myTotalVotes: 0,
@@ -99,7 +64,7 @@ export function useSurveyMetrics() {
   /**
    * Calculate team participation rate based on "Yes" votes only
    */
-  const calculateTeamParticipationRate = (surveys: Survey[], totalTeamMembers: number): number => {
+  const calculateTeamParticipationRate = (surveys: ISurvey[], totalTeamMembers: number): number => {
     if (!surveys.length || !totalTeamMembers) return 0
 
     const activeMembers = calculateActiveTeamMembers(surveys)
@@ -114,7 +79,7 @@ export function useSurveyMetrics() {
   /**
    * Calculate comprehensive team metrics
    */
-  const calculateTeamMetrics = (surveys: Survey[], teamMembersCount?: number): TeamMetrics => {
+  const calculateTeamMetrics = (surveys: ISurvey[], teamMembersCount?: number): ITeamMetrics => {
     if (!surveys.length) {
       return {
         totalSurveys: 0,
@@ -153,7 +118,7 @@ export function useSurveyMetrics() {
   /**
    * Calculate player-specific metrics
    */
-  const calculatePlayerMetrics = (surveys: Survey[], playerId: string | null): PlayerMetrics => {
+  const calculatePlayerMetrics = (surveys: ISurvey[], playerId: string | null): IPlayerMetrics => {
     if (!playerId || !surveys.length) {
       return {
         yesVotes: 0,
@@ -197,7 +162,7 @@ export function useSurveyMetrics() {
   /**
    * Get survey type distribution
    */
-  const getSurveyTypeDistribution = (surveys: Survey[]): Record<string, number> => {
+  const getSurveyTypeDistribution = (surveys: ISurvey[]): Record<string, number> => {
     const distribution: Record<string, number> = {}
 
     surveys.forEach(survey => {
@@ -211,7 +176,7 @@ export function useSurveyMetrics() {
   /**
    * Get vote statistics for a survey
    */
-  const getSurveyVoteStats = (survey: Survey) => {
+  const getSurveyVoteStats = (survey: ISurvey) => {
     if (!survey.votes) {
       return { yesCount: 0, noCount: 0, totalVotes: 0 }
     }
@@ -226,24 +191,21 @@ export function useSurveyMetrics() {
   /**
    * Create computed properties for metrics
    */
-  const createMetricsComputeds = (surveys: any, userUid?: any, teamMembersCount?: any) => {
+  const createMetricsComputeds = (surveys: Ref<ISurvey[]>, userUid?: Ref<string | undefined>, teamMembersCount?: Ref<number>) => {
     const totalSurveys = computed(() => calculateTotalSurveys(surveys.value || []))
 
     const activeTeamMembers = computed(() => calculateActiveTeamMembers(surveys.value || []))
 
     const personalMetrics = computed(() => {
-      const uid = typeof userUid === 'function' ? userUid() : userUid?.value || userUid
-      return calculatePersonalMetrics(surveys.value || [], uid)
+      return calculatePersonalMetrics(surveys.value || [], userUid?.value)
     })
 
     const teamMetrics = computed(() => {
-      const count = typeof teamMembersCount === 'function' ? teamMembersCount() : teamMembersCount?.value || teamMembersCount
-      return calculateTeamMetrics(surveys.value || [], count)
+      return calculateTeamMetrics(surveys.value || [], teamMembersCount?.value)
     })
 
     const teamParticipationRate = computed(() => {
-      const count = typeof teamMembersCount === 'function' ? teamMembersCount() : teamMembersCount?.value || teamMembersCount
-      return calculateTeamParticipationRate(surveys.value || [], count || 0)
+      return calculateTeamParticipationRate(surveys.value || [], teamMembersCount?.value || 0)
     })
 
     const surveyTypeDistribution = computed(() => getSurveyTypeDistribution(surveys.value || []))
@@ -271,5 +233,5 @@ export function useSurveyMetrics() {
   }
 }
 
-// Export types for use in other files
-export type { Survey, Vote, TeamMetrics, PlayerMetrics, PersonalMetrics }
+// Re-export types for convenience
+export type { ITeamMetrics, IPlayerMetrics, IPersonalMetrics } from '@/interfaces/interfaces'

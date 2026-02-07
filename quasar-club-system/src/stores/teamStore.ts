@@ -1,23 +1,13 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
-import { ISurvey } from '@/interfaces/interfaces'
-
-const getInitialTeam = () => ({
-  creator: '1',
-  id: '1',
-  invitationCode: '123',
-  members: [],
-  name: 'Team 1',
-  powerusers: [],
-  surveys: [],
-});
+import { ISurvey, ITeam } from '@/interfaces/interfaces'
 
 export const useTeamStore = defineStore("team", () => {
   // State
-  const teams = ref([]);
+  const teams = ref<ITeam[]>([]);
   const surveys = ref<ISurvey[]>([]);
-  const editedSurvey = ref(null);
-  const currentTeam = ref(getInitialTeam());
+  const editedSurvey = ref<ISurvey | null>(null);
+  const currentTeam = ref<ITeam | null>(null);
 
   // Firestore listeners - managed by use cases
   const unsubscribeTeams = ref<(() => void) | null>(null);
@@ -33,7 +23,7 @@ export const useTeamStore = defineStore("team", () => {
   });
 
   // Pure state mutations (no business logic)
-  const setTeams = (teamsList: any[]) => {
+  const setTeams = (teamsList: ITeam[]) => {
     teams.value = teamsList;
   };
 
@@ -41,7 +31,7 @@ export const useTeamStore = defineStore("team", () => {
     surveys.value = surveysList;
   };
 
-  const setCurrentTeam = (team: any) => {
+  const setCurrentTeam = (team: ITeam | null) => {
     currentTeam.value = team;
   };
 

@@ -1,19 +1,11 @@
-import { computed, ref } from 'vue'
+import { computed, ref, Ref } from 'vue'
 import { DateTime } from 'luxon'
+import { ISurvey } from '@/interfaces/interfaces'
 
-interface SurveyFilters {
+export interface SurveyFilters {
   searchName: string
   dateFrom: string
   dateTo: string
-}
-
-interface Survey {
-  id: string
-  title: string
-  date: string
-  time: string
-  createdDate: string
-  [key: string]: any
 }
 
 export function useSurveyFilters() {
@@ -29,7 +21,7 @@ export function useSurveyFilters() {
   /**
    * Filter surveys based on search name and date range
    */
-  const filterSurveys = (surveys: Survey[], customFilters?: SurveyFilters) => {
+  const filterSurveys = (surveys: ISurvey[], customFilters?: SurveyFilters) => {
     const activeFilters = customFilters || filters.value
     let filtered = [...surveys]
 
@@ -71,7 +63,7 @@ export function useSurveyFilters() {
   /**
    * Create a computed property for filtered surveys
    */
-  const createFilteredSurveys = (surveys: any, customFilters?: any) => {
+  const createFilteredSurveys = (surveys: Ref<ISurvey[]>, customFilters?: Ref<SurveyFilters>) => {
     return computed(() => {
       const surveysValue = Array.isArray(surveys.value) ? surveys.value : surveys
       const filtersValue = customFilters?.value || filters.value
@@ -86,7 +78,7 @@ export function useSurveyFilters() {
   /**
    * Create a computed property for recent surveys (newest first, limited)
    */
-  const createRecentFilteredSurveys = (surveys: any, limit = 5, customFilters?: any) => {
+  const createRecentFilteredSurveys = (surveys: Ref<ISurvey[]>, limit = 5, customFilters?: Ref<SurveyFilters>) => {
     return computed(() => {
       const surveysValue = Array.isArray(surveys.value) ? surveys.value : surveys
       const filtersValue = customFilters?.value || filters.value
@@ -151,5 +143,5 @@ export function useSurveyFilters() {
   }
 }
 
-// Export types for use in other files
-export type { SurveyFilters, Survey }
+// Re-export types for convenience
+export type { SurveyFilters }
