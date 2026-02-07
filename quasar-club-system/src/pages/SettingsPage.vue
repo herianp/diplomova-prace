@@ -267,10 +267,8 @@
 import { ref, computed, reactive } from 'vue'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.ts'
-import { useScreenComposable } from '@/composable/useScreenComposable.js'
-import { getAuth, updatePassword, reauthenticateWithCredential, EmailAuthProvider, updateProfile } from 'firebase/auth'
-import { doc, updateDoc } from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
+import { useScreenComposable } from '@/composable/useScreenComposable'
+import { useAuthFirebase } from '@/services/authFirebase'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
@@ -279,7 +277,7 @@ const { refreshUser, logoutUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
 const $q = useQuasar()
 const { t, locale } = useI18n()
-const auth = getAuth()
+const authFirebase = useAuthFirebase()
 
 // State
 const editingProfile = ref(false)
@@ -336,27 +334,19 @@ const cancelEditingProfile = () => {
 const saveProfile = async () => {
   try {
     savingProfile.value = true
-    
-    // Update Firebase Auth profile
-    await updateProfile(auth.currentUser, {
-      displayName: profileForm.displayName
-    })
-    
-    // Update Firestore user document
-    const userRef = doc(db, 'users', user.value.uid)
-    await updateDoc(userRef, {
-      displayName: profileForm.displayName
-    })
-    
+
+    if (!user.value?.uid) return
+    await authFirebase.updateUserProfile(user.value.uid, profileForm.displayName)
+
     // Update the auth store
     await refreshUser()
-    
+
     $q.notify({
       type: 'positive',
       message: t('settings.profile.updateSuccess'),
       icon: 'check_circle'
     })
-    
+
     editingProfile.value = false
   } catch (error) {
     console.error('Error updating profile:', error)
@@ -373,39 +363,33 @@ const saveProfile = async () => {
 const changePassword = async () => {
   try {
     changingPassword.value = true
-    
-    // Re-authenticate user first
-    const credential = EmailAuthProvider.credential(
-      user.value.email,
-      passwordForm.currentPassword
+
+    await authFirebase.changeUserPassword(
+      passwordForm.currentPassword,
+      passwordForm.newPassword
     )
-    
-    await reauthenticateWithCredential(auth.currentUser, credential)
-    
-    // Update password
-    await updatePassword(auth.currentUser, passwordForm.newPassword)
-    
+
     $q.notify({
       type: 'positive',
       message: t('settings.password.changeSuccess'),
       icon: 'check_circle'
     })
-    
+
     // Clear form
     passwordForm.currentPassword = ''
     passwordForm.newPassword = ''
     passwordForm.confirmPassword = ''
-    
+
   } catch (error) {
     console.error('Error changing password:', error)
-    
+
     let errorMessage = t('settings.password.changeError')
     if (error.code === 'auth/wrong-password') {
       errorMessage = t('settings.password.wrongPassword')
     } else if (error.code === 'auth/weak-password') {
       errorMessage = t('settings.password.weakPassword')
     }
-    
+
     $q.notify({
       type: 'negative',
       message: errorMessage,

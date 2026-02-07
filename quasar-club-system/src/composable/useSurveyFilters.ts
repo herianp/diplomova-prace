@@ -1,6 +1,7 @@
 import { computed, ref, Ref } from 'vue'
 import { DateTime } from 'luxon'
 import { ISurvey } from '@/interfaces/interfaces'
+import { SEASON_CONFIG } from '@/config/seasonConfig'
 
 export interface SurveyFilters {
   searchName: string
@@ -12,8 +13,8 @@ export function useSurveyFilters() {
   // Default filter state with season dates
   const defaultFilters: SurveyFilters = {
     searchName: '',
-    dateFrom: '2025-07-13', // Season start
-    dateTo: '2026-06-30'    // Season end
+    dateFrom: SEASON_CONFIG.startDate,
+    dateTo: SEASON_CONFIG.endDate
   }
 
   const filters = ref<SurveyFilters>({ ...defaultFilters })

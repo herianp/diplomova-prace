@@ -74,21 +74,9 @@ import { useRoute } from 'vue-router'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  doc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  getDoc
-} from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
-import { useNotifications } from '@/composable/useNotificationsComposable.js'
+import { queryByIdsInChunks } from '@/utils/firestoreUtils'
+import { useNotifications } from '@/composable/useNotificationsComposable'
+import { useTeamFirebase } from '@/services/teamFirebase'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
 import TeamInvitationComponent from '@/components/team/TeamInvitationComponent.vue'
@@ -99,6 +87,7 @@ const { currentUser } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
+const teamFirebase = useTeamFirebase()
 
 // State
 const loading = ref(true)
@@ -121,9 +110,9 @@ const { isCurrentUserPowerUser }  = useAuthComposable();
 
 const loadTeam = async () => {
   try {
-    const teamDoc = await getDoc(doc(db, 'teams', teamId.value))
-    if (teamDoc.exists()) {
-      team.value = { id: teamDoc.id, ...teamDoc.data() }
+    const teamData = await teamFirebase.getTeamById(teamId.value)
+    if (teamData) {
+      team.value = { id: teamId.value, ...teamData }
       await loadTeamMembers()
       if (isCurrentUserPowerUser.value) {
         await loadPendingInvitations()
@@ -149,28 +138,7 @@ const loadTeamMembers = async () => {
       return
     }
 
-    const allUsers = []
-
-    // Split members into chunks of 30 (Firestore IN query limit)
-    const chunkSize = 30
-    for (let i = 0; i < members.length; i += chunkSize) {
-      const chunk = members.slice(i, i + chunkSize)
-
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('__name__', 'in', chunk)
-      )
-      const usersSnapshot = await getDocs(usersQuery)
-
-      const chunkUsers = usersSnapshot.docs.map(doc => ({
-        uid: doc.id,
-        ...doc.data()
-      }))
-
-      allUsers.push(...chunkUsers)
-    }
-
-    teamMembers.value = allUsers
+    teamMembers.value = await queryByIdsInChunks('users', members)
   } catch (error) {
     console.error('Error loading team members:', error)
   }
@@ -178,16 +146,7 @@ const loadTeamMembers = async () => {
 
 const loadPendingInvitations = async () => {
   try {
-    const invitationsQuery = query(
-      collection(db, 'teamInvitations'),
-      where('teamId', '==', teamId.value),
-      where('status', '==', 'pending')
-    )
-    const invitationsSnapshot = await getDocs(invitationsQuery)
-    pendingInvitations.value = invitationsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
+    pendingInvitations.value = await teamFirebase.loadPendingInvitations(teamId.value)
   } catch (error) {
     console.error('Error loading pending invitations:', error)
   }
@@ -198,13 +157,9 @@ const sendInvitation = async () => {
     sendingInvite.value = true
 
     // Check if user exists
-    const usersQuery = query(
-      collection(db, 'users'),
-      where('email', '==', inviteForm.email)
-    )
-    const usersSnapshot = await getDocs(usersQuery)
+    const targetUser = await teamFirebase.findUserByEmail(inviteForm.email)
 
-    if (usersSnapshot.empty) {
+    if (!targetUser) {
       $q.notify({
         type: 'negative',
         message: t('team.single.invite.userNotFound'),
@@ -212,8 +167,6 @@ const sendInvitation = async () => {
       })
       return
     }
-
-    const targetUser = usersSnapshot.docs[0]
 
     // Check if user is already a member
     if (team.value.members?.includes(targetUser.id)) {
@@ -226,15 +179,9 @@ const sendInvitation = async () => {
     }
 
     // Check if invitation already exists
-    const existingInviteQuery = query(
-      collection(db, 'teamInvitations'),
-      where('teamId', '==', teamId.value),
-      where('inviteeEmail', '==', inviteForm.email),
-      where('status', '==', 'pending')
-    )
-    const existingInviteSnapshot = await getDocs(existingInviteQuery)
+    const alreadyInvited = await teamFirebase.checkExistingInvitation(teamId.value, inviteForm.email)
 
-    if (!existingInviteSnapshot.empty) {
+    if (alreadyInvited) {
       $q.notify({
         type: 'negative',
         message: t('team.single.invite.alreadyInvited'),
@@ -256,7 +203,7 @@ const sendInvitation = async () => {
       createdAt: new Date()
     }
 
-    const invitationRef = await addDoc(collection(db, 'teamInvitations'), invitationData)
+    const invitationRef = await teamFirebase.sendTeamInvitation(invitationData)
 
     // Create notification for the invitee
     await createTeamInvitationNotification({
@@ -289,7 +236,7 @@ const sendInvitation = async () => {
 
 const cancelInvitation = async (invitation) => {
   try {
-    await deleteDoc(doc(db, 'teamInvitations', invitation.id))
+    await teamFirebase.cancelInvitation(invitation.id)
     $q.notify({
       type: 'positive',
       message: t('team.single.pendingInvites.cancelled'),
@@ -313,11 +260,7 @@ const confirmRemoveMember = (member) => {
 
 const removeMember = async () => {
   try {
-    const teamRef = doc(db, 'teams', teamId.value)
-    await updateDoc(teamRef, {
-      members: arrayRemove(memberToRemove.value.uid),
-      powerusers: arrayRemove(memberToRemove.value.uid)
-    })
+    await teamFirebase.removeMember(teamId.value, memberToRemove.value.uid)
 
     $q.notify({
       type: 'positive',
@@ -341,10 +284,7 @@ const removeMember = async () => {
 
 const promoteToPowerUser = async (member) => {
   try {
-    const teamRef = doc(db, 'teams', teamId.value)
-    await updateDoc(teamRef, {
-      powerusers: arrayUnion(member.uid)
-    })
+    await teamFirebase.promoteToPowerUser(teamId.value, member.uid)
 
     $q.notify({
       type: 'positive',

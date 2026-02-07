@@ -6,19 +6,18 @@
     </q-chip>
 
     <q-chip color="green-3" text-color="black" class="q-pa-sm">
-      👍 {{ teamStore.getPositiveVotes(survey.id) }}
+      👍 {{ countPositiveVotes(survey.votes) }}
     </q-chip>
 
     <q-chip color="red-3" text-color="black" class="q-pa-sm">
-      👎 {{ teamStore.getNegativeVotes(survey.id) }}
+      👎 {{ countNegativeVotes(survey.votes) }}
     </q-chip>
 
   </div>
 </template>
 
 <script setup>
-import { useTeamStore } from '@/stores/teamStore'
-const teamStore = useTeamStore()
+import { countPositiveVotes, countNegativeVotes } from '@/utils/voteUtils'
 
 defineProps({
   survey: {

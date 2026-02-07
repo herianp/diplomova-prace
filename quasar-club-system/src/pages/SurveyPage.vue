@@ -36,17 +36,17 @@ import { DateTime } from 'luxon'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable'
+import { useReadiness } from '@/composable/useReadiness'
 import SurveyCard from '@/components/new/SurveyCard.vue'
-import { getAuth, onAuthStateChanged } from 'firebase/auth'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
 import { useI18n } from 'vue-i18n'
-import { useScreenComposable } from '@/composable/useScreenComposable.js'
+import { useScreenComposable } from '@/composable/useScreenComposable'
 import SurveyCardMobile from '@/components/new/SurveyCardMobile.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import SurveyCreateMenu from '@/components/survey/SurveyCreateMenu.vue'
 
-const auth = getAuth()
 const teamStore = useTeamStore()
+const { waitForTeam } = useReadiness()
 const { setSurveysListener, addSurvey } = useSurveyUseCases()
 const { isCurrentUserPowerUser } = useAuthComposable()
 const { isMobile } = useScreenComposable()
@@ -118,7 +118,7 @@ async function handleSurveySubmit(payload) {
       date: payload.date,
       time: payload.time,
       dateTime: getDateByDateAndTime(payload.date, payload.time),
-      teamId: currentTeam.value.id,
+      teamId: currentTeam.value?.id,
       type: payload.surveyType,
     })
     console.log('Survey created successfully:', payload)
@@ -129,18 +129,10 @@ async function handleSurveySubmit(payload) {
 }
 
 onMounted(async () => {
-  onAuthStateChanged(auth, (user) => {
-    if (user && teamStore.currentTeam?.id) {
-      // Add delay to ensure Firebase auth and team setup is complete
-      setTimeout(() => {
-        if (teamStore.currentTeam?.id) {
-          setSurveysListener(teamStore.currentTeam.id)
-        }
-      }, 300)
-    } else {
-      console.error('No authenticated user found or no current team.')
-    }
-  })
+  await waitForTeam()
+  if (teamStore.currentTeam?.id) {
+    setSurveysListener(teamStore.currentTeam.id)
+  }
 })
 </script>
 

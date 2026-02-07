@@ -1,7 +1,6 @@
 import { ref, computed, Ref } from 'vue'
-import { db } from '@/firebase/config.ts'
-import { collection, query, where, getDocs } from 'firebase/firestore'
 import { ITeamMember, ITeam, IPlayerOption, ISurvey, IVote, IMemberStats } from '@/interfaces/interfaces'
+import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 
 export function useTeamMemberUtils() {
   const loading = ref(false)
@@ -20,28 +19,7 @@ export function useTeamMemberUtils() {
     error.value = null
 
     try {
-      const allUsers: ITeamMember[] = []
-      const chunkSize = 30 // Firestore IN query limit
-
-      // Split members into chunks of 30
-      for (let i = 0; i < memberIds.length; i += chunkSize) {
-        const chunk = memberIds.slice(i, i + chunkSize)
-
-        const usersQuery = query(
-          collection(db, 'users'),
-          where('__name__', 'in', chunk)
-        )
-        const usersSnapshot = await getDocs(usersQuery)
-
-        const chunkUsers = usersSnapshot.docs.map(doc => ({
-          uid: doc.id,
-          ...doc.data()
-        })) as ITeamMember[]
-
-        allUsers.push(...chunkUsers)
-      }
-
-      return allUsers
+      return await queryByIdsInChunks<ITeamMember>('users', memberIds)
     } catch (err) {
       error.value = 'Error loading team members'
       console.error('Error loading team members:', err)

@@ -35,11 +35,11 @@
                   <div class="vote-stats">
                     <div class="vote-count positive">
                       <q-icon name="thumb_up" size="sm" />
-                      <span>{{ getPositiveVotes(survey) }}</span>
+                      <span>{{ countPositiveVotes(survey.votes || []) }}</span>
                     </div>
                     <div class="vote-count negative">
                       <q-icon name="thumb_down" size="sm" />
-                      <span>{{ getNegativeVotes(survey) }}</span>
+                      <span>{{ countNegativeVotes(survey.votes || []) }}</span>
                     </div>
                   </div>
 
@@ -73,6 +73,7 @@
 
 <script setup>
 import { useDateHelpers } from '@/composable/useDateHelpers'
+import { countPositiveVotes, countNegativeVotes } from '@/utils/voteUtils'
 
 const props = defineProps({
   surveys: {
@@ -90,14 +91,6 @@ const { getDisplayedDateTime } = useDateHelpers()
 const getUserVote = (survey) => {
   const vote = survey.votes?.find(v => v.userUid === props.currentUserUid)
   return vote ? vote.vote : null
-}
-
-const getPositiveVotes = (survey) => {
-  return survey.votes?.filter(vote => vote.vote === true).length || 0
-}
-
-const getNegativeVotes = (survey) => {
-  return survey.votes?.filter(vote => vote.vote === false).length || 0
 }
 
 const getSurveyTypeColor = (type) => {

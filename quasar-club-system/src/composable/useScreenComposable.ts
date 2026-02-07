@@ -1,7 +1,15 @@
-import { computed } from 'vue'
+import { computed, ComputedRef } from 'vue'
 import { useQuasar } from 'quasar'
 
-export function useScreenComposable() {
+interface ScreenComposable {
+  isMobile: ComputedRef<boolean>
+  isTablet: ComputedRef<boolean>
+  isDesktop: ComputedRef<boolean>
+  width: ComputedRef<number>
+  height: ComputedRef<number>
+}
+
+export function useScreenComposable(): ScreenComposable {
   const $q = useQuasar()
 
   const isMobile = computed(() => $q.screen.width < 700)

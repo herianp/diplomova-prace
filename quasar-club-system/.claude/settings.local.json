@@ -1,0 +1,11 @@
+{
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "firebase"
+  ],
+  "permissions": {
+    "allow": [
+      "Bash(npx quasar build)"
+    ]
+  }
+}

@@ -9,9 +9,13 @@ import {
   where,
   getDoc,
   getDocs,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
   Unsubscribe,
+  DocumentReference,
 } from 'firebase/firestore'
-import { ITeam, ICashboxTransaction } from '@/interfaces/interfaces'
+import { ITeam, ICashboxTransaction, ITeamInvitation } from '@/interfaces/interfaces'
 
 export function useTeamFirebase() {
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -86,11 +90,76 @@ export function useTeamFirebase() {
     }
   }
 
+  const loadPendingInvitations = async (teamId: string): Promise<ITeamInvitation[]> => {
+    const invitationsQuery = query(
+      collection(db, 'teamInvitations'),
+      where('teamId', '==', teamId),
+      where('status', '==', 'pending')
+    )
+    const snapshot = await getDocs(invitationsQuery)
+    return snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as ITeamInvitation[]
+  }
+
+  const findUserByEmail = async (email: string): Promise<{ id: string; data: Record<string, unknown> } | null> => {
+    const usersQuery = query(
+      collection(db, 'users'),
+      where('email', '==', email)
+    )
+    const snapshot = await getDocs(usersQuery)
+    if (snapshot.empty) return null
+    const userDoc = snapshot.docs[0]
+    return { id: userDoc.id, data: userDoc.data() }
+  }
+
+  const checkExistingInvitation = async (teamId: string, email: string): Promise<boolean> => {
+    const existingInviteQuery = query(
+      collection(db, 'teamInvitations'),
+      where('teamId', '==', teamId),
+      where('inviteeEmail', '==', email),
+      where('status', '==', 'pending')
+    )
+    const snapshot = await getDocs(existingInviteQuery)
+    return !snapshot.empty
+  }
+
+  const sendTeamInvitation = async (invitationData: Omit<ITeamInvitation, 'id'>): Promise<DocumentReference> => {
+    return await addDoc(collection(db, 'teamInvitations'), invitationData)
+  }
+
+  const cancelInvitation = async (invitationId: string): Promise<void> => {
+    await deleteDoc(doc(db, 'teamInvitations', invitationId))
+  }
+
+  const removeMember = async (teamId: string, memberUid: string): Promise<void> => {
+    const teamRef = doc(db, 'teams', teamId)
+    await updateDoc(teamRef, {
+      members: arrayRemove(memberUid),
+      powerusers: arrayRemove(memberUid)
+    })
+  }
+
+  const promoteToPowerUser = async (teamId: string, memberUid: string): Promise<void> => {
+    const teamRef = doc(db, 'teams', teamId)
+    await updateDoc(teamRef, {
+      powerusers: arrayUnion(memberUid)
+    })
+  }
+
   return {
     createTeam,
     deleteTeam,
     getTeamsByUserId,
     getTeamById,
     addCashboxTransaction,
+    loadPendingInvitations,
+    findUserByEmail,
+    checkExistingInvitation,
+    sendTeamInvitation,
+    cancelInvitation,
+    removeMember,
+    promoteToPowerUser,
   }
 }

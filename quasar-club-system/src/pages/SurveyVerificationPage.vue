@@ -215,19 +215,18 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
-import { useTeamComposable } from '@/composable/useTeamComposable'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '@/firebase/config'
+import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 
 const route = useRoute()
 const router = useRouter()
 const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
-const { getSurveyById, verifySurvey, deleteSurvey: deleteSurveyFromDB } = useTeamComposable()
+const { getSurveyById, verifySurvey, deleteSurvey: deleteSurveyFromDB } = useSurveyUseCases()
 const $q = useQuasar()
 const { t } = useI18n()
 
@@ -295,29 +294,7 @@ const loadTeamMembers = async () => {
       return
     }
 
-    const members = currentTeam.value.members
-    const allUsers = []
-
-    // Split members into chunks of 30 (Firestore IN query limit)
-    const chunkSize = 30
-    for (let i = 0; i < members.length; i += chunkSize) {
-      const chunk = members.slice(i, i + chunkSize)
-
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('__name__', 'in', chunk)
-      )
-      const usersSnapshot = await getDocs(usersQuery)
-
-      const chunkUsers = usersSnapshot.docs.map(doc => ({
-        uid: doc.id,
-        ...doc.data()
-      }))
-
-      allUsers.push(...chunkUsers)
-    }
-
-    teamMembers.value = allUsers
+    teamMembers.value = await queryByIdsInChunks('users', currentTeam.value.members)
   } catch (error) {
     console.error('Error loading team members:', error)
     teamMembers.value = []

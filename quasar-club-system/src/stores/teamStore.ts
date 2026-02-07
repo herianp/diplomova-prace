@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { ISurvey, ITeam } from '@/interfaces/interfaces'
 
 export const useTeamStore = defineStore("team", () => {
@@ -12,15 +12,6 @@ export const useTeamStore = defineStore("team", () => {
   // Firestore listeners - managed by use cases
   const unsubscribeTeams = ref<(() => void) | null>(null);
   const unsubscribeSurveys = ref<(() => void) | null>(null);
-
-  // Getters
-  const getPositiveVotes = computed(() => (surveyId: string) => {
-    return surveys.value.find(survey => survey.id === surveyId)?.votes.filter(vote => vote.vote).length || 0;
-  });
-
-  const getNegativeVotes = computed(() => (surveyId: string) => {
-    return surveys.value.find(survey => survey.id === surveyId)?.votes.filter(vote => !vote.vote).length || 0;
-  });
 
   // Pure state mutations (no business logic)
   const setTeams = (teamsList: ITeam[]) => {
@@ -72,9 +63,6 @@ export const useTeamStore = defineStore("team", () => {
     currentTeam,
     unsubscribeTeams,
     unsubscribeSurveys,
-    // Getters
-    getPositiveVotes,
-    getNegativeVotes,
     // Pure state mutations
     setTeams,
     setSurveys,

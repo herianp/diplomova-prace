@@ -1,4 +1,5 @@
 ﻿import { DateTime } from "luxon";
+import { SEASON_CONFIG } from '@/config/seasonConfig';
 
 interface DatePreset {
   key: string
@@ -66,8 +67,8 @@ export function useDateHelpers(locale = 'en') {
       {
         key: 'season',
         label: translateKey('reports.thisSeason'),
-        from: '2025-07-13',
-        to: '2026-06-30'
+        from: SEASON_CONFIG.startDate,
+        to: SEASON_CONFIG.endDate
       },
       {
         key: 'thisMonth',
@@ -113,8 +114,8 @@ export function useDateHelpers(locale = 'en') {
    */
   const getSeasonDateRange = () => {
     return {
-      from: '2025-07-13',
-      to: '2026-06-30'
+      from: SEASON_CONFIG.startDate,
+      to: SEASON_CONFIG.endDate
     }
   }
 

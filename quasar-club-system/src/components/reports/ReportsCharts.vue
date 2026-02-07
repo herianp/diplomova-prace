@@ -386,13 +386,10 @@ const createMemberActivityChart = () => {
 
 const createAllCharts = async () => {
   await nextTick()
-
-  // Add small delay to ensure DOM is ready
-  setTimeout(() => {
-    createParticipationChart()
-    createSurveyTypesChart()
-    createMemberActivityChart()
-  }, 100)
+  await nextTick()
+  createParticipationChart()
+  createSurveyTypesChart()
+  createMemberActivityChart()
 }
 
 const destroyAllCharts = () => {

@@ -71,6 +71,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
+import { useReadiness } from '@/composable/useReadiness'
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics.vue'
 import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
@@ -82,6 +83,7 @@ import { useSurveyFilters } from '@/composable/useSurveyFilters'
 
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
+const { waitForTeam } = useReadiness()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
 const { filters, createFilteredSurveys, createRecentFilteredSurveys, updateFilters } = useSurveyFilters()
@@ -104,13 +106,8 @@ const onFiltersChanged = (newFilters) => {
 const refreshData = async () => {
   isLoading.value = true
   try {
-    // Refresh surveys data - add delay to ensure auth is ready
     if (currentTeam.value?.id && authStore.user?.uid) {
-      setTimeout(() => {
-        if (currentTeam.value?.id && authStore.user?.uid) {
-          setSurveysListener(currentTeam.value.id)
-        }
-      }, 400)
+      setSurveysListener(currentTeam.value.id)
     }
   } catch (error) {
     console.error('Error refreshing dashboard data:', error)
@@ -119,11 +116,9 @@ const refreshData = async () => {
   }
 }
 
-onMounted(() => {
-  // Wait for auth and team setup before loading dashboard data
-  setTimeout(() => {
-    refreshData()
-  }, 500)
+onMounted(async () => {
+  await waitForTeam()
+  refreshData()
 })
 </script>
 

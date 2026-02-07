@@ -4,11 +4,15 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   User,
   getAuth,
   Unsubscribe
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { IUser } from "@/interfaces/interfaces";
 
 export function useAuthFirebase() {
@@ -95,6 +99,33 @@ export function useAuthFirebase() {
     }
   };
 
+  const updateUserProfile = async (uid: string, displayName: string): Promise<void> => {
+    const auth = getAuth();
+    if (!auth.currentUser) throw new Error('No authenticated user');
+
+    // Update Firebase Auth profile
+    await updateProfile(auth.currentUser, { displayName });
+
+    // Update Firestore user document
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { displayName });
+  };
+
+  const changeUserPassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+    const auth = getAuth();
+    if (!auth.currentUser?.email) throw new Error('No authenticated user');
+
+    // Re-authenticate user first
+    const credential = EmailAuthProvider.credential(
+      auth.currentUser.email,
+      currentPassword
+    );
+    await reauthenticateWithCredential(auth.currentUser, credential);
+
+    // Update password
+    await updatePassword(auth.currentUser, newPassword);
+  };
+
   return {
     authStateListener,
     loginUser,
@@ -103,6 +134,8 @@ export function useAuthFirebase() {
     createUserInFirestore,
     getCurrentUser,
     refreshUser,
-    getUserFromFirestore
+    getUserFromFirestore,
+    updateUserProfile,
+    changeUserPassword
   };
 }

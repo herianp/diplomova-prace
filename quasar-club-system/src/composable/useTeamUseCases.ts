@@ -1,8 +1,10 @@
+import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { ITeam, ICashboxTransaction } from '@/interfaces/interfaces'
 
 export function useTeamUseCases() {
+  const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
 
@@ -13,17 +15,22 @@ export function useTeamUseCases() {
         teamStore.unsubscribeTeams()
       }
 
+      let isFirstCallback = true
+
       // Set up new listener
       const unsubscribe = teamFirebase.getTeamsByUserId(userId, (teamsList) => {
         teamStore.setTeams(teamsList)
-        console.log("Teams updated: ", teamsList)
 
         // Set first team as current if available
         if (teamsList.length > 0) {
           teamStore.setCurrentTeam(teamsList[0])
         }
 
-        resolve()
+        if (isFirstCallback) {
+          isFirstCallback = false
+          authStore.setTeamReady(true)
+          resolve()
+        }
       })
 
       // Store unsubscribe function

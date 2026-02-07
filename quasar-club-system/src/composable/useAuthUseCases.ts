@@ -13,38 +13,25 @@ export function useAuthUseCases() {
   const { authStateListener, loginUser, logoutUser, registerUser, refreshUser, getCurrentUser } = useAuthFirebase()
 
   const initializeAuth = () => {
-    // Set up auth state listener
     const unsubscribe = authStateListener(async (user: User | null) => {
       if (user) {
-        console.log(`User signed in: ${user.uid}`)
         authStore.setUser(user)
-        
-        // Set up team listener after user is authenticated
+        authStore.setAuthReady(true)
+
         try {
-          // Add a small delay to ensure Firebase auth is fully ready
-          setTimeout(async () => {
-            try {
-              const { setTeamListener } = useTeamUseCases()
-              await setTeamListener(user.uid)
-              console.log('Team listener set up successfully')
-            } catch (error) {
-              console.error('Error setting up team listener:', error)
-              // If there's still an error, it might be a permissions issue
-              // Log it but don't crash the app
-            }
-          }, 100)
-        } catch (error) {
-          console.error('Error in team setup timeout:', error)
+          const { setTeamListener } = useTeamUseCases()
+          await setTeamListener(user.uid)
+        } catch (error: any) {
+          console.error('Error setting up team listener:', error)
         }
       } else {
-        console.log("User signed out.")
         authStore.setUser(null)
+        authStore.setAuthReady(true)
         router.push(RouteEnum.HOME.path)
         teamStore.clearData()
       }
     })
 
-    // Store unsubscribe function for cleanup
     authStore.setAuthUnsubscribe(unsubscribe)
   }
 

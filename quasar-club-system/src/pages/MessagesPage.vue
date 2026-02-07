@@ -108,20 +108,11 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useTeamStore } from '@/stores/teamStore.ts'
-import { useScreenComposable } from '@/composable/useScreenComposable.js'
+import { useScreenComposable } from '@/composable/useScreenComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
-import {
-  collection,
-  query,
-  where,
-  limit,
-  onSnapshot,
-  addDoc,
-  serverTimestamp
-} from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
+import { useMessageFirebase } from '@/services/messageFirebase'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
 const teamStore = useTeamStore()
@@ -129,6 +120,7 @@ const { isMobile } = useScreenComposable()
 const { currentUser } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
+const messageFirebase = useMessageFirebase()
 
 // State
 const messages = ref([])
@@ -156,37 +148,30 @@ const loadMessages = () => {
     unsubscribe()
   }
 
-  const messagesQuery = query(
-    collection(db, 'messages'),
-    where('teamId', '==', currentTeam.value.id),
-    limit(100)
+  unsubscribe = messageFirebase.listenToMessages(
+    currentTeam.value.id,
+    100,
+    (msgs) => {
+      messages.value = msgs.sort((a, b) => {
+        const aTime = a.createdAt?.seconds || 0
+        const bTime = b.createdAt?.seconds || 0
+        return aTime - bTime
+      })
+      loading.value = false
+
+      nextTick(() => {
+        scrollToBottom()
+      })
+    },
+    () => {
+      loading.value = false
+      $q.notify({
+        type: 'negative',
+        message: t('messages.loadError'),
+        icon: 'error'
+      })
+    }
   )
-
-  unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-    messages.value = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })).sort((a, b) => {
-      // Sort by createdAt ascending (oldest first)
-      const aTime = a.createdAt?.seconds || 0
-      const bTime = b.createdAt?.seconds || 0
-      return aTime - bTime
-    })
-    loading.value = false
-
-    // Scroll to bottom after messages load
-    nextTick(() => {
-      scrollToBottom()
-    })
-  }, (error) => {
-    console.error('Error loading messages:', error)
-    loading.value = false
-    $q.notify({
-      type: 'negative',
-      message: t('messages.loadError'),
-      icon: 'error'
-    })
-  })
 }
 
 const sendMessage = async () => {
@@ -197,13 +182,12 @@ const sendMessage = async () => {
   sending.value = true
 
   try {
-    await addDoc(collection(db, 'messages'), {
-      content: newMessage.value.trim(),
-      authorId: currentUser.value.uid,
-      authorName: currentUser.value.displayName || currentUser.value.email,
-      teamId: currentTeam.value.id,
-      createdAt: serverTimestamp()
-    })
+    await messageFirebase.sendMessage(
+      currentTeam.value?.id,
+      currentUser.value?.uid,
+      currentUser.value?.displayName || currentUser.value?.email,
+      newMessage.value.trim()
+    )
 
     newMessage.value = ''
 

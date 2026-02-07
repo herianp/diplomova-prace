@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { useScreenComposable } from '@/composable/useScreenComposable.js'
+import { useScreenComposable } from '@/composable/useScreenComposable'
 
 defineProps({
   currentTeam: {

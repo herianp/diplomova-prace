@@ -109,7 +109,8 @@ export interface INotification {
   title: string
   message: string
   read: boolean
-  createdAt: Date
+  createdAt: { seconds: number; toDate?: () => Date } | Date
+  readAt?: Date
   teamId?: string
   surveyId?: string
   invitationId?: string
@@ -122,7 +123,7 @@ export interface IMessage {
   authorId: string
   authorName: string
   teamId: string
-  createdAt: Date
+  createdAt: { seconds: number; toDate?: () => Date } | Date
 }
 
 // ============================================================

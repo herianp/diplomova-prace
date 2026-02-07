@@ -56,6 +56,7 @@ import ReportsPlayerFilter from '@/components/reports/ReportsPlayerFilter.vue'
 import ReportsPlayerStats from '@/components/reports/ReportsPlayerStats.vue'
 import ReportsCharts from '@/components/reports/ReportsCharts.vue'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
+import { useReadiness } from '@/composable/useReadiness'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
 import { useSurveyMetrics } from '@/composable/useSurveyMetrics'
 import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
@@ -145,30 +146,22 @@ const loadData = async () => {
   loading.value = true
 
   try {
+    const { waitForTeam } = useReadiness()
+    await waitForTeam()
+
     // Load team members first
     await loadTeamMembersData()
 
     // Only load surveys if they're not already loaded for this team
     if (surveys.value.length === 0 && authStore.user?.uid) {
-      // Add delay to ensure Firebase auth is ready
-      setTimeout(async () => {
-        if (currentTeam.value?.id && authStore.user?.uid) {
-          await setSurveysListener(currentTeam.value.id)
-
-          // Wait a bit for surveys to load
-          setTimeout(() => {
-            updateTeamMetrics()
-            updatePlayerMetrics()
-            loading.value = false
-          }, 500)
-        }
-      }, 300)
-    } else {
-      // Surveys already loaded, just calculate metrics
-      updateTeamMetrics()
-      updatePlayerMetrics()
-      loading.value = false
+      if (currentTeam.value?.id) {
+        await setSurveysListener(currentTeam.value.id)
+      }
     }
+
+    updateTeamMetrics()
+    updatePlayerMetrics()
+    loading.value = false
   } catch (error) {
     console.error('Error loading reports data:', error)
     $q.notify({

@@ -90,6 +90,7 @@ import { DateTime } from 'luxon'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 import BaseModal from '@/components/base/BaseModal.vue'
 import VoteStats from '@/components/VoteStats.vue'
 import BaseCard from '@/components/base/BaseCard.vue'
@@ -110,6 +111,7 @@ const props = defineProps({
 
 const authStore = useAuthStore()
 const teamStore = useTeamStore()
+const { voteOnSurvey } = useSurveyUseCases()
 const router = useRouter()
 const i18n = useI18n()
 const { getDisplayedDateTime } = useDateHelpers(i18n.locale.value)
@@ -146,19 +148,19 @@ const surveyBackgroundClass = computed(() => {
 })
 
 function isSurveyActive() {
-  return props.survey.votes.some((vote) => vote.userUid === user.value.uid)
+  return props.survey.votes.some((vote) => vote.userUid === user.value?.uid)
 }
 
 function isPositiveVote() {
-  return props.survey.votes.some((vote) => vote.userUid === user.value.uid && vote.vote)
+  return props.survey.votes.some((vote) => vote.userUid === user.value?.uid && vote.vote)
 }
 
 function addSurveyVote(surveyId, vote) {
   // Block voting if survey is expired
-  if (isExpired.value) {
+  if (isExpired.value || !user.value?.uid) {
     return
   }
-  teamStore.addSurveyVote(surveyId, user.value.uid, vote)
+  voteOnSurvey(surveyId, user.value.uid, vote)
 }
 
 // Navigation to verification page
