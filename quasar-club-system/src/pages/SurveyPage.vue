@@ -22,8 +22,7 @@
         :key="survey.id"
         class="col-12"
       >
-        <SurveyCard v-if="!isMobile" :survey="survey" />
-        <SurveyCardMobile v-else :survey="survey" />
+        <SurveyCard :survey="survey" />
       </div>
     </div>
 
@@ -41,7 +40,6 @@ import SurveyCard from '@/components/new/SurveyCard.vue'
 import { useDateHelpers } from '@/composable/useDateHelpers.ts'
 import { useI18n } from 'vue-i18n'
 import { useScreenComposable } from '@/composable/useScreenComposable'
-import SurveyCardMobile from '@/components/new/SurveyCardMobile.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import SurveyCreateMenu from '@/components/survey/SurveyCreateMenu.vue'
 
@@ -121,7 +119,6 @@ async function handleSurveySubmit(payload) {
       teamId: currentTeam.value?.id,
       type: payload.surveyType,
     })
-    console.log('Survey created successfully:', payload)
   } catch (err) {
     console.error('Error creating survey:', err)
     throw err // Re-throw to let SurveyCreateMenu handle the error

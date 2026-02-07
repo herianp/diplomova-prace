@@ -33,7 +33,6 @@ export function useAuthComposable() {
     try {
       await authUseCases.signOut()
       router.push(RouteEnum.LOGIN.path)
-      console.log('User signed out successfully')
     } catch (error: any) {
       console.error(`Logout Error: ${error.message}`)
       throw error

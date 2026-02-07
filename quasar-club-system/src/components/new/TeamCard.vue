@@ -55,7 +55,6 @@ const showModal = ref(false)
 const isAdmin = computed(() => authStore.isAdmin)
 
 function openTeam(teamId) {
-  console.log('teamId', teamId)
   setSurveysListener(teamId)
   const team = teamStore.teams.find(t => t.id === teamId)
   teamStore.setCurrentTeam(team)
@@ -66,10 +65,9 @@ async function handleDeleteTeam() {
   try {
     await deleteTeam(props.team.id);
   } catch (err) {
-    console.log(`err ${err}`);
+    console.error(`err ${err}`);
   }
 
-  console.log('Component team deleted:', props.team.id)
   showModal.value = false
 }
 </script>

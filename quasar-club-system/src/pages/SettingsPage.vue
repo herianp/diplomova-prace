@@ -89,7 +89,7 @@
             <div class="q-mb-md">
               <q-input
                 v-model="passwordForm.currentPassword"
-                :type="showCurrentPassword ? 'text' : 'password'"
+                :type="passwordVisible.current ? 'text' : 'password'"
                 :label="$t('settings.password.current')"
                 outlined
                 dense
@@ -100,9 +100,9 @@
                 </template>
                 <template v-slot:append>
                   <q-icon
-                    :name="showCurrentPassword ? 'visibility_off' : 'visibility'"
+                    :name="passwordVisible.current ? 'visibility_off' : 'visibility'"
                     class="cursor-pointer"
-                    @click="showCurrentPassword = !showCurrentPassword"
+                    @click="passwordVisible.current = !passwordVisible.current"
                   />
                 </template>
               </q-input>
@@ -112,7 +112,7 @@
             <div class="q-mb-md">
               <q-input
                 v-model="passwordForm.newPassword"
-                :type="showNewPassword ? 'text' : 'password'"
+                :type="passwordVisible.new ? 'text' : 'password'"
                 :label="$t('settings.password.new')"
                 outlined
                 dense
@@ -126,9 +126,9 @@
                 </template>
                 <template v-slot:append>
                   <q-icon
-                    :name="showNewPassword ? 'visibility_off' : 'visibility'"
+                    :name="passwordVisible.new ? 'visibility_off' : 'visibility'"
                     class="cursor-pointer"
-                    @click="showNewPassword = !showNewPassword"
+                    @click="passwordVisible.new = !passwordVisible.new"
                   />
                 </template>
               </q-input>
@@ -138,7 +138,7 @@
             <div class="q-mb-md">
               <q-input
                 v-model="passwordForm.confirmPassword"
-                :type="showConfirmPassword ? 'text' : 'password'"
+                :type="passwordVisible.confirm ? 'text' : 'password'"
                 :label="$t('settings.password.confirm')"
                 outlined
                 dense
@@ -152,9 +152,9 @@
                 </template>
                 <template v-slot:append>
                   <q-icon
-                    :name="showConfirmPassword ? 'visibility_off' : 'visibility'"
+                    :name="passwordVisible.confirm ? 'visibility_off' : 'visibility'"
                     class="cursor-pointer"
-                    @click="showConfirmPassword = !showConfirmPassword"
+                    @click="passwordVisible.confirm = !passwordVisible.confirm"
                   />
                 </template>
               </q-input>
@@ -286,9 +286,11 @@ const changingPassword = ref(false)
 const showSignOutDialog = ref(false)
 
 // Password visibility toggles
-const showCurrentPassword = ref(false)
-const showNewPassword = ref(false)
-const showConfirmPassword = ref(false)
+const passwordVisible = reactive({
+  current: false,
+  new: false,
+  confirm: false
+})
 
 // User data
 const user = computed(() => authStore.user)

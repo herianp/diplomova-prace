@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <q-dialog v-model="model" :backdrop-filter="backdropFilter">
     <q-card>
       <q-card-section class="row items-center q-pb-none text-h6">
@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 
 const model = defineModel()
 
@@ -31,10 +31,6 @@ defineProps({
 })
 
 defineEmits(['update:modelValue'])
-
-onMounted(() => {
-  console.log(`model ${JSON.stringify(model.value)}`)
-})
 
 const backdropFilter = ref('contrast(40%)')
 </script>

@@ -31,7 +31,6 @@ export function useTeamFirebase() {
         surveys: [],
       }
       await addDoc(collection(db, 'teams'), newTeam)
-      console.log('Team created:', newTeam)
     } catch (error) {
       console.error('Error creating team:', error)
       throw error
@@ -41,7 +40,6 @@ export function useTeamFirebase() {
   const deleteTeam = async (teamId: string) => {
     try {
       await deleteDoc(doc(db, "teams", teamId));
-      console.log(`Team ${teamId} deleted.`);
     } catch (error) {
       console.error("Error deleting team:", error);
       throw error;

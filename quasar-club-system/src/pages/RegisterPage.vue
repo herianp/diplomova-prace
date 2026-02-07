@@ -7,9 +7,13 @@
 <script setup>
 import { ref } from "vue";
 import RegisterFormNew from '@/components/new/RegisterFormNew.vue'
-import { useAuthComposable } from '@/composable/useAuthComposable.js'
+import { useAuthComposable } from '@/composable/useAuthComposable'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 
 const { registerUser } = useAuthComposable();
+const $q = useQuasar()
+const { t } = useI18n()
 
 const credentials = ref({
   name: '',
@@ -17,12 +21,15 @@ const credentials = ref({
   password: ''
 });
 
-async function submitRegister(event) {
-  if (!credentials.value.name || !credentials.value.email|| !credentials.value.password) {
-    alert(`Please fill in all fields - ${event}`);
+async function submitRegister() {
+  if (!credentials.value.name || !credentials.value.email || !credentials.value.password) {
+    $q.notify({
+      type: 'warning',
+      message: t('common.fillAllFields'),
+      icon: 'warning'
+    })
     return;
   }
-  console.log(`credentials.value: ${JSON.stringify(credentials.value)}`);
   await registerUser(credentials.value.email, credentials.value.password, credentials.value.name);
 }
 </script>

@@ -230,7 +230,8 @@ export default {
     edit: "Upravit",
     delete: "Smazat",
     update: "Aktualizovat",
-    back: "Zpět"
+    back: "Zpět",
+    fillAllFields: "Prosím vyplňte všechna pole"
   },
   validation: {
     required: "Toto pole je povinné"

@@ -73,8 +73,6 @@ export function useSurveyStatusManager() {
         isSurveyExpired(survey) && !survey.status // Only process surveys without explicit status
       )
       
-      console.log(`Processing ${expiredSurveys.length} expired surveys`)
-      
       // Update expired surveys based on user role
       // Note: We set status based on the current user's role when processing
       // In a real application, you might want to set status based on team power users
@@ -93,8 +91,7 @@ export function useSurveyStatusManager() {
       }
       
       lastExpirationCheck.value = new Date()
-      console.log(`Expiration check completed at ${lastExpirationCheck.value}`)
-      
+
     } catch (error) {
       console.error('Error processing expired surveys:', error)
     } finally {

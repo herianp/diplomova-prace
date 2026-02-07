@@ -33,7 +33,6 @@ export function useAuthFirebase() {
   const logoutUser = async (): Promise<void> => {
     try {
       await signOut(auth);
-      console.log("User signed out successfully");
     } catch (error) {
       console.error(`Logout Error: ${error.message}`);
       throw error;
@@ -65,7 +64,6 @@ export function useAuthFirebase() {
 
     try {
       await setDoc(doc(db, "users", user.uid), userDoc);
-      console.log("User registered and added to Firestore:", userDoc);
     } catch (error) {
       console.error("Error adding user to Firestore:", error);
       throw error;

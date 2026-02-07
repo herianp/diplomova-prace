@@ -47,7 +47,7 @@ async function handleCreateTeam(payload) {
   try {
     await createTeam(payload.title, currentUser.value.uid);
   } catch (err) {
-    console.log(`err ${err}`);
+    console.error(`err ${err}`);
   }
 }
 

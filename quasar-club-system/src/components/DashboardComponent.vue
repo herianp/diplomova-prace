@@ -1,5 +1,27 @@
 <template>
   <div class="dashboard-container">
+    <!-- Loading Skeleton -->
+    <template v-if="!currentTeam">
+      <div class="q-mb-lg">
+        <q-card flat bordered class="q-pa-md">
+          <q-skeleton type="text" width="40%" class="q-mb-sm" />
+          <q-skeleton type="text" width="25%" />
+        </q-card>
+      </div>
+      <div class="row q-col-gutter-md q-mb-lg">
+        <div v-for="n in 4" :key="n" class="col-6 col-md-3">
+          <q-card flat bordered class="q-pa-md">
+            <q-skeleton type="text" width="60%" class="q-mb-sm" />
+            <q-skeleton type="rect" height="40px" />
+          </q-card>
+        </div>
+      </div>
+      <q-card flat bordered class="q-pa-md">
+        <q-skeleton type="rect" height="200px" />
+      </q-card>
+    </template>
+
+    <template v-else>
     <!-- Team Header -->
     <div class="team-header q-mb-lg">
       <q-card flat bordered class="q-pa-md">
@@ -64,6 +86,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 

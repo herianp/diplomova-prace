@@ -52,10 +52,7 @@ export function useSurveyUseCases() {
       // Create notifications for all team members (business logic)
       if (teamMembers.length > 0) {
         await createSurveyNotification(surveyData, teamMembers)
-        console.log('Survey notifications created for', teamMembers.length, 'members')
       }
-
-      console.log('Survey added:', newSurvey)
     } catch (error) {
       console.error('Error adding survey:', error)
       throw error

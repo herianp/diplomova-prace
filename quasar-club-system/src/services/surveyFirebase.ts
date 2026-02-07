@@ -48,7 +48,6 @@ export function useSurveyFirebase() {
   const deleteSurvey = async (surveyId: string) => {
     try {
       await deleteDoc(doc(db, 'surveys', surveyId))
-      console.log(`Survey ${surveyId} deleted.`)
     } catch (error) {
       console.error('Error deleting survey:', error)
       throw error
@@ -80,7 +79,6 @@ export function useSurveyFirebase() {
   const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>): Promise<void> => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), updatedSurvey)
-      console.log(`Survey ${surveyId} updated.`)
     } catch (error) {
       console.error('Error updating survey:', error)
       throw error
@@ -143,7 +141,6 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
-      console.log(`Survey ${surveyId} status updated to ${status}`)
     } catch (error) {
       console.error('Error updating survey status:', error)
       throw error
@@ -163,7 +160,6 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
-      console.log(`Survey ${surveyId} verified by ${verifiedBy}`)
     } catch (error) {
       console.error('Error verifying survey:', error)
       throw error
@@ -173,7 +169,6 @@ export function useSurveyFirebase() {
   const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), { votes })
-      console.log(`Survey ${surveyId} votes updated`)
     } catch (error) {
       console.error('Error updating survey votes:', error)
       throw error

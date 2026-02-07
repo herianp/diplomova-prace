@@ -161,8 +161,8 @@ export default {
     totalSurveys: "Total Surveys",
     teamMembers: "Team Members",
     myVotes: "My Votes",
-    teamParticipation: "Týmová docházka",
-    personalParticipation: "Osobní docházka",
+    teamParticipation: "Team Attendance",
+    personalParticipation: "Personal Attendance",
     recentSurveys: "Recent Surveys",
     last5Surveys: "Last 5 surveys with your voting history",
     votingTrends: "Voting Trends",
@@ -230,7 +230,8 @@ export default {
     edit: "Edit",
     delete: "Delete",
     update: "Update",
-    back: "Back"
+    back: "Back",
+    fillAllFields: "Please fill in all fields"
   },
   validation: {
     required: "This field is required"

@@ -22,7 +22,7 @@
       <!-- Messages List -->
       <div class="messages-list q-mb-lg" ref="messagesContainer">
         <q-card flat bordered class="messages-card">
-          <q-card-section class="messages-content" style="height: 400px; overflow-y: auto;">
+          <q-card-section class="messages-content" style="max-height: 60vh; overflow-y: auto;">
             <!-- Loading State -->
             <div v-if="loading" class="text-center q-pa-md">
               <q-spinner-dots size="30px" color="primary" />
