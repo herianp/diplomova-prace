@@ -151,7 +151,7 @@ onMounted(async () => {
   padding: 1rem;
 }
 
-.team-header .q-card {
+.team-header :deep(.q-card) {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }

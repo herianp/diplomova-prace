@@ -214,18 +214,18 @@ const handleSurveyDeleted = () => {
 </script>
 
 <style scoped>
-.survey-active {
+:deep(.survey-active) {
   background-color: #e8f5e8 !important;
   border-left: 4px solid #4caf50 !important;
 }
 
-.survey-awaiting-verification {
+:deep(.survey-awaiting-verification) {
   background-color: #fff3e0 !important;
   border-left: 6px solid #ff6f00 !important;
   box-shadow: 0 2px 8px rgba(255, 111, 0, 0.2) !important;
 }
 
-.survey-closed {
+:deep(.survey-closed) {
   background-color: #f5f5f5 !important;
   border-left: 4px solid #9e9e9e !important;
 }

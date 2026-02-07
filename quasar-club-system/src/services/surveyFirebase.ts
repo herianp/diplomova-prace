@@ -125,7 +125,7 @@ export function useSurveyFirebase() {
     userUid: string,
     newVote: boolean,
     votes: IVote[],
-    isUserVoteExists: IVote,
+    _isUserVoteExists: IVote,
   ) => {
     // Convert legacy parameter to standard format and delegate to unified function
     return addOrUpdateVote(surveyId, userUid, newVote, votes)

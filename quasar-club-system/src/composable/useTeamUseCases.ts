@@ -21,8 +21,8 @@ export function useTeamUseCases() {
       const unsubscribe = teamFirebase.getTeamsByUserId(userId, (teamsList) => {
         teamStore.setTeams(teamsList)
 
-        // Set first team as current if available
-        if (teamsList.length > 0) {
+        // Only auto-select on first load when no team is selected
+        if (!teamStore.currentTeam && teamsList.length > 0) {
           teamStore.setCurrentTeam(teamsList[0])
         }
 

@@ -47,16 +47,16 @@ const handleRegister = () => {
 };
 </script>
 
-<style>
-.q-card {
+<style scoped>
+:deep(.q-card) {
   width: 360px;
 }
 
-.q-form {
+:deep(.q-form) {
   text-align: center;
 }
 
-.q-form h3 {
+:deep(.q-form h3) {
   margin: 0;
 }
 </style>
