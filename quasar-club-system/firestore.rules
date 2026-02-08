@@ -51,6 +51,10 @@ service cloud.firestore {
         request.resource.data.members.hasAny([request.auth.uid]) &&
         request.resource.data.powerusers.hasAny([request.auth.uid]);
 
+      // Allow team creator to delete the team
+      allow delete: if request.auth != null &&
+        request.auth.uid == resource.data.creator;
+
       // Allow users to add themselves to team when accepting invitation
       // Note: This is validated by the invitation system and batch writes
       allow update: if request.auth != null &&
@@ -108,27 +112,39 @@ service cloud.firestore {
     
     // Notifications - users can only access their own notifications
     match /notifications/{notificationId} {
-      allow read, write: if request.auth != null && 
+      allow read, write: if request.auth != null &&
         request.auth.uid == resource.data.userId;
-        
+
       // Allow system to create notifications
       allow create: if request.auth != null;
+
+      // Allow team creator to read/delete notifications when deleting team
+      allow read, delete: if request.auth != null &&
+        resource.data.teamId != null &&
+        exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+        get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid;
     }
     
     // Messages - team-based messaging system
     match /messages/{messageId} {
       // Allow team members to read messages from their team
-      allow read: if request.auth != null && 
+      allow read: if request.auth != null &&
         resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.members.hasAny([request.auth.uid]);
-        
+
       // Allow power users to create messages for their team
-      allow create: if request.auth != null && 
+      allow create: if request.auth != null &&
         request.resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(request.resource.data.teamId)) &&
         get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.powerusers.hasAny([request.auth.uid]) &&
         request.resource.data.authorId == request.auth.uid;
+
+      // Allow team creator to delete messages when deleting team
+      allow delete: if request.auth != null &&
+        resource.data.teamId != null &&
+        exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
+        get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid;
     }
     
     

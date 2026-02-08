@@ -10,7 +10,12 @@
       "Bash(npx yarn add vue-i18n@^9.14.5)",
       "Bash(npx yarn add:*)",
       "Bash(xxd:*)",
-      "Bash(npx firebase deploy --only firestore:rules)"
+      "Bash(npx firebase deploy --only firestore:rules)",
+      "Bash(npx:*)",
+      "mcp__firebase__firebase_get_environment",
+      "mcp__firebase__firestore_list_collections",
+      "mcp__firebase__firestore_query_collection",
+      "mcp__firebase__firebase_validate_security_rules"
     ]
   },
   "enableAllProjectMcpServers": true,

@@ -12,6 +12,7 @@ import {
   updateDoc,
   arrayUnion,
   arrayRemove,
+  writeBatch,
   Unsubscribe,
   DocumentReference,
 } from 'firebase/firestore'
@@ -39,10 +40,36 @@ export function useTeamFirebase() {
 
   const deleteTeam = async (teamId: string) => {
     try {
-      await deleteDoc(doc(db, "teams", teamId));
+      // Firestore batches are limited to 500 operations, use multiple batches if needed
+      const collectionsToClean = ['surveys', 'messages', 'notifications', 'teamInvitations']
+
+      for (const col of collectionsToClean) {
+        const q = query(collection(db, col), where('teamId', '==', teamId))
+        const snapshot = await getDocs(q)
+        // Delete in batches of 499 (leaving room for the team doc in last batch)
+        const docs = snapshot.docs
+        for (let i = 0; i < docs.length; i += 499) {
+          const batch = writeBatch(db)
+          const chunk = docs.slice(i, i + 499)
+          chunk.forEach((d) => batch.delete(d.ref))
+          await batch.commit()
+        }
+      }
+
+      // Delete cashboxTransactions subcollection
+      const cashboxRef = collection(doc(db, 'teams', teamId), 'cashboxTransactions')
+      const cashboxSnap = await getDocs(cashboxRef)
+      if (!cashboxSnap.empty) {
+        const batch = writeBatch(db)
+        cashboxSnap.docs.forEach((d) => batch.delete(d.ref))
+        await batch.commit()
+      }
+
+      // Delete the team document itself
+      await deleteDoc(doc(db, 'teams', teamId))
     } catch (error) {
-      console.error("Error deleting team:", error);
-      throw error;
+      console.error('Error deleting team:', error)
+      throw error
     }
   }
 

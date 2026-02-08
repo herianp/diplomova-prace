@@ -131,6 +131,17 @@ export default {
         cancel: "Zrušit pozvánku",
         cancelled: "Pozvánka byla zrušena",
         cancelError: "Nepodařilo se zrušit pozvánku"
+      },
+      delete: {
+        dangerZone: "Nebezpečná zóna",
+        dangerDescription: "Trvale smazat tento tým a všechna související data",
+        button: "Smazat tým",
+        confirmTitle: "Smazat tým",
+        confirmMessage: "Tím se trvale smaže tým a všechny jeho ankety, zprávy, oznámení a pozvánky. Tuto akci nelze vrátit zpět.",
+        typeTeamName: "Pro potvrzení zadejte název týmu",
+        nameMismatch: "Název týmu se neshoduje",
+        success: "Tým byl úspěšně smazán",
+        error: "Nepodařilo se smazat tým"
       }
     }
   },

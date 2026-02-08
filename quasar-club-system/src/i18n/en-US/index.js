@@ -131,6 +131,17 @@ export default {
         cancel: "Cancel invitation",
         cancelled: "Invitation cancelled",
         cancelError: "Failed to cancel invitation"
+      },
+      delete: {
+        dangerZone: "Danger Zone",
+        dangerDescription: "Permanently delete this team and all associated data",
+        button: "Delete Team",
+        confirmTitle: "Delete Team",
+        confirmMessage: "This will permanently delete the team and all its surveys, messages, notifications, and invitations. This action cannot be undone.",
+        typeTeamName: "Type the team name to confirm",
+        nameMismatch: "Team name does not match",
+        success: "Team deleted successfully",
+        error: "Failed to delete team"
       }
     }
   },

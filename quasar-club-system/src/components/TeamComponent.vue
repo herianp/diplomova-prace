@@ -70,6 +70,7 @@
 
 <script setup>
 import { ref } from 'vue'
+import { storeToRefs } from 'pinia'
 import TeamCard from '@/components/new/TeamCard.vue'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useTeamUseCases } from '@/composable/useTeamUseCases'
@@ -77,7 +78,7 @@ import { useTeamStore } from '@/stores/teamStore'
 
 const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
 const { createTeam } = useTeamUseCases()
-const { teams } = useTeamStore()
+const { teams } = storeToRefs(useTeamStore())
 
 const showCreateDialog = ref(false)
 const newTeamName = ref('')

@@ -43,7 +43,12 @@ export function useTeamUseCases() {
   }
 
   const deleteTeam = async (teamId: string): Promise<void> => {
-    return teamFirebase.deleteTeam(teamId)
+    await teamFirebase.deleteTeam(teamId)
+    // Clear currentTeam if the deleted team was selected
+    if (teamStore.currentTeam?.id === teamId) {
+      const remaining = teamStore.teams.filter(t => t.id !== teamId)
+      teamStore.setCurrentTeam(remaining.length > 0 ? remaining[0] : null)
+    }
   }
 
   const getTeamById = async (teamId: string): Promise<ITeam | null> => {

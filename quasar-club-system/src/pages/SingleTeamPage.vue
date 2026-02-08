@@ -38,6 +38,28 @@
           />
         </div>
       </div>
+
+      <!-- Danger Zone (Creator Only) -->
+      <div v-if="isCreator" class="q-mt-xl">
+        <q-card flat bordered class="border-negative">
+          <q-card-section>
+            <div class="row items-center q-gutter-sm">
+              <q-icon name="warning" color="negative" size="1.5rem" />
+              <div class="text-subtitle1 text-weight-bold text-negative">{{ $t('team.single.delete.dangerZone') }}</div>
+            </div>
+            <div class="text-body2 text-grey-7 q-mt-xs">{{ $t('team.single.delete.dangerDescription') }}</div>
+          </q-card-section>
+          <q-card-actions>
+            <q-btn
+              outline
+              color="negative"
+              icon="delete_forever"
+              :label="$t('team.single.delete.button')"
+              @click="showDeleteDialog = true"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
     </div>
 
     <div v-else class="text-center q-mt-xl">
@@ -65,29 +87,66 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- Delete Team Confirmation Dialog -->
+    <q-dialog v-model="showDeleteDialog">
+      <q-card style="min-width: 380px;">
+        <q-card-section class="row items-center q-pb-none">
+          <q-icon name="delete_forever" color="negative" size="2em" class="q-mr-md" />
+          <span class="text-h6 text-negative">{{ $t('team.single.delete.confirmTitle') }}</span>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-body2 q-mb-md">{{ $t('team.single.delete.confirmMessage') }}</div>
+          <q-input
+            v-model="deleteConfirmName"
+            :label="$t('team.single.delete.typeTeamName')"
+            :hint="team?.name"
+            filled
+            dense
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('common.cancel')" color="grey-7" v-close-popup />
+          <q-btn
+            unelevated
+            :label="$t('team.single.delete.button')"
+            color="negative"
+            :disable="deleteConfirmName !== team?.name"
+            :loading="isDeleting"
+            @click="handleDeleteTeam"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 import { useNotifications } from '@/composable/useNotificationsComposable'
 import { useTeamFirebase } from '@/services/teamFirebase'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
+import { RouteEnum } from '@/enums/routesEnum'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
 import TeamInvitationComponent from '@/components/team/TeamInvitationComponent.vue'
 import TeamInvitationPendingComponent from '@/components/team/TeamInvitationPendingComponent.vue'
 
 const route = useRoute()
+const router = useRouter()
 const { currentUser } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
 const teamFirebase = useTeamFirebase()
+const { deleteTeam } = useTeamUseCases()
 
 // State
 const loading = ref(true)
@@ -97,6 +156,9 @@ const pendingInvitations = ref([])
 const sendingInvite = ref(false)
 const showRemoveDialog = ref(false)
 const memberToRemove = ref(null)
+const showDeleteDialog = ref(false)
+const deleteConfirmName = ref('')
+const isDeleting = ref(false)
 
 // Form
 const inviteForm = reactive({
@@ -106,7 +168,8 @@ const inviteForm = reactive({
 
 // Computed
 const teamId = computed(() => route.params.teamId)
-const { isCurrentUserPowerUser }  = useAuthComposable();
+const { isCurrentUserPowerUser }  = useAuthComposable()
+const isCreator = computed(() => team.value?.creator === currentUser.value?.uid)
 
 const loadTeam = async () => {
   try {
@@ -310,6 +373,30 @@ const updateInviteEmail = (value) => {
 
 const updateInviteMessage = (value) => {
   inviteForm.message = value
+}
+
+const handleDeleteTeam = async () => {
+  if (deleteConfirmName.value !== team.value?.name) return
+  isDeleting.value = true
+  try {
+    await deleteTeam(teamId.value)
+    $q.notify({
+      type: 'positive',
+      message: t('team.single.delete.success'),
+      icon: 'check'
+    })
+    showDeleteDialog.value = false
+    router.push(RouteEnum.TEAM.path)
+  } catch (error) {
+    console.error('Error deleting team:', error)
+    $q.notify({
+      type: 'negative',
+      message: t('team.single.delete.error'),
+      icon: 'error'
+    })
+  } finally {
+    isDeleting.value = false
+  }
 }
 
 onMounted(() => {
