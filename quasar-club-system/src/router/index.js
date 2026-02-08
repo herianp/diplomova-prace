@@ -48,7 +48,10 @@ export default defineRouter(function () {
     const publicPaths = [RouteEnum.LOGIN.path, RouteEnum.REGISTER.path]
     const isPublic = publicPaths.includes(to.path)
 
-    if (!authStore.user?.uid && !isPublic) {
+    // Redirect root to dashboard or login
+    if (to.path === '/') {
+      next(authStore.user?.uid ? RouteEnum.DASHBOARD.path : RouteEnum.LOGIN.path)
+    } else if (!authStore.user?.uid && !isPublic) {
       next(RouteEnum.LOGIN.path)
     } else if (authStore.user?.uid && isPublic) {
       next(RouteEnum.DASHBOARD.path)

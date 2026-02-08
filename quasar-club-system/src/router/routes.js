@@ -13,7 +13,6 @@ const routes = [
     path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", name: RouteEnum.HOME.name, component: () => import("pages/HomePage.vue") },
       { path: RouteEnum.ABOUT.path, name: RouteEnum.ABOUT.name, component: () => import("pages/AboutPage.vue") },
       { path: RouteEnum.DASHBOARD.path, name: RouteEnum.DASHBOARD.name, component: () => import("pages/DashboardPage.vue") },
       { path: RouteEnum.SURVEY.path, name: RouteEnum.SURVEY.name, component: () => import("pages/SurveyPage.vue") },

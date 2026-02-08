@@ -1,75 +1,111 @@
 <template>
-  <div class="col-12 col-sm-6 col-md-6 col-lg-4 clickable-card" @click="openTeam(team.id)">
-    <BaseCard>
-      <template #content>
-        <div class="text-overline">Members: {{ team.members.length }}</div>
-        <div class="text-h5 q-mt-sm q-mb-xs">{{ team.name }}</div>
-        <div class="text-caption text-grey">Power Users: {{ team.powerusers.length }}</div>
-      </template>
-
-      <template #media>
-        <q-img class="rounded-borders max-h-150" src="https://cdn.quasar.dev/img/parallax2.jpg" />
-      </template>
-
-      <template v-if="isAdmin" #actions>
-        <q-btn flat round icon="delete" color="red" @click="showModal = true" />
-      </template>
-    </BaseCard>
-  </div>
-
-  <BaseModal v-model="showModal" :title="$t('team.update')">
-    <template #body>
-      <div>
-        <p>DELETE - Are you sure?</p>
-        <q-btn flat round icon="delete" color="red" @click="handleDeleteTeam" />
+  <q-card
+    flat
+    bordered
+    class="team-card cursor-pointer"
+    :class="{ 'team-card--active': isActive }"
+    @click="selectTeam"
+  >
+    <q-card-section class="q-pa-md">
+      <div class="row items-center no-wrap q-mb-sm">
+        <q-avatar size="40px" :color="avatarColor" text-color="white" class="q-mr-sm">
+          <span class="text-weight-bold" style="font-size: 1.1rem;">{{ teamInitial }}</span>
+        </q-avatar>
+        <div class="col" style="min-width: 0;">
+          <div class="text-subtitle1 text-weight-medium ellipsis">{{ team.name }}</div>
+          <q-chip
+            :color="isPowerUser ? 'positive' : 'grey-4'"
+            :text-color="isPowerUser ? 'white' : 'grey-8'"
+            size="xs"
+            dense
+            :icon="isPowerUser ? 'shield' : 'person'"
+            :label="isPowerUser ? $t('dashboard.powerUser') : $t('dashboard.member')"
+          />
+        </div>
+        <q-btn
+          v-if="isPowerUser"
+          flat
+          round
+          dense
+          icon="settings"
+          color="grey-7"
+          size="sm"
+          @click.stop="manageTeam"
+        >
+          <q-tooltip>{{ $t('team.manage') }}</q-tooltip>
+        </q-btn>
       </div>
-    </template>
-  </BaseModal>
+
+      <div class="row items-center q-gutter-x-md text-caption text-grey-7">
+        <div class="row items-center no-wrap">
+          <q-icon name="group" size="16px" class="q-mr-xs" />
+          <span>{{ team.members?.length || 0 }} {{ $t('team.members') }}</span>
+        </div>
+        <div class="row items-center no-wrap">
+          <q-icon name="shield" size="16px" class="q-mr-xs" />
+          <span>{{ team.powerusers?.length || 0 }}</span>
+        </div>
+      </div>
+    </q-card-section>
+  </q-card>
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
-import BaseModal from '@/components/base/BaseModal.vue'
-import BaseCard from '@/components/base/BaseCard.vue'
-import { useTeamStore } from '@/stores/teamStore.ts'
-import { useAuthStore } from '@/stores/authStore.js'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { useTeamUseCases } from '@/composable/useTeamUseCases.ts'
-import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
+import { useTeamStore } from '@/stores/teamStore'
+import { useAuthStore } from '@/stores/authStore'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 
-const teamStore = useTeamStore();
-const authStore = useAuthStore();
-const router = useRouter();
-const { deleteTeam } = useTeamUseCases();
+const router = useRouter()
+const teamStore = useTeamStore()
+const authStore = useAuthStore()
 const { setSurveysListener } = useSurveyUseCases()
 
 const props = defineProps({
   team: {
     type: Object,
-    required: true,
-  },
+    required: true
+  }
 })
 
-const showModal = ref(false)
+const isActive = computed(() => teamStore.currentTeam?.id === props.team.id)
 
-const isAdmin = computed(() => authStore.isAdmin)
+const isPowerUser = computed(() =>
+  props.team.powerusers?.includes(authStore.user?.uid)
+)
 
-function openTeam(teamId) {
-  setSurveysListener(teamId)
-  const team = teamStore.teams.find(t => t.id === teamId)
-  teamStore.setCurrentTeam(team)
-  router.push(`/survey`)
+const teamInitial = computed(() =>
+  props.team.name ? props.team.name.charAt(0).toUpperCase() : '?'
+)
+
+const avatarColors = ['primary', 'secondary', 'accent', 'positive', 'info', 'deep-purple', 'teal', 'indigo']
+const avatarColor = computed(() => {
+  const index = props.team.name
+    ? props.team.name.charCodeAt(0) % avatarColors.length
+    : 0
+  return avatarColors[index]
+})
+
+const selectTeam = () => {
+  teamStore.setCurrentTeam(props.team)
+  setSurveysListener(props.team.id)
 }
 
-async function handleDeleteTeam() {
-  try {
-    await deleteTeam(props.team.id);
-  } catch (err) {
-    console.error(`err ${err}`);
-  }
-
-  showModal.value = false
+const manageTeam = () => {
+  router.push(`/team/${props.team.id}`)
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.team-card {
+  border-left: 3px solid transparent;
+  transition: border-color 0.2s ease;
+  height: 100%;
+}
+
+.team-card--active {
+  border-left-color: var(--q-primary);
+  background: rgba(25, 118, 210, 0.04);
+}
+</style>
