@@ -1,33 +1,56 @@
 <template>
   <q-form @submit.prevent="submitFormHandler" class="q-gutter-md">
     <q-select
-      filled
-      dense
       v-model="surveyType"
       :options="surveyTypeOptions"
-      style="width: 250px"
-    />
+      :label="$t('survey.form.type')"
+      outlined
+      dense
+      emit-value
+      map-options
+    >
+      <template v-slot:prepend>
+        <q-icon name="category" />
+      </template>
+    </q-select>
 
     <q-input
       v-model="title"
-      label="Title"
-      filled
+      :label="$t('survey.form.title')"
+      outlined
       dense
       lazy-rules
-      :rules="[(val) => !!val || 'Title is required']"
-    />
+      :rules="[(val) => !!val || $t('validation.required')]"
+    >
+      <template v-slot:prepend>
+        <q-icon name="title" />
+      </template>
+    </q-input>
 
-    <q-input v-model="description" label="Description" filled dense type="text" />
+    <q-input
+      v-model="description"
+      :label="$t('survey.form.description')"
+      outlined
+      dense
+      type="text"
+    >
+      <template v-slot:prepend>
+        <q-icon name="description" />
+      </template>
+    </q-input>
 
-    <!-- ✅ Date Picker -->
+    <!-- Date Picker -->
     <q-input
       v-model="date"
-      label="Select date"
-      filled
+      :label="$t('survey.form.date')"
+      outlined
       dense
       readonly
-      :rules="[(val) => !!val || 'Date is required']"
+      :rules="[(val) => !!val || $t('validation.required')]"
     >
+      <template v-slot:prepend>
+        <q-icon name="event" />
+      </template>
       <template #append>
         <q-icon name="event" class="cursor-pointer">
           <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -37,15 +60,18 @@
       </template>
     </q-input>
 
-    <!-- ✅ Time Picker -->
+    <!-- Time Picker -->
     <q-input
       v-model="time"
-      label="Select time"
-      filled
+      :label="$t('survey.form.time')"
+      outlined
       dense
       readonly
-      :rules="[(val) => !!val || 'Time is required']"
+      :rules="[(val) => !!val || $t('validation.required')]"
     >
+      <template v-slot:prepend>
+        <q-icon name="access_time" />
+      </template>
       <template #append>
         <q-icon name="access_time" class="cursor-pointer">
           <q-popup-proxy cover transition-show="scale" transition-hide="scale">
@@ -55,7 +81,7 @@
       </template>
     </q-input>
 
-    <q-btn type="submit" label="Submit" color="primary" class="q-mt-md" unelevated />
+    <q-btn type="submit" :label="$t('common.save')" color="primary" class="q-mt-md" unelevated />
   </q-form>
 </template>
 
@@ -72,11 +98,7 @@ const title = ref('')
 const description = ref('')
 const date = ref(new Date().toISOString().slice(0, 10))
 const time = ref('19:00')
-const surveyType = ref({
-  label: i18n.t(`survey.type.${SurveyTypes.Training}`),
-  value: SurveyTypes.Training,
-});
-
+const surveyType = ref(SurveyTypes.Training)
 
 const surveyTypeOptions = computed(() => {
   return Object.values(SurveyTypes).map((type) => ({
@@ -91,7 +113,7 @@ function submitFormHandler() {
     description: description.value,
     date: date.value,
     time: time.value,
-    surveyType: surveyType.value.value,
+    surveyType: surveyType.value,
   })
 
   // Reset inputs

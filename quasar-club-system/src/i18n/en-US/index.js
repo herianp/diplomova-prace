@@ -49,6 +49,25 @@ export default {
     createMenu: {
       description: "Fill out the form below to create a new survey for your team"
     },
+    pageSubtitle: "Manage and track your team surveys",
+    emptyState: "No surveys found",
+    emptyStateHint: "Try adjusting your filters or create a new survey",
+    votes: {
+      total: "Votes",
+      unvoted: "unvoted"
+    },
+    actions: {
+      settings: "Settings",
+      voteYes: "Vote Yes",
+      voteNo: "Vote No"
+    },
+    metrics: {
+      total: "Total Surveys",
+      active: "Active Surveys",
+      myParticipation: "My Attendance",
+      teamParticipation: "Team Attendance",
+      toggle: "Show Metrics"
+    },
     verification: {
       title: "Survey Verification",
       reviewAttendance: "Review and modify attendance for this survey",
@@ -371,6 +390,8 @@ export default {
     lastMonth: "Last Month",
     thisWeek: "This Week",
     lastWeek: "Last Week",
+    nextWeek: "Next Week",
+    nextMonth: "Next Month",
     last7Days: "Last 7 Days",
     last30Days: "Last 30 Days",
     teamStatistics: "Team Statistics",

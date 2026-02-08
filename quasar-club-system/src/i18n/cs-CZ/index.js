@@ -49,6 +49,25 @@ export default {
     createMenu: {
       description: "Vyplňte formulář níže pro vytvoření nové ankety pro váš tým"
     },
+    pageSubtitle: "Spravujte a sledujte ankety vašeho týmu",
+    emptyState: "Žádné ankety nenalezeny",
+    emptyStateHint: "Zkuste upravit filtry nebo vytvořte novou anketu",
+    votes: {
+      total: "Hlasy",
+      unvoted: "nehlasovalo"
+    },
+    actions: {
+      settings: "Nastavení",
+      voteYes: "Hlasovat Ano",
+      voteNo: "Hlasovat Ne"
+    },
+    metrics: {
+      total: "Celkem anket",
+      active: "Aktivní ankety",
+      myParticipation: "Moje docházka",
+      teamParticipation: "Týmová docházka",
+      toggle: "Zobrazit metriky"
+    },
     verification: {
       title: "Ověření ankety",
       reviewAttendance: "Zkontrolujte a upravte účast v této anketě",
@@ -371,6 +390,8 @@ export default {
     lastMonth: "Minulý měsíc",
     thisWeek: "Tento týden",
     lastWeek: "Minulý týden",
+    nextWeek: "Příští týden",
+    nextMonth: "Příští měsíc",
     last7Days: "Posledních 7 dní",
     last30Days: "Posledních 30 dní",
     teamStatistics: "Statistiky týmu",

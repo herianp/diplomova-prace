@@ -103,7 +103,7 @@
     </template>
 
     <template #actions>
-      <VoteStats :survey="survey" />
+      <VoteStats :survey="survey" :team-member-count="teamMemberCount" />
       <SurveyTag :type="survey.type" :class="isMobile ? 'q-ma-none' : 'q-ml-lg q-ma-none'" />
     </template>
   </BaseCard>
@@ -143,6 +143,10 @@ const props = defineProps({
   survey: {
     type: Object,
     required: true,
+  },
+  teamMemberCount: {
+    type: Number,
+    default: 0,
   },
 })
 
