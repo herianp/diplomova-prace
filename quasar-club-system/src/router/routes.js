@@ -22,6 +22,7 @@ const routes = [
       { path: RouteEnum.MESSAGES.path, name: RouteEnum.MESSAGES.name, component: () => import("pages/MessagesPage.vue") },
       { path: RouteEnum.REPORTS.path, name: RouteEnum.REPORTS.name, component: () => import("pages/ReportsPage.vue") },
       { path: RouteEnum.SETTINGS.path, name: RouteEnum.SETTINGS.name, component: () => import("pages/SettingsPage.vue") },
+      { path: RouteEnum.ADMIN.path, name: RouteEnum.ADMIN.name, component: () => import("pages/AdminPage.vue"), meta: { requiresAdmin: true } },
       { path: RouteEnum.SURVEY_VERIFICATION.path, name: RouteEnum.SURVEY_VERIFICATION.name, component: () => import("pages/SurveyVerificationPage.vue") },
       { path: "/:teamId/surveys", name: "TeamSurveys", component: () => import("pages/SurveyPage.vue") },
     ]

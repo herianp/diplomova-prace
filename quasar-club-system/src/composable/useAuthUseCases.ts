@@ -16,6 +16,11 @@ export function useAuthUseCases() {
     const unsubscribe = authStateListener(async (user: User | null) => {
       if (user) {
         authStore.setUser(user)
+
+        // Check admin custom claim
+        const tokenResult = await user.getIdTokenResult()
+        authStore.setAdmin(tokenResult.claims.admin === true)
+
         authStore.setAuthReady(true)
 
         try {
@@ -26,6 +31,7 @@ export function useAuthUseCases() {
         }
       } else {
         authStore.setUser(null)
+        authStore.setAdmin(false)
         authStore.setAuthReady(true)
         router.push(RouteEnum.HOME.path)
         teamStore.clearData()

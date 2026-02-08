@@ -40,7 +40,7 @@
       </div>
 
       <!-- Danger Zone (Creator Only) -->
-      <div v-if="isCreator" class="q-mt-xl">
+      <div v-if="canDeleteTeam" class="q-mt-xl">
         <q-card flat bordered class="border-negative">
           <q-card-section>
             <div class="row items-center q-gutter-sm">
@@ -141,7 +141,7 @@ import TeamInvitationPendingComponent from '@/components/team/TeamInvitationPend
 
 const route = useRoute()
 const router = useRouter()
-const { currentUser } = useAuthComposable()
+const { currentUser, isAdmin } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
@@ -169,7 +169,7 @@ const inviteForm = reactive({
 // Computed
 const teamId = computed(() => route.params.teamId)
 const { isCurrentUserPowerUser }  = useAuthComposable()
-const isCreator = computed(() => team.value?.creator === currentUser.value?.uid)
+const canDeleteTeam = computed(() => team.value?.creator === currentUser.value?.uid || isAdmin.value)
 
 const loadTeam = async () => {
   try {

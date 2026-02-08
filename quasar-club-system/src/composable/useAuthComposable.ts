@@ -13,6 +13,7 @@ export function useAuthComposable() {
 
   const currentUser = computed(() => authStore.user)
   const isLoading = computed(() => authStore.isLoading)
+  const isAdmin = computed(() => authStore.isAdmin)
 
   const isCurrentUserPowerUser = computed(() => {
     return teamStore.currentTeam?.powerusers?.includes(currentUser.value?.uid) || false
@@ -60,6 +61,7 @@ export function useAuthComposable() {
   return {
     currentUser,
     isLoading,
+    isAdmin,
     isCurrentUserPowerUser,
     loginUser,
     logoutUser,

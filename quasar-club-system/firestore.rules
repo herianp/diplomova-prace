@@ -6,9 +6,12 @@ service cloud.firestore {
     match /surveys/{surveyId} {
       // Allow power users full read/write/create access
       allow read, write, update, create: if isPowerUserForTeam(getTeamId());
-      
+
       // Allow power users to delete surveys (using existing resource for delete operations)
       allow delete: if isPowerUserForTeam(resource.data.teamId);
+
+      // Allow app admin to read/delete any survey
+      allow read, delete: if isAppAdmin();
       
       //Allow read surveys of the team authenticated members of the team
       allow read: if canTeamExistsAndIsUserAuthenticated(resource.data.teamId) &&
@@ -18,6 +21,11 @@ service cloud.firestore {
       allow update: if canTeamExistsAndIsUserAuthenticated(resource.data.teamId) &&
       	isTeamMember(resource.data.teamId) &&
         request.resource.data.votes != null; //todo
+    }
+
+    // Helper function to check if the user is a global app admin
+    function isAppAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
     }
 
     // Helper function to check if the user is a power user for a given team
@@ -45,15 +53,18 @@ service cloud.firestore {
       allow read, write: if request.auth != null &&
         resource.data.members.hasAny([request.auth.uid]);
 
+      // Allow app admin full read access to all teams
+      allow read: if isAppAdmin();
+
       // Allow creation if user is adding themselves as creator and member
       allow create: if request.auth != null &&
         request.resource.data.creator == request.auth.uid &&
         request.resource.data.members.hasAny([request.auth.uid]) &&
         request.resource.data.powerusers.hasAny([request.auth.uid]);
 
-      // Allow team creator to delete the team
+      // Allow team creator or app admin to delete the team
       allow delete: if request.auth != null &&
-        request.auth.uid == resource.data.creator;
+        (request.auth.uid == resource.data.creator || isAppAdmin());
 
       // Allow users to add themselves to team when accepting invitation
       // Note: This is validated by the invitation system and batch writes
@@ -71,6 +82,9 @@ service cloud.firestore {
       match /cashboxTransactions/{transactionId} {
         allow read, write: if request.auth != null &&
           get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+
+        // Allow app admin to read/delete cashbox transactions
+        allow read, delete: if isAppAdmin();
       }
     }
     
@@ -104,10 +118,13 @@ service cloud.firestore {
         resource.data.status == 'pending';
         
       // Allow power users to delete (cancel) invitations
-      allow delete: if request.auth != null && 
+      allow delete: if request.auth != null &&
         resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.powerusers.hasAny([request.auth.uid]);
+
+      // Allow app admin to read/delete any invitation
+      allow read, delete: if isAppAdmin();
     }
     
     // Notifications - users can only access their own notifications
@@ -118,11 +135,11 @@ service cloud.firestore {
       // Allow system to create notifications
       allow create: if request.auth != null;
 
-      // Allow team creator to read/delete notifications when deleting team
+      // Allow team creator or app admin to read/delete notifications when deleting team
       allow read, delete: if request.auth != null &&
         resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
-        get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid;
+        (get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid || isAppAdmin());
     }
     
     // Messages - team-based messaging system
@@ -140,11 +157,11 @@ service cloud.firestore {
         get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.powerusers.hasAny([request.auth.uid]) &&
         request.resource.data.authorId == request.auth.uid;
 
-      // Allow team creator to delete messages when deleting team
+      // Allow team creator or app admin to delete messages when deleting team
       allow delete: if request.auth != null &&
         resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
-        get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid;
+        (get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid || isAppAdmin());
     }
     
     

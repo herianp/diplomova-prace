@@ -55,6 +55,8 @@ export default defineRouter(function () {
       next(RouteEnum.LOGIN.path)
     } else if (authStore.user?.uid && isPublic) {
       next(RouteEnum.DASHBOARD.path)
+    } else if (to.meta?.requiresAdmin && !authStore.isAdmin) {
+      next(RouteEnum.DASHBOARD.path)
     } else {
       next()
     }
