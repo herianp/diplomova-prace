@@ -1,7 +1,7 @@
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
-import { ITeam, ICashboxTransaction } from '@/interfaces/interfaces'
+import { ITeam } from '@/interfaces/interfaces'
 
 export function useTeamUseCases() {
   const authStore = useAuthStore()
@@ -60,10 +60,6 @@ export function useTeamUseCases() {
     teamStore.setCurrentTeam(team)
   }
 
-  const addCashboxTransaction = async (teamId: string, transactionData: ICashboxTransaction): Promise<void> => {
-    return teamFirebase.addCashboxTransaction(teamId, transactionData)
-  }
-
   const clearTeamData = () => {
     teamStore.clearData()
   }
@@ -74,7 +70,6 @@ export function useTeamUseCases() {
     deleteTeam,
     getTeamById,
     getTeamByIdAndSetCurrentTeam,
-    addCashboxTransaction,
     clearTeamData
   }
 }

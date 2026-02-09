@@ -10,6 +10,12 @@ export enum SurveyStatus {
   AWAITING_VERIFICATION = 'awaiting_verification'
 }
 
+export enum FineRuleTrigger {
+  NO_ATTENDANCE = 'no_attendance',
+  VOTED_YES_BUT_ABSENT = 'voted_yes_but_absent',
+  UNVOTED = 'unvoted'
+}
+
 // ============================================================
 // User & Auth
 // ============================================================
@@ -41,15 +47,6 @@ export interface ITeam {
   members: string[]
   invitationCode: string
   surveys: string[]
-  cashboxTransactions?: ICashboxTransaction[]
-}
-
-export interface ICashboxTransaction {
-  id?: string
-  amount: number
-  description: string
-  date: string | Date
-  createdBy: string
 }
 
 export interface ITeamInvitation {
@@ -203,4 +200,76 @@ export interface ITeamMember {
 export interface IPlayerOption {
   label: string
   value: string | null
+}
+
+// ============================================================
+// Cashbox & Fines
+// ============================================================
+
+export interface IFineRule {
+  id?: string
+  name: string
+  amount: number
+  triggerType: FineRuleTrigger
+  surveyType?: SurveyTypes | null
+  active: boolean
+  createdBy: string
+  createdAt: Date
+}
+
+export interface IFine {
+  id?: string
+  playerId: string
+  amount: number
+  reason: string
+  source: 'auto' | 'manual'
+  ruleId?: string
+  surveyId?: string
+  surveyTitle?: string
+  createdBy: string
+  createdAt: Date
+}
+
+export interface IPayment {
+  id?: string
+  playerId: string
+  amount: number
+  note?: string
+  createdBy: string
+  createdAt: Date
+}
+
+export interface IPlayerBalance {
+  playerId: string
+  displayName: string
+  totalFined: number
+  totalPaid: number
+  balance: number
+}
+
+export interface ICashboxHistoryEntry {
+  id?: string
+  clearedAt: Date
+  clearedBy: string
+  summary: {
+    totalFined: number
+    totalPaid: number
+    totalOutstanding: number
+    totalCredits: number
+    totalFinesCount: number
+  }
+  playerBalances: IPlayerBalance[]
+  fines: Array<{
+    playerId: string
+    amount: number
+    reason: string
+    source: string
+    createdAt: Date
+  }>
+  payments: Array<{
+    playerId: string
+    amount: number
+    note?: string
+    createdAt: Date
+  }>
 }

@@ -78,12 +78,46 @@ service cloud.firestore {
         request.resource.data.creator == resource.data.creator &&
         request.resource.data.powerusers == resource.data.powerusers;
 
-      // Subcollection: cashbox transactions - team members can read/write
+      // Subcollection: cashbox transactions (legacy)
       match /cashboxTransactions/{transactionId} {
         allow read, write: if request.auth != null &&
           get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow read, delete: if isAppAdmin();
+      }
 
-        // Allow app admin to read/delete cashbox transactions
+      // Subcollection: fine rules - members read, power users write
+      match /fineRules/{ruleId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update, delete: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+        allow read, delete: if isAppAdmin();
+      }
+
+      // Subcollection: fines - members read, power users write
+      match /fines/{fineId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update, delete: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+        allow read, delete: if isAppAdmin();
+      }
+
+      // Subcollection: payments - members read, power users write
+      match /payments/{paymentId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update, delete: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+        allow read, delete: if isAppAdmin();
+      }
+
+      // Subcollection: cashbox history - members read, power users write
+      match /cashboxHistory/{historyId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update, delete: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
         allow read, delete: if isAppAdmin();
       }
     }

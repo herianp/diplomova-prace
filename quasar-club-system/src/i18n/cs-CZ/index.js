@@ -408,5 +408,118 @@ export default {
     monthlyTrend: "Měsíční trend docházky",
     playerRanking: "Žebříček docházky hráčů",
     attendanceRate: "Míra docházky"
+  },
+  cashbox: {
+    title: "Pokladna",
+    subtitle: "Správa pokut a plateb vašeho týmu",
+    noTeam: "Není vybrán tým",
+    selectTeamFirst: "Prosím vyberte tým pro správu pokladny",
+    loading: "Načítání dat pokladny...",
+    dashboard: {
+      totalFined: "Celkem pokutováno",
+      totalPaid: "Celkem zaplaceno",
+      outstanding: "Nedoplatek",
+      credits: "Přeplatky hráčů",
+      totalFines: "Celkem pokut"
+    },
+    players: {
+      title: "Zůstatky hráčů",
+      search: "Hledat hráče...",
+      owes: "dluží",
+      credit: "přeplatek",
+      settled: "vyrovnáno",
+      noFines: "Žádné pokuty ani platby",
+      totalFined: "Celkem pokutováno",
+      totalPaid: "Celkem zaplaceno",
+      balance: "Zůstatek"
+    },
+    fines: {
+      title: "Pokuty",
+      addFine: "Přidat pokutu",
+      addManualFine: "Přidat manuální pokutu",
+      player: "Hráč",
+      amount: "Částka",
+      reason: "Důvod",
+      reasonPlaceholder: "Zadejte důvod pokuty...",
+      source: "Zdroj",
+      auto: "Automatická",
+      manual: "Manuální",
+      deleteFine: "Smazat pokutu",
+      addSuccess: "Pokuta byla přidána",
+      addError: "Nepodařilo se přidat pokutu",
+      deleteSuccess: "Pokuta byla smazána",
+      deleteError: "Nepodařilo se smazat pokutu",
+      selectPlayer: "Vyberte hráče",
+      amountRequired: "Částka je povinná",
+      reasonRequired: "Důvod je povinný",
+      playerRequired: "Hráč je povinný"
+    },
+    payments: {
+      title: "Platby",
+      recordPayment: "Zaznamenat platbu",
+      player: "Hráč",
+      amount: "Částka",
+      note: "Poznámka (volitelné)",
+      notePlaceholder: "např. Hotově na tréninku",
+      addSuccess: "Platba byla zaznamenána",
+      addError: "Nepodařilo se zaznamenat platbu",
+      delete: "Smazat platbu",
+      deleteSuccess: "Platba byla smazána",
+      deleteError: "Nepodařilo se smazat platbu",
+      selectPlayer: "Vyberte hráče",
+      amountRequired: "Částka je povinná",
+      playerRequired: "Hráč je povinný"
+    },
+    rules: {
+      title: "Pravidla pokut",
+      addRule: "Přidat pravidlo",
+      name: "Název pravidla",
+      namePlaceholder: "např. Absence na tréninku",
+      amount: "Částka",
+      trigger: "Podmínka",
+      surveyType: "Typ ankety",
+      allTypes: "Všechny typy",
+      active: "Aktivní",
+      inactive: "Neaktivní",
+      noAttendance: "Neúčast",
+      votedYesButAbsent: "Potvrdil ale nepřišel",
+      unvoted: "Nehlasoval",
+      addSuccess: "Pravidlo bylo přidáno",
+      addError: "Nepodařilo se přidat pravidlo",
+      updateSuccess: "Pravidlo bylo aktualizováno",
+      updateError: "Nepodařilo se aktualizovat pravidlo",
+      deleteSuccess: "Pravidlo bylo smazáno",
+      deleteError: "Nepodařilo se smazat pravidlo",
+      confirmDelete: "Opravdu chcete smazat toto pravidlo?",
+      nameRequired: "Název pravidla je povinný",
+      amountRequired: "Částka je povinná"
+    },
+    history: {
+      title: "Nedávná aktivita",
+      fine: "Pokuta",
+      payment: "Platba",
+      noActivity: "Žádná nedávná aktivita"
+    },
+    currency: "Kč",
+    autoFines: {
+      generated: "{count} automatických pokut vygenerováno"
+    },
+    clear: {
+      button: "Vyčistit pokladnu",
+      confirmTitle: "Vyčistit pokladnu",
+      confirmMessage: "Toto archivuje všechny aktuální pokuty a platby a začne znovu. Zbývající zůstatky budou převedeny.",
+      warning: "Tuto akci nelze vrátit zpět.",
+      success: "Pokladna byla vyčištěna",
+      error: "Nepodařilo se vyčistit pokladnu",
+      carryOverFine: "Převod z minulého období",
+      carryOverPayment: "Převod přeplatku z minulého období"
+    },
+    cashboxHistory: {
+      title: "Historie pokladny",
+      clearedAt: "Vyčištěno dne",
+      clearedBy: "Vyčistil",
+      noHistory: "Zatím žádná historie",
+      viewDetails: "Zobrazit detaily"
+    }
   }
 }

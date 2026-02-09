@@ -16,7 +16,7 @@ import {
   Unsubscribe,
   DocumentReference,
 } from 'firebase/firestore'
-import { ITeam, ICashboxTransaction, ITeamInvitation } from '@/interfaces/interfaces'
+import { ITeam, ITeamInvitation } from '@/interfaces/interfaces'
 
 export function useTeamFirebase() {
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -56,13 +56,16 @@ export function useTeamFirebase() {
         }
       }
 
-      // Delete cashboxTransactions subcollection
-      const cashboxRef = collection(doc(db, 'teams', teamId), 'cashboxTransactions')
-      const cashboxSnap = await getDocs(cashboxRef)
-      if (!cashboxSnap.empty) {
-        const batch = writeBatch(db)
-        cashboxSnap.docs.forEach((d) => batch.delete(d.ref))
-        await batch.commit()
+      // Delete cashbox subcollections (fineRules, fines, payments)
+      const subcollections = ['fineRules', 'fines', 'payments', 'cashboxTransactions']
+      for (const sub of subcollections) {
+        const subRef = collection(doc(db, 'teams', teamId), sub)
+        const subSnap = await getDocs(subRef)
+        if (!subSnap.empty) {
+          const batch = writeBatch(db)
+          subSnap.docs.forEach((d) => batch.delete(d.ref))
+          await batch.commit()
+        }
       }
 
       // Delete the team document itself
@@ -90,27 +93,9 @@ export function useTeamFirebase() {
       if (!teamDoc.exists()) return null
 
       const teamData = teamDoc.data()
-      const cashboxTransactionsRef = collection(teamRef, 'cashboxTransactions')
-      const cashboxTransactionsSnap = await getDocs(cashboxTransactionsRef)
-
-      const cashboxTransactions = cashboxTransactionsSnap.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }))
-
-      return { ...teamData, cashboxTransactions }
+      return { id: teamDoc.id, ...teamData } as ITeam
     } catch (error) {
       console.error('Error getting team document:', error)
-      throw error
-    }
-  }
-
-  const addCashboxTransaction = async (teamId: string, transactionData: ICashboxTransaction): Promise<void> => {
-    try {
-      const cashboxTransactionsRef = collection(doc(db, 'teams', teamId), 'cashboxTransactions')
-      await addDoc(cashboxTransactionsRef, transactionData)
-    } catch (error) {
-      console.error('Error adding cashbox transaction:', error)
       throw error
     }
   }
@@ -178,7 +163,6 @@ export function useTeamFirebase() {
     deleteTeam,
     getTeamsByUserId,
     getTeamById,
-    addCashboxTransaction,
     loadPendingInvitations,
     findUserByEmail,
     checkExistingInvitation,

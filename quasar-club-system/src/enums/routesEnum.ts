@@ -12,5 +12,6 @@ export const RouteEnum = Object.freeze({
   REPORTS: { path: '/reports', name: 'reports'},
   SETTINGS: { path: '/settings', name: 'settings'},
   ADMIN: { path: '/admin', name: 'admin'},
+  CASHBOX: { path: '/cashbox', name: 'cashbox'},
   SURVEY_VERIFICATION: { path: '/survey/:surveyId/verify', name: 'surveyVerification'},
 });

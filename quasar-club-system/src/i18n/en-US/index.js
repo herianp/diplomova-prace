@@ -408,5 +408,118 @@ export default {
     monthlyTrend: "Monthly Attendance Trend",
     playerRanking: "Player Attendance Ranking",
     attendanceRate: "Attendance Rate"
+  },
+  cashbox: {
+    title: "Cashbox",
+    subtitle: "Manage fines and payments for your team",
+    noTeam: "No Team Selected",
+    selectTeamFirst: "Please select a team to manage the cashbox",
+    loading: "Loading cashbox data...",
+    dashboard: {
+      totalFined: "Total Fined",
+      totalPaid: "Total Paid",
+      outstanding: "Outstanding",
+      credits: "Player Credits",
+      totalFines: "Total Fines"
+    },
+    players: {
+      title: "Player Balances",
+      search: "Search players...",
+      owes: "owes",
+      credit: "credit",
+      settled: "settled",
+      noFines: "No fines or payments recorded",
+      totalFined: "Total Fined",
+      totalPaid: "Total Paid",
+      balance: "Balance"
+    },
+    fines: {
+      title: "Fines",
+      addFine: "Add Fine",
+      addManualFine: "Add Manual Fine",
+      player: "Player",
+      amount: "Amount",
+      reason: "Reason",
+      reasonPlaceholder: "Enter reason for fine...",
+      source: "Source",
+      auto: "Auto",
+      manual: "Manual",
+      deleteFine: "Delete Fine",
+      addSuccess: "Fine added successfully",
+      addError: "Failed to add fine",
+      deleteSuccess: "Fine deleted successfully",
+      deleteError: "Failed to delete fine",
+      selectPlayer: "Select a player",
+      amountRequired: "Amount is required",
+      reasonRequired: "Reason is required",
+      playerRequired: "Player is required"
+    },
+    payments: {
+      title: "Payments",
+      recordPayment: "Record Payment",
+      player: "Player",
+      amount: "Amount",
+      note: "Note (optional)",
+      notePlaceholder: "e.g. Cash at training",
+      addSuccess: "Payment recorded successfully",
+      addError: "Failed to record payment",
+      delete: "Delete Payment",
+      deleteSuccess: "Payment deleted successfully",
+      deleteError: "Failed to delete payment",
+      selectPlayer: "Select a player",
+      amountRequired: "Amount is required",
+      playerRequired: "Player is required"
+    },
+    rules: {
+      title: "Fine Rules",
+      addRule: "Add Rule",
+      name: "Rule Name",
+      namePlaceholder: "e.g. Missed training",
+      amount: "Amount",
+      trigger: "Trigger",
+      surveyType: "Survey Type",
+      allTypes: "All Types",
+      active: "Active",
+      inactive: "Inactive",
+      noAttendance: "No Attendance",
+      votedYesButAbsent: "Confirmed but absent",
+      unvoted: "Did not vote",
+      addSuccess: "Rule added successfully",
+      addError: "Failed to add rule",
+      updateSuccess: "Rule updated successfully",
+      updateError: "Failed to update rule",
+      deleteSuccess: "Rule deleted successfully",
+      deleteError: "Failed to delete rule",
+      confirmDelete: "Are you sure you want to delete this rule?",
+      nameRequired: "Rule name is required",
+      amountRequired: "Amount is required"
+    },
+    history: {
+      title: "Recent Activity",
+      fine: "Fine",
+      payment: "Payment",
+      noActivity: "No recent activity"
+    },
+    currency: "CZK",
+    autoFines: {
+      generated: "{count} auto-fine(s) generated"
+    },
+    clear: {
+      button: "Clear Cashbox",
+      confirmTitle: "Clear Cashbox",
+      confirmMessage: "This will archive all current fines and payments and start fresh. Outstanding balances will be carried over.",
+      warning: "This action cannot be undone.",
+      success: "Cashbox cleared successfully",
+      error: "Failed to clear cashbox",
+      carryOverFine: "Carry-over from previous period",
+      carryOverPayment: "Credit carry-over from previous period"
+    },
+    cashboxHistory: {
+      title: "Cashbox History",
+      clearedAt: "Cleared on",
+      clearedBy: "Cleared by",
+      noHistory: "No history yet",
+      viewDetails: "View Details"
+    }
   }
 }
