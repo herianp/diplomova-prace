@@ -17,7 +17,8 @@
       "mcp__firebase__firestore_query_collection",
       "mcp__firebase__firebase_validate_security_rules",
       "mcp__firebase__auth_get_users",
-      "mcp__firebase__auth_update_user"
+      "mcp__firebase__auth_update_user",
+      "Bash(grep:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

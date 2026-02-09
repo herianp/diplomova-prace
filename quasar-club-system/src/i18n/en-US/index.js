@@ -316,7 +316,10 @@ export default {
     sent: "Message sent",
     sendError: "Failed to send message",
     loadError: "Failed to load messages",
-    powerUserOnly: "Only team power users can send messages"
+    powerUserOnly: "Only team power users can send messages",
+    messagesCount: "messages",
+    today: "Today",
+    yesterday: "Yesterday"
   },
   admin: {
     title: "Admin Dashboard",
@@ -401,6 +404,9 @@ export default {
     playerStatistics: "Player Statistics",
     attendance: "Attendance",
     nonAttendance: "Non-Attendance",
-    avgPlayerParticipation: "Avg Player Attendance"
+    avgPlayerParticipation: "Avg Player Attendance",
+    monthlyTrend: "Monthly Attendance Trend",
+    playerRanking: "Player Attendance Ranking",
+    attendanceRate: "Attendance Rate"
   }
 }

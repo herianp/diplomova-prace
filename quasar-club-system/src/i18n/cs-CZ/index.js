@@ -316,7 +316,10 @@ export default {
     sent: "Zpráva odeslána",
     sendError: "Nepodařilo se odeslat zprávu",
     loadError: "Nepodařilo se načíst zprávy",
-    powerUserOnly: "Pouze správci týmu mohou odesílat zprávy"
+    powerUserOnly: "Pouze správci týmu mohou odesílat zprávy",
+    messagesCount: "zpráv",
+    today: "Dnes",
+    yesterday: "Včera"
   },
   admin: {
     title: "Administrace",
@@ -401,6 +404,9 @@ export default {
     playerStatistics: "Statistiky hráče",
     attendance: "Účast",
     nonAttendance: "Neúčast",
-    avgPlayerParticipation: "Průměrná docházka hráče"
+    avgPlayerParticipation: "Průměrná docházka hráče",
+    monthlyTrend: "Měsíční trend docházky",
+    playerRanking: "Žebříček docházky hráčů",
+    attendanceRate: "Míra docházky"
   }
 }

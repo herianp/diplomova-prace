@@ -1,44 +1,86 @@
 <template>
   <div class="reports-container">
-    <!-- Header Component -->
-    <ReportsHeader :current-team="currentTeam" />
+    <!-- Loading Skeleton -->
+    <template v-if="!currentTeam">
+      <div class="q-mb-md">
+        <q-skeleton type="text" width="50%" class="q-mb-xs" />
+        <q-skeleton type="text" width="30%" />
+      </div>
+      <div class="row q-col-gutter-sm q-mb-lg">
+        <div v-for="n in 4" :key="n" class="col-6 col-md-3">
+          <q-card flat bordered class="q-pa-md">
+            <q-skeleton type="text" width="60%" class="q-mb-sm" />
+            <q-skeleton type="rect" height="32px" />
+          </q-card>
+        </div>
+      </div>
+      <q-card flat bordered class="q-pa-md">
+        <q-skeleton type="rect" height="200px" />
+      </q-card>
+    </template>
 
-    <!-- Reports Content -->
-    <div v-if="currentTeam" class="reports-content">
-      <!-- Filter Menu (same as SurveyPage) -->
+    <template v-else>
+      <!-- Header Section -->
+      <div class="welcome-section q-mb-lg">
+        <div class="row items-center justify-between">
+          <div class="col">
+            <div class="text-h5 text-weight-bold">
+              {{ currentTeam?.name }}
+            </div>
+            <div class="text-body2 text-grey-7">
+              {{ $t('reports.teamMetrics') }}
+            </div>
+          </div>
+          <div class="row items-center q-gutter-sm">
+            <q-chip
+              :color="isCurrentUserPowerUser ? 'positive' : 'grey-4'"
+              :text-color="isCurrentUserPowerUser ? 'white' : 'grey-8'"
+              :icon="isCurrentUserPowerUser ? 'shield' : 'person'"
+              :label="isCurrentUserPowerUser ? $t('dashboard.powerUser') : $t('dashboard.member')"
+              dense
+            />
+            <q-chip
+              color="primary"
+              text-color="white"
+              icon="poll"
+              :label="filteredSurveys.length + ' ' + $t('dashboard.surveys')"
+              dense
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Menu -->
       <SurveyFilterMenu
         v-model="filters"
         @filters-changed="onFiltersChanged"
         class="q-mb-lg"
       />
 
-      <!-- Team Statistics Component -->
-      <ReportsTeamStats :team-metrics="teamMetrics" />
-
-      <!-- Player Filter Component -->
+      <!-- Player Filter (ABOVE stats) -->
       <ReportsPlayerFilter
         v-model:selected-player="selectedPlayer"
         :player-options="playerOptions"
-        :get-player-name="getPlayerName"
+        :get-player-name="getPlayerNameBound"
       />
 
-      <!-- Player Statistics Component -->
-      <ReportsPlayerStats
-        :selected-player="selectedPlayer"
+      <!-- Unified Metrics -->
+      <ReportsMetrics
+        :team-metrics="teamMetrics"
         :player-metrics="playerMetrics"
-        :get-player-name="getPlayerName"
+        :selected-player="selectedPlayer"
+        :get-player-name="getPlayerNameBound"
       />
 
-      <!-- Charts Component -->
+      <!-- Charts -->
       <ReportsCharts
         :loading="loading"
         :filtered-surveys="filteredSurveys"
         :current-team="currentTeam"
         :team-members="teamMembers"
         :selected-player="selectedPlayer"
-        class="q-mr-lg"
       />
-    </div>
+    </template>
   </div>
 </template>
 
@@ -46,15 +88,12 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useTeamStore } from '@/stores/teamStore.ts'
 import { useAuthStore } from '@/stores/authStore.ts'
-import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import { DateTime } from 'luxon'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
-import ReportsHeader from '@/components/reports/ReportsHeader.vue'
-import ReportsTeamStats from '@/components/reports/ReportsTeamStats.vue'
 import ReportsPlayerFilter from '@/components/reports/ReportsPlayerFilter.vue'
-import ReportsPlayerStats from '@/components/reports/ReportsPlayerStats.vue'
+import ReportsMetrics from '@/components/reports/ReportsMetrics.vue'
 import ReportsCharts from '@/components/reports/ReportsCharts.vue'
+import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useReadiness } from '@/composable/useReadiness'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
@@ -63,11 +102,11 @@ import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
 
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
-const $q = useQuasar()
 const { t } = useI18n()
+const { isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
 
-// New composables
+// Composables
 const { filters, createFilteredSurveys, updateFilters } = useSurveyFilters()
 const { calculateTeamMetrics, calculatePlayerMetrics } = useSurveyMetrics()
 const { loadTeamMembers, createPlayerOptions, getPlayerName } = useTeamMemberUtils()
@@ -75,37 +114,28 @@ const { loadTeamMembers, createPlayerOptions, getPlayerName } = useTeamMemberUti
 // State
 const loading = ref(true)
 const teamMembers = ref([])
-const teamMetrics = ref({
-  totalSurveys: 0,
-  totalMembers: 0,
-  averageParticipation: 0,
-  activeSurveys: 0
-})
-const playerMetrics = ref({
-  yesVotes: 0,
-  noVotes: 0,
-  unvoted: 0,
-  averageParticipation: 0
-})
-
 const selectedPlayer = ref(null)
-
-// Set current date as dateTo for reports
-filters.value.dateTo = DateTime.now().toISODate()
-
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
 const surveys = computed(() => teamStore.surveys || [])
+const teamMemberCount = computed(() => currentTeam.value?.members?.length || 0)
 
-// Use the new composables for computed properties
+// Filtered surveys using the shared composable
 const filteredSurveys = createFilteredSurveys(surveys, filters)
+
+// Reactive computed metrics (replaces imperative watchers)
+const teamMetrics = computed(() => calculateTeamMetrics(filteredSurveys.value, teamMemberCount.value))
+const playerMetrics = computed(() => calculatePlayerMetrics(filteredSurveys.value, selectedPlayer.value))
+
+// Fix: bound getPlayerName with teamMembers
+const getPlayerNameBound = (id) => getPlayerName(id, teamMembers.value)
 
 const playerOptions = computed(() =>
   createPlayerOptions(teamMembers.value, t('reports.allPlayers'))
 )
 
-// Filter event handler for SurveyFilterMenu
+// Filter event handler
 const onFiltersChanged = (newFilters) => {
   updateFilters(newFilters)
 }
@@ -125,18 +155,6 @@ const loadTeamMembersData = async () => {
   }
 }
 
-const updateTeamMetrics = () => {
-  const surveys = filteredSurveys.value
-  const membersCount = currentTeam.value?.members?.length || 0
-  teamMetrics.value = calculateTeamMetrics(surveys, membersCount)
-}
-
-const updatePlayerMetrics = () => {
-  const surveys = filteredSurveys.value
-  playerMetrics.value = calculatePlayerMetrics(surveys, selectedPlayer.value)
-}
-
-
 const loadData = async () => {
   if (!currentTeam.value) {
     loading.value = false
@@ -149,26 +167,17 @@ const loadData = async () => {
     const { waitForTeam } = useReadiness()
     await waitForTeam()
 
-    // Load team members first
     await loadTeamMembersData()
 
-    // Only load surveys if they're not already loaded for this team
     if (surveys.value.length === 0 && authStore.user?.uid) {
       if (currentTeam.value?.id) {
         await setSurveysListener(currentTeam.value.id)
       }
     }
 
-    updateTeamMetrics()
-    updatePlayerMetrics()
     loading.value = false
   } catch (error) {
     console.error('Error loading reports data:', error)
-    $q.notify({
-      type: 'negative',
-      message: t('reports.loadError'),
-      icon: 'error'
-    })
     loading.value = false
   }
 }
@@ -180,33 +189,9 @@ watch(currentTeam, (newTeam) => {
   }
 }, { immediate: false })
 
-// Watch for surveys changes to update metrics without reloading
-watch(surveys, (newSurveys) => {
-  if (newSurveys.length > 0 && !loading.value) {
-    updateTeamMetrics()
-    updatePlayerMetrics()
-  }
-}, { deep: true })
-
-// Watch for filter changes (affects team metrics and player metrics)
-watch(filters, () => {
-  if (!loading.value) {
-    updateTeamMetrics()
-    updatePlayerMetrics()
-  }
-}, { deep: true })
-
-// Watch for player filter changes (affects player metrics)
-watch(selectedPlayer, () => {
-  if (!loading.value) {
-    updatePlayerMetrics()
-  }
-})
-
 onMounted(() => {
   loadData()
 })
-
 </script>
 
 <style scoped>
@@ -215,9 +200,9 @@ onMounted(() => {
   padding: 1rem;
 }
 
-@media (max-width: 768px) {
+@media (min-width: 600px) {
   .reports-container {
-    padding: 1rem;
+    padding: 1.5rem;
   }
 }
 </style>
