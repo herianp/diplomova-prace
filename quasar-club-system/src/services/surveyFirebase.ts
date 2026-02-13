@@ -11,14 +11,7 @@ import {
   getDoc,
   Unsubscribe,
 } from 'firebase/firestore'
-import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
-
-interface SurveyNotificationData {
-  id: string
-  title: string
-  teamId: string
-  teamMembers: string[]
-}
+import { ISurvey, IVote, SurveyStatus, ISurveyNotificationData } from '@/interfaces/interfaces'
 
 export function useSurveyFirebase() {
   const getSurveysByTeamId = (teamId: string, callback: (surveys: ISurvey[]) => void): Unsubscribe => {
@@ -55,14 +48,13 @@ export function useSurveyFirebase() {
   const deleteSurvey = async (surveyId: string) => {
     try {
       await deleteDoc(doc(db, 'surveys', surveyId))
-      console.log(`Survey ${surveyId} deleted.`)
     } catch (error) {
       console.error('Error deleting survey:', error)
       throw error
     }
   }
 
-  const addSurvey = async (newSurvey: ISurvey, teamMembers: string[] = []): Promise<SurveyNotificationData> => {
+  const addSurvey = async (newSurvey: ISurvey, teamMembers: string[] = []): Promise<ISurveyNotificationData> => {
     try {
       // Create the survey
       const surveyRef = await addDoc(collection(db, 'surveys'), {
@@ -87,7 +79,6 @@ export function useSurveyFirebase() {
   const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>): Promise<void> => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), updatedSurvey)
-      console.log(`Survey ${surveyId} updated.`)
     } catch (error) {
       console.error('Error updating survey:', error)
       throw error
@@ -134,7 +125,7 @@ export function useSurveyFirebase() {
     userUid: string,
     newVote: boolean,
     votes: IVote[],
-    isUserVoteExists: IVote,
+    _isUserVoteExists: IVote,
   ) => {
     // Convert legacy parameter to standard format and delegate to unified function
     return addOrUpdateVote(surveyId, userUid, newVote, votes)
@@ -142,7 +133,7 @@ export function useSurveyFirebase() {
 
   const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
     try {
-      const updateData: any = { status }
+      const updateData: Partial<ISurvey> = { status }
 
       if (status === SurveyStatus.CLOSED && verifiedBy) {
         updateData.verifiedAt = new Date()
@@ -150,7 +141,6 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
-      console.log(`Survey ${surveyId} status updated to ${status}`)
     } catch (error) {
       console.error('Error updating survey status:', error)
       throw error
@@ -159,7 +149,7 @@ export function useSurveyFirebase() {
 
   const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]) => {
     try {
-      const updateData: any = {
+      const updateData: Partial<ISurvey> = {
         status: SurveyStatus.CLOSED,
         verifiedAt: new Date(),
         verifiedBy: verifiedBy
@@ -170,7 +160,6 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
-      console.log(`Survey ${surveyId} verified by ${verifiedBy}`)
     } catch (error) {
       console.error('Error verifying survey:', error)
       throw error
@@ -180,7 +169,6 @@ export function useSurveyFirebase() {
   const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), { votes })
-      console.log(`Survey ${surveyId} votes updated`)
     } catch (error) {
       console.error('Error updating survey votes:', error)
       throw error

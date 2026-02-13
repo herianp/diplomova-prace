@@ -201,31 +201,19 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore.ts'
-import { useScreenComposable } from '@/composable/useScreenComposable.js'
+import { useScreenComposable } from '@/composable/useScreenComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
-import {
-  collection,
-  query,
-  where,
-  limit,
-  startAfter,
-  onSnapshot,
-  doc,
-  updateDoc,
-  writeBatch,
-  arrayUnion,
-  getDocs
-} from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
+import { useNotificationFirebase } from '@/services/notificationFirebase'
 
 const authStore = useAuthStore()
 const { isMobile } = useScreenComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 const router = useRouter()
+const notificationFirebase = useNotificationFirebase()
 
 // State
 const notifications = ref([])
@@ -285,26 +273,19 @@ const loadNotifications = () => {
     unsubscribe()
   }
 
-  const notificationsQuery = query(
-    collection(db, 'notifications'),
-    where('userId', '==', currentUser.value.uid),
-    limit(pageSize)
+  unsubscribe = notificationFirebase.listenToNotifications(
+    currentUser.value.uid,
+    pageSize,
+    (notifs, last) => {
+      notifications.value = notifs
+      lastDoc = last
+      hasMore.value = notifs.length === pageSize
+      loading.value = false
+    },
+    () => {
+      loading.value = false
+    }
   )
-
-  unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-    notifications.value = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-
-
-    lastDoc = snapshot.docs[snapshot.docs.length - 1]
-    hasMore.value = snapshot.docs.length === pageSize
-    loading.value = false
-  }, (error) => {
-    console.error('Error loading notifications:', error)
-    loading.value = false
-  })
 }
 
 const loadMoreNotifications = async () => {
@@ -313,22 +294,15 @@ const loadMoreNotifications = async () => {
   loadingMore.value = true
 
   try {
-    const moreQuery = query(
-      collection(db, 'notifications'),
-      where('userId', '==', currentUser.value.uid),
-      startAfter(lastDoc),
-      limit(pageSize)
+    const result = await notificationFirebase.loadMoreNotifications(
+      currentUser.value.uid,
+      lastDoc,
+      pageSize
     )
 
-    const snapshot = await getDocs(moreQuery)
-    const moreNotifications = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
-
-    notifications.value.push(...moreNotifications)
-    lastDoc = snapshot.docs[snapshot.docs.length - 1]
-    hasMore.value = snapshot.docs.length === pageSize
+    notifications.value.push(...result.notifications)
+    lastDoc = result.lastDoc
+    hasMore.value = result.hasMore
 
   } catch (error) {
     console.error('Error loading more notifications:', error)
@@ -342,26 +316,20 @@ const loadMoreNotifications = async () => {
   }
 }
 
-const refreshNotifications = () => {
+const refreshNotifications = async () => {
   refreshing.value = true
   notifications.value = []
   lastDoc = null
   hasMore.value = true
-  loadNotifications()
-
-  setTimeout(() => {
-    refreshing.value = false
-  }, 1000)
+  await loadNotifications()
+  refreshing.value = false
 }
 
 const markAsRead = async (notification) => {
   if (notification.read) return
 
   try {
-    await updateDoc(doc(db, 'notifications', notification.id), {
-      read: true,
-      readAt: new Date()
-    })
+    await notificationFirebase.markNotificationAsRead(notification.id)
   } catch (error) {
     console.error('Error marking notification as read:', error)
   }
@@ -371,18 +339,8 @@ const markAllAsRead = async () => {
   markingAllRead.value = true
 
   try {
-    const batch = writeBatch(db)
-    const unreadNotifications = notifications.value.filter(n => !n.read)
-
-    unreadNotifications.forEach(notification => {
-      const notificationRef = doc(db, 'notifications', notification.id)
-      batch.update(notificationRef, {
-        read: true,
-        readAt: new Date()
-      })
-    })
-
-    await batch.commit()
+    const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
+    await notificationFirebase.markAllNotificationsAsRead(unreadIds)
 
     $q.notify({
       type: 'positive',
@@ -406,31 +364,7 @@ const handleInvitationResponse = async (notification, response) => {
   respondingTo.value = notification.id
 
   try {
-    const batch = writeBatch(db)
-
-    // Update the team invitation
-    const invitationRef = doc(db, 'teamInvitations', notification.invitationId)
-    batch.update(invitationRef, {
-      status: response,
-      respondedAt: new Date()
-    })
-
-    if (response === 'accepted') {
-      // Add user to team
-      const teamRef = doc(db, 'teams', notification.teamId)
-      batch.update(teamRef, {
-        members: arrayUnion(currentUser.value.uid)
-      })
-    }
-
-    // Update notification
-    const notificationRef = doc(db, 'notifications', notification.id)
-    batch.update(notificationRef, {
-      status: response,
-      read: true
-    })
-
-    await batch.commit()
+    await notificationFirebase.respondToInvitation(notification, response, currentUser.value.uid)
 
     $q.notify({
       type: response === 'accepted' ? 'positive' : 'info',

@@ -132,27 +132,18 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useAuthStore } from '@/stores/authStore.ts'
+import { useReadiness } from '@/composable/useReadiness'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
-import {
-  collection,
-  query,
-  where,
-  limit,
-  onSnapshot,
-  doc,
-  updateDoc,
-  writeBatch,
-  arrayUnion
-} from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
+import { useNotificationFirebase } from '@/services/notificationFirebase'
 
 const authStore = useAuthStore()
 const $q = useQuasar()
 const { t } = useI18n()
 const router = useRouter()
+const notificationFirebase = useNotificationFirebase()
 
 // State
 const notifications = ref([])
@@ -166,7 +157,10 @@ const unreadCount = computed(() => notifications.value.filter(n => !n.read).leng
 const hasUnread = computed(() => unreadCount.value > 0)
 
 // Methods
-const loadNotifications = () => {
+const loadNotifications = async () => {
+  const { waitForAuth } = useReadiness()
+  await waitForAuth()
+
   if (!currentUser.value?.uid) {
     loading.value = false
     return
@@ -177,43 +171,28 @@ const loadNotifications = () => {
     unsubscribe()
   }
 
-  // Add a small delay to ensure Firebase auth is fully ready
-  setTimeout(() => {
-    if (!currentUser.value?.uid) {
-      loading.value = false
-      return
-    }
-
-    try {
-      const notificationsQuery = query(
-        collection(db, 'notifications'),
-        where('userId', '==', currentUser.value.uid),
-        limit(10)
-      )
-
-      unsubscribe = onSnapshot(notificationsQuery, (snapshot) => {
-        notifications.value = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })).sort((a, b) => {
-          // Sort by createdAt descending (newest first)
+  try {
+    unsubscribe = notificationFirebase.listenToNotifications(
+      currentUser.value.uid,
+      10,
+      (notifs) => {
+        notifications.value = notifs.sort((a, b) => {
           const aTime = a.createdAt?.seconds || 0
           const bTime = b.createdAt?.seconds || 0
           return bTime - aTime
         })
         loading.value = false
-      }, (error) => {
-        console.error('Error loading notifications:', error)
-        // If there's a permission error, just set loading to false and empty notifications
+      },
+      () => {
         notifications.value = []
         loading.value = false
-      })
-    } catch (error) {
-      console.error('Error setting up notifications listener:', error)
-      notifications.value = []
-      loading.value = false
-    }
-  }, 200) // 200ms delay to ensure auth is ready
+      }
+    )
+  } catch (error) {
+    console.error('Error setting up notifications listener:', error)
+    notifications.value = []
+    loading.value = false
+  }
 }
 
 const handleNotificationClick = async (notification) => {
@@ -241,31 +220,7 @@ const handleNotificationClick = async (notification) => {
 
 const handleInvitationResponse = async (notification, response) => {
   try {
-    const batch = writeBatch(db)
-
-    // Update the team invitation
-    const invitationRef = doc(db, 'teamInvitations', notification.invitationId)
-    batch.update(invitationRef, {
-      status: response,
-      respondedAt: new Date()
-    })
-
-    if (response === 'accepted') {
-      // Add user to team
-      const teamRef = doc(db, 'teams', notification.teamId)
-      batch.update(teamRef, {
-        members: arrayUnion(currentUser.value.uid)
-      })
-    }
-
-    // Update notification
-    const notificationRef = doc(db, 'notifications', notification.id)
-    batch.update(notificationRef, {
-      status: response,
-      read: true
-    })
-
-    await batch.commit()
+    await notificationFirebase.respondToInvitation(notification, response, currentUser.value.uid)
 
     $q.notify({
       type: response === 'accepted' ? 'positive' : 'info',
@@ -287,10 +242,7 @@ const handleInvitationResponse = async (notification, response) => {
 
 const markAsRead = async (notificationId) => {
   try {
-    await updateDoc(doc(db, 'notifications', notificationId), {
-      read: true,
-      readAt: new Date()
-    })
+    await notificationFirebase.markNotificationAsRead(notificationId)
   } catch (error) {
     console.error('Error marking notification as read:', error)
   }
@@ -298,18 +250,8 @@ const markAsRead = async (notificationId) => {
 
 const markAllAsRead = async () => {
   try {
-    const batch = writeBatch(db)
-    const unreadNotifications = notifications.value.filter(n => !n.read)
-
-    unreadNotifications.forEach(notification => {
-      const notificationRef = doc(db, 'notifications', notification.id)
-      batch.update(notificationRef, {
-        read: true,
-        readAt: new Date()
-      })
-    })
-
-    await batch.commit()
+    const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
+    await notificationFirebase.markAllNotificationsAsRead(unreadIds)
 
     $q.notify({
       type: 'positive',
@@ -378,16 +320,7 @@ watch(currentUser, (newUser, oldUser) => {
 })
 
 onMounted(() => {
-  // Only load notifications if user is already authenticated
-  // Otherwise wait for the watcher to trigger
-  if (currentUser.value?.uid) {
-    // Add a delay to ensure auth is stable
-    setTimeout(() => {
-      if (currentUser.value?.uid) {
-        loadNotifications()
-      }
-    }, 300)
-  }
+  loadNotifications()
 })
 
 onUnmounted(() => {

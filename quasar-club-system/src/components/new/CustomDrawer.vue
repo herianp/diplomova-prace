@@ -17,6 +17,13 @@
 
       <q-separator />
 
+      <q-item v-if="isAdmin" clickable v-ripple @click="navigateTo(RouteEnum.ADMIN.path)">
+        <q-item-section avatar>
+          <q-icon name="admin_panel_settings" color="red" />
+        </q-item-section>
+        <q-item-section>{{ $t('admin.title') }}</q-item-section>
+      </q-item>
+
       <q-item clickable v-ripple @click="navigateTo(RouteEnum.SETTINGS.path)">
         <q-item-section avatar>
           <q-icon name="settings" />
@@ -41,7 +48,7 @@ import { RouteEnum } from '@/enums/routesEnum.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 
 const router = useRouter();
-const { logoutUser } = useAuthComposable();
+const { logoutUser, isAdmin } = useAuthComposable();
 
 const drawerOpen = ref(true);
 
@@ -51,6 +58,7 @@ const topLinks = [
   { title: "Teams", icon: "groups", route: RouteEnum.TEAM.path },
   { title: "Surveys", icon: "poll", route: RouteEnum.SURVEY.path },
   { title: "Reports", icon: "bar_chart", route: RouteEnum.REPORTS.path },
+  { title: "Cashbox", icon: "account_balance_wallet", route: RouteEnum.CASHBOX.path },
   { title: "Messages", icon: "chat", route: RouteEnum.MESSAGES.path },
 ];
 

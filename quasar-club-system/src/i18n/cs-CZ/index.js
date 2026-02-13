@@ -49,6 +49,25 @@ export default {
     createMenu: {
       description: "Vyplňte formulář níže pro vytvoření nové ankety pro váš tým"
     },
+    pageSubtitle: "Spravujte a sledujte ankety vašeho týmu",
+    emptyState: "Žádné ankety nenalezeny",
+    emptyStateHint: "Zkuste upravit filtry nebo vytvořte novou anketu",
+    votes: {
+      total: "Hlasy",
+      unvoted: "nehlasovalo"
+    },
+    actions: {
+      settings: "Nastavení",
+      voteYes: "Hlasovat Ano",
+      voteNo: "Hlasovat Ne"
+    },
+    metrics: {
+      total: "Celkem anket",
+      active: "Aktivní ankety",
+      myParticipation: "Moje docházka",
+      teamParticipation: "Týmová docházka",
+      toggle: "Zobrazit metriky"
+    },
     verification: {
       title: "Ověření ankety",
       reviewAttendance: "Zkontrolujte a upravte účast v této anketě",
@@ -82,6 +101,9 @@ export default {
     title: "Týmy",
     create: "Vytvořit tým",
     update: "Upravit tým",
+    teamOverview: "Přehled vašich týmů",
+    teamName: "Název týmu",
+    noTeams: "Nejste členem žádného týmu",
     selectTeam: "Vybrat tým",
     switchTeam: "Přepnout tým",
     members: "členů",
@@ -128,6 +150,17 @@ export default {
         cancel: "Zrušit pozvánku",
         cancelled: "Pozvánka byla zrušena",
         cancelError: "Nepodařilo se zrušit pozvánku"
+      },
+      delete: {
+        dangerZone: "Nebezpečná zóna",
+        dangerDescription: "Trvale smazat tento tým a všechna související data",
+        button: "Smazat tým",
+        confirmTitle: "Smazat tým",
+        confirmMessage: "Tím se trvale smaže tým a všechny jeho ankety, zprávy, oznámení a pozvánky. Tuto akci nelze vrátit zpět.",
+        typeTeamName: "Pro potvrzení zadejte název týmu",
+        nameMismatch: "Název týmu se neshoduje",
+        success: "Tým byl úspěšně smazán",
+        error: "Nepodařilo se smazat tým"
       }
     }
   },
@@ -158,6 +191,7 @@ export default {
     teamOverview: "Přehled týmu",
     powerUser: "Správce",
     member: "Člen",
+    admin: "Administrátor",
     totalSurveys: "Celkem anket",
     teamMembers: "Členové týmu",
     myVotes: "Mé hlasy",
@@ -230,7 +264,8 @@ export default {
     edit: "Upravit",
     delete: "Smazat",
     update: "Aktualizovat",
-    back: "Zpět"
+    back: "Zpět",
+    fillAllFields: "Prosím vyplňte všechna pole"
   },
   validation: {
     required: "Toto pole je povinné"
@@ -281,7 +316,40 @@ export default {
     sent: "Zpráva odeslána",
     sendError: "Nepodařilo se odeslat zprávu",
     loadError: "Nepodařilo se načíst zprávy",
-    powerUserOnly: "Pouze správci týmu mohou odesílat zprávy"
+    powerUserOnly: "Pouze správci týmu mohou odesílat zprávy",
+    messagesCount: "zpráv",
+    today: "Dnes",
+    yesterday: "Včera"
+  },
+  admin: {
+    title: "Administrace",
+    description: "Celkový přehled a správa systému",
+    teamsTab: "Týmy",
+    usersTab: "Uživatelé",
+    totalTeams: "Celkem týmů",
+    totalUsers: "Celkem uživatelů",
+    totalSurveys: "Celkem anket",
+    avgTeamSize: "Průměrná velikost týmu",
+    searchTeams: "Hledat týmy...",
+    searchUsers: "Hledat uživatele...",
+    teamName: "Název týmu",
+    members: "Členové",
+    powerUsers: "Správci",
+    surveys: "Ankety",
+    creator: "Tvůrce",
+    actions: "Akce",
+    viewTeam: "Zobrazit tým",
+    deleteTeam: "Smazat tým",
+    confirmDeleteTeam: "Pro potvrzení smazání zadejte název týmu. Tím se trvale smaže tým a všechna související data.",
+    deleteSuccess: "Tým byl úspěšně smazán",
+    deleteError: "Nepodařilo se smazat tým",
+    displayName: "Zobrazované jméno",
+    email: "E-mail",
+    createdAt: "Vytvořeno",
+    teamsCount: "Týmy",
+    noTeams: "Žádné týmy nenalezeny",
+    noUsers: "Žádní uživatelé nenalezeni",
+    loadError: "Nepodařilo se načíst data administrace"
   },
   reports: {
     title: "Reporty a analytika",
@@ -325,6 +393,8 @@ export default {
     lastMonth: "Minulý měsíc",
     thisWeek: "Tento týden",
     lastWeek: "Minulý týden",
+    nextWeek: "Příští týden",
+    nextMonth: "Příští měsíc",
     last7Days: "Posledních 7 dní",
     last30Days: "Posledních 30 dní",
     teamStatistics: "Statistiky týmu",
@@ -334,6 +404,122 @@ export default {
     playerStatistics: "Statistiky hráče",
     attendance: "Účast",
     nonAttendance: "Neúčast",
-    avgPlayerParticipation: "Průměrná docházka hráče"
+    avgPlayerParticipation: "Průměrná docházka hráče",
+    monthlyTrend: "Měsíční trend docházky",
+    playerRanking: "Žebříček docházky hráčů",
+    attendanceRate: "Míra docházky"
+  },
+  cashbox: {
+    title: "Pokladna",
+    subtitle: "Správa pokut a plateb vašeho týmu",
+    noTeam: "Není vybrán tým",
+    selectTeamFirst: "Prosím vyberte tým pro správu pokladny",
+    loading: "Načítání dat pokladny...",
+    dashboard: {
+      totalFined: "Celkem pokutováno",
+      totalPaid: "Celkem zaplaceno",
+      outstanding: "Nedoplatek",
+      credits: "Přeplatky hráčů",
+      totalFines: "Celkem pokut"
+    },
+    players: {
+      title: "Zůstatky hráčů",
+      search: "Hledat hráče...",
+      owes: "dluží",
+      credit: "přeplatek",
+      settled: "vyrovnáno",
+      noFines: "Žádné pokuty ani platby",
+      totalFined: "Celkem pokutováno",
+      totalPaid: "Celkem zaplaceno",
+      balance: "Zůstatek"
+    },
+    fines: {
+      title: "Pokuty",
+      addFine: "Přidat pokutu",
+      addManualFine: "Přidat manuální pokutu",
+      player: "Hráč",
+      amount: "Částka",
+      reason: "Důvod",
+      reasonPlaceholder: "Zadejte důvod pokuty...",
+      source: "Zdroj",
+      auto: "Automatická",
+      manual: "Manuální",
+      deleteFine: "Smazat pokutu",
+      addSuccess: "Pokuta byla přidána",
+      addError: "Nepodařilo se přidat pokutu",
+      deleteSuccess: "Pokuta byla smazána",
+      deleteError: "Nepodařilo se smazat pokutu",
+      selectPlayer: "Vyberte hráče",
+      amountRequired: "Částka je povinná",
+      reasonRequired: "Důvod je povinný",
+      playerRequired: "Hráč je povinný"
+    },
+    payments: {
+      title: "Platby",
+      recordPayment: "Zaznamenat platbu",
+      player: "Hráč",
+      amount: "Částka",
+      note: "Poznámka (volitelné)",
+      notePlaceholder: "např. Hotově na tréninku",
+      addSuccess: "Platba byla zaznamenána",
+      addError: "Nepodařilo se zaznamenat platbu",
+      delete: "Smazat platbu",
+      deleteSuccess: "Platba byla smazána",
+      deleteError: "Nepodařilo se smazat platbu",
+      selectPlayer: "Vyberte hráče",
+      amountRequired: "Částka je povinná",
+      playerRequired: "Hráč je povinný"
+    },
+    rules: {
+      title: "Pravidla pokut",
+      addRule: "Přidat pravidlo",
+      name: "Název pravidla",
+      namePlaceholder: "např. Absence na tréninku",
+      amount: "Částka",
+      trigger: "Podmínka",
+      surveyType: "Typ ankety",
+      allTypes: "Všechny typy",
+      active: "Aktivní",
+      inactive: "Neaktivní",
+      noAttendance: "Neúčast",
+      votedYesButAbsent: "Potvrdil ale nepřišel",
+      unvoted: "Nehlasoval",
+      addSuccess: "Pravidlo bylo přidáno",
+      addError: "Nepodařilo se přidat pravidlo",
+      updateSuccess: "Pravidlo bylo aktualizováno",
+      updateError: "Nepodařilo se aktualizovat pravidlo",
+      deleteSuccess: "Pravidlo bylo smazáno",
+      deleteError: "Nepodařilo se smazat pravidlo",
+      confirmDelete: "Opravdu chcete smazat toto pravidlo?",
+      nameRequired: "Název pravidla je povinný",
+      amountRequired: "Částka je povinná"
+    },
+    history: {
+      title: "Nedávná aktivita",
+      fine: "Pokuta",
+      payment: "Platba",
+      noActivity: "Žádná nedávná aktivita"
+    },
+    currency: "Kč",
+    autoFines: {
+      generated: "{count} automatických pokut vygenerováno"
+    },
+    clear: {
+      button: "Vyčistit pokladnu",
+      confirmTitle: "Vyčistit pokladnu",
+      confirmMessage: "Toto archivuje všechny aktuální pokuty a platby a začne znovu. Zbývající zůstatky budou převedeny.",
+      warning: "Tuto akci nelze vrátit zpět.",
+      success: "Pokladna byla vyčištěna",
+      error: "Nepodařilo se vyčistit pokladnu",
+      carryOverFine: "Převod z minulého období",
+      carryOverPayment: "Převod přeplatku z minulého období"
+    },
+    cashboxHistory: {
+      title: "Historie pokladny",
+      clearedAt: "Vyčištěno dne",
+      clearedBy: "Vyčistil",
+      noHistory: "Zatím žádná historie",
+      viewDetails: "Zobrazit detaily"
+    }
   }
 }

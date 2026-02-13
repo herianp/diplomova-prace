@@ -1,7 +1,10 @@
+import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
+import { ITeam } from '@/interfaces/interfaces'
 
 export function useTeamUseCases() {
+  const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
 
@@ -12,17 +15,22 @@ export function useTeamUseCases() {
         teamStore.unsubscribeTeams()
       }
 
+      let isFirstCallback = true
+
       // Set up new listener
       const unsubscribe = teamFirebase.getTeamsByUserId(userId, (teamsList) => {
         teamStore.setTeams(teamsList)
-        console.log("Teams updated: ", teamsList)
 
-        // Set first team as current if available
-        if (teamsList.length > 0) {
+        // Only auto-select on first load when no team is selected
+        if (!teamStore.currentTeam && teamsList.length > 0) {
           teamStore.setCurrentTeam(teamsList[0])
         }
 
-        resolve()
+        if (isFirstCallback) {
+          isFirstCallback = false
+          authStore.setTeamReady(true)
+          resolve()
+        }
       })
 
       // Store unsubscribe function
@@ -35,20 +43,21 @@ export function useTeamUseCases() {
   }
 
   const deleteTeam = async (teamId: string): Promise<void> => {
-    return teamFirebase.deleteTeam(teamId)
+    await teamFirebase.deleteTeam(teamId)
+    // Clear currentTeam if the deleted team was selected
+    if (teamStore.currentTeam?.id === teamId) {
+      const remaining = teamStore.teams.filter(t => t.id !== teamId)
+      teamStore.setCurrentTeam(remaining.length > 0 ? remaining[0] : null)
+    }
   }
 
-  const getTeamById = async (teamId: string) => {
+  const getTeamById = async (teamId: string): Promise<ITeam | null> => {
     return teamFirebase.getTeamById(teamId)
   }
 
-  const getTeamByIdAndSetCurrentTeam = async (teamId: string) => {
+  const getTeamByIdAndSetCurrentTeam = async (teamId: string): Promise<void> => {
     const team = await teamFirebase.getTeamById(teamId)
     teamStore.setCurrentTeam(team)
-  }
-
-  const addCashboxTransaction = async (teamId: string, transactionData: any): Promise<void> => {
-    return teamFirebase.addCashboxTransaction(teamId, transactionData)
   }
 
   const clearTeamData = () => {
@@ -61,7 +70,6 @@ export function useTeamUseCases() {
     deleteTeam,
     getTeamById,
     getTeamByIdAndSetCurrentTeam,
-    addCashboxTransaction,
     clearTeamData
   }
 }

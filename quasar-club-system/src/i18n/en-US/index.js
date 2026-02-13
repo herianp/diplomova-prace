@@ -49,6 +49,25 @@ export default {
     createMenu: {
       description: "Fill out the form below to create a new survey for your team"
     },
+    pageSubtitle: "Manage and track your team surveys",
+    emptyState: "No surveys found",
+    emptyStateHint: "Try adjusting your filters or create a new survey",
+    votes: {
+      total: "Votes",
+      unvoted: "unvoted"
+    },
+    actions: {
+      settings: "Settings",
+      voteYes: "Vote Yes",
+      voteNo: "Vote No"
+    },
+    metrics: {
+      total: "Total Surveys",
+      active: "Active Surveys",
+      myParticipation: "My Attendance",
+      teamParticipation: "Team Attendance",
+      toggle: "Show Metrics"
+    },
     verification: {
       title: "Survey Verification",
       reviewAttendance: "Review and modify attendance for this survey",
@@ -82,6 +101,9 @@ export default {
     title: "Teams",
     create: "Create team",
     update: "Edit team",
+    teamOverview: "Your teams overview",
+    teamName: "Team name",
+    noTeams: "You are not a member of any team yet",
     selectTeam: "Select Team",
     switchTeam: "Switch Team",
     members: "members",
@@ -128,6 +150,17 @@ export default {
         cancel: "Cancel invitation",
         cancelled: "Invitation cancelled",
         cancelError: "Failed to cancel invitation"
+      },
+      delete: {
+        dangerZone: "Danger Zone",
+        dangerDescription: "Permanently delete this team and all associated data",
+        button: "Delete Team",
+        confirmTitle: "Delete Team",
+        confirmMessage: "This will permanently delete the team and all its surveys, messages, notifications, and invitations. This action cannot be undone.",
+        typeTeamName: "Type the team name to confirm",
+        nameMismatch: "Team name does not match",
+        success: "Team deleted successfully",
+        error: "Failed to delete team"
       }
     }
   },
@@ -158,11 +191,12 @@ export default {
     teamOverview: "Team Overview",
     powerUser: "Power User",
     member: "Member",
+    admin: "Admin",
     totalSurveys: "Total Surveys",
     teamMembers: "Team Members",
     myVotes: "My Votes",
-    teamParticipation: "Týmová docházka",
-    personalParticipation: "Osobní docházka",
+    teamParticipation: "Team Attendance",
+    personalParticipation: "Personal Attendance",
     recentSurveys: "Recent Surveys",
     last5Surveys: "Last 5 surveys with your voting history",
     votingTrends: "Voting Trends",
@@ -230,7 +264,8 @@ export default {
     edit: "Edit",
     delete: "Delete",
     update: "Update",
-    back: "Back"
+    back: "Back",
+    fillAllFields: "Please fill in all fields"
   },
   validation: {
     required: "This field is required"
@@ -281,7 +316,40 @@ export default {
     sent: "Message sent",
     sendError: "Failed to send message",
     loadError: "Failed to load messages",
-    powerUserOnly: "Only team power users can send messages"
+    powerUserOnly: "Only team power users can send messages",
+    messagesCount: "messages",
+    today: "Today",
+    yesterday: "Yesterday"
+  },
+  admin: {
+    title: "Admin Dashboard",
+    description: "System-wide overview and management",
+    teamsTab: "Teams",
+    usersTab: "Users",
+    totalTeams: "Total Teams",
+    totalUsers: "Total Users",
+    totalSurveys: "Total Surveys",
+    avgTeamSize: "Avg Team Size",
+    searchTeams: "Search teams...",
+    searchUsers: "Search users...",
+    teamName: "Team Name",
+    members: "Members",
+    powerUsers: "Power Users",
+    surveys: "Surveys",
+    creator: "Creator",
+    actions: "Actions",
+    viewTeam: "View Team",
+    deleteTeam: "Delete Team",
+    confirmDeleteTeam: "Type the team name to confirm deletion. This will permanently delete the team and all associated data.",
+    deleteSuccess: "Team deleted successfully",
+    deleteError: "Failed to delete team",
+    displayName: "Display Name",
+    email: "Email",
+    createdAt: "Created At",
+    teamsCount: "Teams",
+    noTeams: "No teams found",
+    noUsers: "No users found",
+    loadError: "Failed to load admin data"
   },
   reports: {
     title: "Reports & Analytics",
@@ -325,6 +393,8 @@ export default {
     lastMonth: "Last Month",
     thisWeek: "This Week",
     lastWeek: "Last Week",
+    nextWeek: "Next Week",
+    nextMonth: "Next Month",
     last7Days: "Last 7 Days",
     last30Days: "Last 30 Days",
     teamStatistics: "Team Statistics",
@@ -334,6 +404,122 @@ export default {
     playerStatistics: "Player Statistics",
     attendance: "Attendance",
     nonAttendance: "Non-Attendance",
-    avgPlayerParticipation: "Avg Player Attendance"
+    avgPlayerParticipation: "Avg Player Attendance",
+    monthlyTrend: "Monthly Attendance Trend",
+    playerRanking: "Player Attendance Ranking",
+    attendanceRate: "Attendance Rate"
+  },
+  cashbox: {
+    title: "Cashbox",
+    subtitle: "Manage fines and payments for your team",
+    noTeam: "No Team Selected",
+    selectTeamFirst: "Please select a team to manage the cashbox",
+    loading: "Loading cashbox data...",
+    dashboard: {
+      totalFined: "Total Fined",
+      totalPaid: "Total Paid",
+      outstanding: "Outstanding",
+      credits: "Player Credits",
+      totalFines: "Total Fines"
+    },
+    players: {
+      title: "Player Balances",
+      search: "Search players...",
+      owes: "owes",
+      credit: "credit",
+      settled: "settled",
+      noFines: "No fines or payments recorded",
+      totalFined: "Total Fined",
+      totalPaid: "Total Paid",
+      balance: "Balance"
+    },
+    fines: {
+      title: "Fines",
+      addFine: "Add Fine",
+      addManualFine: "Add Manual Fine",
+      player: "Player",
+      amount: "Amount",
+      reason: "Reason",
+      reasonPlaceholder: "Enter reason for fine...",
+      source: "Source",
+      auto: "Auto",
+      manual: "Manual",
+      deleteFine: "Delete Fine",
+      addSuccess: "Fine added successfully",
+      addError: "Failed to add fine",
+      deleteSuccess: "Fine deleted successfully",
+      deleteError: "Failed to delete fine",
+      selectPlayer: "Select a player",
+      amountRequired: "Amount is required",
+      reasonRequired: "Reason is required",
+      playerRequired: "Player is required"
+    },
+    payments: {
+      title: "Payments",
+      recordPayment: "Record Payment",
+      player: "Player",
+      amount: "Amount",
+      note: "Note (optional)",
+      notePlaceholder: "e.g. Cash at training",
+      addSuccess: "Payment recorded successfully",
+      addError: "Failed to record payment",
+      delete: "Delete Payment",
+      deleteSuccess: "Payment deleted successfully",
+      deleteError: "Failed to delete payment",
+      selectPlayer: "Select a player",
+      amountRequired: "Amount is required",
+      playerRequired: "Player is required"
+    },
+    rules: {
+      title: "Fine Rules",
+      addRule: "Add Rule",
+      name: "Rule Name",
+      namePlaceholder: "e.g. Missed training",
+      amount: "Amount",
+      trigger: "Trigger",
+      surveyType: "Survey Type",
+      allTypes: "All Types",
+      active: "Active",
+      inactive: "Inactive",
+      noAttendance: "No Attendance",
+      votedYesButAbsent: "Confirmed but absent",
+      unvoted: "Did not vote",
+      addSuccess: "Rule added successfully",
+      addError: "Failed to add rule",
+      updateSuccess: "Rule updated successfully",
+      updateError: "Failed to update rule",
+      deleteSuccess: "Rule deleted successfully",
+      deleteError: "Failed to delete rule",
+      confirmDelete: "Are you sure you want to delete this rule?",
+      nameRequired: "Rule name is required",
+      amountRequired: "Amount is required"
+    },
+    history: {
+      title: "Recent Activity",
+      fine: "Fine",
+      payment: "Payment",
+      noActivity: "No recent activity"
+    },
+    currency: "CZK",
+    autoFines: {
+      generated: "{count} auto-fine(s) generated"
+    },
+    clear: {
+      button: "Clear Cashbox",
+      confirmTitle: "Clear Cashbox",
+      confirmMessage: "This will archive all current fines and payments and start fresh. Outstanding balances will be carried over.",
+      warning: "This action cannot be undone.",
+      success: "Cashbox cleared successfully",
+      error: "Failed to clear cashbox",
+      carryOverFine: "Carry-over from previous period",
+      carryOverPayment: "Credit carry-over from previous period"
+    },
+    cashboxHistory: {
+      title: "Cashbox History",
+      clearedAt: "Cleared on",
+      clearedBy: "Cleared by",
+      noHistory: "No history yet",
+      viewDetails: "View Details"
+    }
   }
 }

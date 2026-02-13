@@ -215,19 +215,20 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
-import { useTeamComposable } from '@/composable/useTeamComposable'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { useCashboxUseCases } from '@/composable/useCashboxUseCases'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
-import { collection, query, where, getDocs } from 'firebase/firestore'
-import { db } from '@/firebase/config'
+import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 
 const route = useRoute()
 const router = useRouter()
 const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
-const { getSurveyById, verifySurvey, deleteSurvey: deleteSurveyFromDB } = useTeamComposable()
+const { getSurveyById, verifySurvey, deleteSurvey: deleteSurveyFromDB } = useSurveyUseCases()
+const { generateAutoFines } = useCashboxUseCases()
 const $q = useQuasar()
 const { t } = useI18n()
 
@@ -295,29 +296,7 @@ const loadTeamMembers = async () => {
       return
     }
 
-    const members = currentTeam.value.members
-    const allUsers = []
-
-    // Split members into chunks of 30 (Firestore IN query limit)
-    const chunkSize = 30
-    for (let i = 0; i < members.length; i += chunkSize) {
-      const chunk = members.slice(i, i + chunkSize)
-
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('__name__', 'in', chunk)
-      )
-      const usersSnapshot = await getDocs(usersQuery)
-
-      const chunkUsers = usersSnapshot.docs.map(doc => ({
-        uid: doc.id,
-        ...doc.data()
-      }))
-
-      allUsers.push(...chunkUsers)
-    }
-
-    teamMembers.value = allUsers
+    teamMembers.value = await queryByIdsInChunks('users', currentTeam.value.members)
   } catch (error) {
     console.error('Error loading team members:', error)
     teamMembers.value = []
@@ -359,8 +338,36 @@ const saveSurvey = async () => {
       }
     })
 
+    // Save original votes before verification for auto-fine comparison
+    const originalVotes = survey.value.votes || []
+
     // Verify the survey with updated votes
     await verifySurvey(survey.value.id, currentUser.value.uid, updatedVotes)
+
+    // Generate auto-fines based on fine rules
+    if (currentTeam.value?.id) {
+      try {
+        const finesGenerated = await generateAutoFines(
+          currentTeam.value.id,
+          survey.value.id,
+          survey.value.title,
+          survey.value.type,
+          originalVotes,
+          updatedVotes,
+          currentTeam.value.members,
+          currentUser.value.uid
+        )
+        if (finesGenerated > 0) {
+          $q.notify({
+            type: 'info',
+            message: t('cashbox.autoFines.generated', { count: finesGenerated }),
+            icon: 'gavel'
+          })
+        }
+      } catch (fineError) {
+        console.error('Error generating auto-fines:', fineError)
+      }
+    }
 
     $q.notify({
       type: 'positive',

@@ -1,5 +1,6 @@
 import { defineRouter } from '#q-app/wrappers'
 import { createRouter, createMemoryHistory, createWebHistory, createWebHashHistory } from 'vue-router'
+import { watch } from 'vue'
 import routes from './routes'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useAuthUseCases } from '@/composable/useAuthUseCases.ts'
@@ -29,10 +30,32 @@ export default defineRouter(function () {
   Router.beforeEach(async (to, from, next) => {
     const authStore = useAuthStore()
 
-    // Route Protection
-    if (!authStore.user?.uid && to.path !== RouteEnum.LOGIN.path && to.path !== RouteEnum.REGISTER.path && to.path !== RouteEnum.ABOUT.path) {
+    // Wait for Firebase auth to resolve before guarding routes
+    if (!authStore.isAuthReady) {
+      await new Promise((resolve) => {
+        const stop = watch(
+          () => authStore.isAuthReady,
+          (ready) => {
+            if (ready) {
+              stop()
+              resolve()
+            }
+          }
+        )
+      })
+    }
+
+    const publicPaths = [RouteEnum.LOGIN.path, RouteEnum.REGISTER.path]
+    const isPublic = publicPaths.includes(to.path)
+
+    // Redirect root to dashboard or login
+    if (to.path === '/') {
+      next(authStore.user?.uid ? RouteEnum.DASHBOARD.path : RouteEnum.LOGIN.path)
+    } else if (!authStore.user?.uid && !isPublic) {
       next(RouteEnum.LOGIN.path)
-    } else if (authStore.user?.uid && to.path === RouteEnum.LOGIN.path) {
+    } else if (authStore.user?.uid && isPublic) {
+      next(RouteEnum.DASHBOARD.path)
+    } else if (to.meta?.requiresAdmin && !authStore.isAdmin) {
       next(RouteEnum.DASHBOARD.path)
     } else {
       next()

@@ -4,19 +4,16 @@ import {
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
   User,
   getAuth,
   Unsubscribe
 } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
-
-interface UserData {
-  uid: string;
-  email: string | null;
-  name?: string;
-  displayName?: string;
-  createdAt: Date;
-}
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { IUser } from "@/interfaces/interfaces";
 
 export function useAuthFirebase() {
   const authStateListener = (callback: (user: User | null) => void): Unsubscribe => {
@@ -36,7 +33,6 @@ export function useAuthFirebase() {
   const logoutUser = async (): Promise<void> => {
     try {
       await signOut(auth);
-      console.log("User signed out successfully");
     } catch (error) {
       console.error(`Logout Error: ${error.message}`);
       throw error;
@@ -58,7 +54,7 @@ export function useAuthFirebase() {
   };
 
   const createUserInFirestore = async (user: User, name?: string): Promise<void> => {
-    const userDoc: UserData = {
+    const userDoc: IUser = {
       uid: user.uid,
       email: user.email,
       name: name || "",
@@ -68,7 +64,6 @@ export function useAuthFirebase() {
 
     try {
       await setDoc(doc(db, "users", user.uid), userDoc);
-      console.log("User registered and added to Firestore:", userDoc);
     } catch (error) {
       console.error("Error adding user to Firestore:", error);
       throw error;
@@ -89,17 +84,44 @@ export function useAuthFirebase() {
     return null;
   };
 
-  const getUserFromFirestore = async (uid: string): Promise<UserData | null> => {
+  const getUserFromFirestore = async (uid: string): Promise<IUser | null> => {
     try {
       const userDoc = await getDoc(doc(db, "users", uid));
       if (userDoc.exists()) {
-        return userDoc.data() as UserData;
+        return userDoc.data() as IUser;
       }
       return null;
     } catch (error) {
       console.error("Error getting user from Firestore:", error);
       throw error;
     }
+  };
+
+  const updateUserProfile = async (uid: string, displayName: string): Promise<void> => {
+    const auth = getAuth();
+    if (!auth.currentUser) throw new Error('No authenticated user');
+
+    // Update Firebase Auth profile
+    await updateProfile(auth.currentUser, { displayName });
+
+    // Update Firestore user document
+    const userRef = doc(db, 'users', uid);
+    await updateDoc(userRef, { displayName });
+  };
+
+  const changeUserPassword = async (currentPassword: string, newPassword: string): Promise<void> => {
+    const auth = getAuth();
+    if (!auth.currentUser?.email) throw new Error('No authenticated user');
+
+    // Re-authenticate user first
+    const credential = EmailAuthProvider.credential(
+      auth.currentUser.email,
+      currentPassword
+    );
+    await reauthenticateWithCredential(auth.currentUser, credential);
+
+    // Update password
+    await updatePassword(auth.currentUser, newPassword);
   };
 
   return {
@@ -110,6 +132,8 @@ export function useAuthFirebase() {
     createUserInFirestore,
     getCurrentUser,
     refreshUser,
-    getUserFromFirestore
+    getUserFromFirestore,
+    updateUserProfile,
+    changeUserPassword
   };
 }

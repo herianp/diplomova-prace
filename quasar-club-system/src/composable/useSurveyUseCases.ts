@@ -1,6 +1,5 @@
 import { useTeamStore } from '@/stores/teamStore'
 import { useSurveyFirebase } from '@/services/surveyFirebase'
-import { useTeamFirebase } from '@/services/teamFirebase'
 import { useNotifications } from '@/composable/useNotificationsComposable'
 import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
 import { getDoc, doc } from 'firebase/firestore'
@@ -10,7 +9,6 @@ export function useSurveyUseCases() {
   const teamStore = useTeamStore()
   const { createSurveyNotification } = useNotifications()
   const surveyFirebase = useSurveyFirebase()
-  const teamFirebase = useTeamFirebase()
 
   const setSurveysListener = (teamId: string) => {
     // Clear existing listener
@@ -52,10 +50,7 @@ export function useSurveyUseCases() {
       // Create notifications for all team members (business logic)
       if (teamMembers.length > 0) {
         await createSurveyNotification(surveyData, teamMembers)
-        console.log('Survey notifications created for', teamMembers.length, 'members')
       }
-
-      console.log('Survey added:', newSurvey)
     } catch (error) {
       console.error('Error adding survey:', error)
       throw error

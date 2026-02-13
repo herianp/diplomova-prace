@@ -1,9 +1,6 @@
 <template>
     <div class="column">
       <div class="row">
-        <h5 class="text-h5 text-white q-my-md">Company & Co</h5>
-      </div>
-      <div class="row">
         <q-card square bordered class="q-pa-lg shadow-1">
           <q-card-section>
             <q-form class="q-gutter-md">
@@ -49,16 +46,16 @@ const handleLogin = () => {
 };
 </script>
 
-<style>
-.q-card {
+<style scoped>
+:deep(.q-card) {
   width: 360px;
 }
 
-.q-form {
+:deep(.q-form) {
   text-align: center;
 }
 
-.q-form h3 {
+:deep(.q-form h3) {
   margin: 0;
 }
 </style>

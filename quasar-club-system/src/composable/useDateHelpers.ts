@@ -1,4 +1,5 @@
 ﻿import { DateTime } from "luxon";
+import { SEASON_CONFIG } from '@/config/seasonConfig';
 
 interface DatePreset {
   key: string
@@ -66,8 +67,8 @@ export function useDateHelpers(locale = 'en') {
       {
         key: 'season',
         label: translateKey('reports.thisSeason'),
-        from: '2025-07-13',
-        to: '2026-06-30'
+        from: SEASON_CONFIG.startDate,
+        to: SEASON_CONFIG.endDate
       },
       {
         key: 'thisMonth',
@@ -85,13 +86,25 @@ export function useDateHelpers(locale = 'en') {
         key: 'thisWeek',
         label: translateKey('reports.thisWeek'),
         from: DateTime.now().startOf('week').toISODate(),
-        to: DateTime.now().toISODate()
+        to: DateTime.now().endOf('week').toISODate()
       },
       {
         key: 'lastWeek',
         label: translateKey('reports.lastWeek'),
         from: DateTime.now().minus({ weeks: 1 }).startOf('week').toISODate(),
         to: DateTime.now().minus({ weeks: 1 }).endOf('week').toISODate()
+      },
+      {
+        key: 'nextWeek',
+        label: translateKey('reports.nextWeek'),
+        from: DateTime.now().plus({ weeks: 1 }).startOf('week').toISODate(),
+        to: DateTime.now().plus({ weeks: 1 }).endOf('week').toISODate()
+      },
+      {
+        key: 'nextMonth',
+        label: translateKey('reports.nextMonth'),
+        from: DateTime.now().plus({ months: 1 }).startOf('month').toISODate(),
+        to: DateTime.now().plus({ months: 1 }).endOf('month').toISODate()
       },
       {
         key: 'last7Days',
@@ -113,8 +126,8 @@ export function useDateHelpers(locale = 'en') {
    */
   const getSeasonDateRange = () => {
     return {
-      from: '2025-07-13',
-      to: '2026-06-30'
+      from: SEASON_CONFIG.startDate,
+      to: SEASON_CONFIG.endDate
     }
   }
 

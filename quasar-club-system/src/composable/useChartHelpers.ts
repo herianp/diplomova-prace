@@ -1,4 +1,4 @@
-import { ref, onUnmounted } from 'vue'
+import { ref, Ref, onUnmounted } from 'vue'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -15,21 +15,10 @@ import {
   Legend,
   ArcElement,
   ChartConfiguration,
-  ChartType
+  ChartType,
+  TooltipItem
 } from 'chart.js'
-
-export interface ChartData {
-  labels: string[]
-  datasets: any[]
-}
-
-export interface ChartOptions {
-  responsive?: boolean
-  maintainAspectRatio?: boolean
-  plugins?: any
-  scales?: any
-  [key: string]: any
-}
+import { IChartData, IChartDataset, IChartOptions, ISurvey, IVote, ITeamMember } from '@/interfaces/interfaces'
 
 // Register Chart.js components
 ChartJS.register(
@@ -94,7 +83,7 @@ export function useChartHelpers() {
   /**
    * Default chart options
    */
-  const defaultOptions: ChartOptions = {
+  const defaultOptions: IChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -116,10 +105,10 @@ export function useChartHelpers() {
    * Create a chart instance with automatic cleanup
    */
   const createChart = (
-    canvasRef: any,
+    canvasRef: Ref<HTMLCanvasElement | null>,
     type: ChartType,
-    data: ChartData,
-    options: ChartOptions = {}
+    data: IChartData,
+    options: IChartOptions = {}
   ) => {
     const chartInstance = ref<ChartJS | null>(null)
 
@@ -135,7 +124,7 @@ export function useChartHelpers() {
       }
     }
 
-    const updateChart = (newData: ChartData, newOptions?: ChartOptions) => {
+    const updateChart = (newData: IChartData, newOptions?: IChartOptions) => {
       if (chartInstance.value) {
         chartInstance.value.data = newData
         if (newOptions) {
@@ -163,7 +152,7 @@ export function useChartHelpers() {
   /**
    * Generate line chart configuration for survey participation over time
    */
-  const createParticipationLineChart = (surveys: any[], userUid?: string): ChartData => {
+  const createParticipationLineChart = (surveys: ISurvey[], userUid?: string): IChartData => {
     const sortedSurveys = surveys.sort((a, b) => a.date.localeCompare(b.date))
 
     const labels = sortedSurveys.map(survey => {
@@ -173,19 +162,19 @@ export function useChartHelpers() {
 
     const participationData = sortedSurveys.map(survey => {
       const totalVotes = survey.votes?.length || 0
-      const yesVotes = survey.votes?.filter((vote: any) => vote.vote === true).length || 0
+      const yesVotes = survey.votes?.filter((vote: IVote) => vote.vote === true).length || 0
       return totalVotes > 0 ? Math.round((yesVotes / totalVotes) * 100) : 0
     })
 
-    let userParticipationData: number[] = []
+    let userParticipationData: (number | null)[] = []
     if (userUid) {
       userParticipationData = sortedSurveys.map(survey => {
-        const userVote = survey.votes?.find((vote: any) => vote.userUid === userUid)
+        const userVote = survey.votes?.find((vote: IVote) => vote.userUid === userUid)
         return userVote ? (userVote.vote ? 100 : 0) : null
       })
     }
 
-    const datasets = [
+    const datasets: IChartDataset[] = [
       {
         label: 'Team Participation %',
         data: participationData,
@@ -214,7 +203,7 @@ export function useChartHelpers() {
   /**
    * Generate doughnut chart for survey types
    */
-  const createSurveyTypesChart = (surveys: any[]): ChartData => {
+  const createSurveyTypesChart = (surveys: ISurvey[]): IChartData => {
     const typeCounts: Record<string, number> = {}
 
     surveys.forEach(survey => {
@@ -239,10 +228,10 @@ export function useChartHelpers() {
   /**
    * Generate bar chart for member activity
    */
-  const createMemberActivityChart = (members: any[], surveys: any[]): ChartData => {
+  const createMemberActivityChart = (members: ITeamMember[], surveys: ISurvey[]): IChartData => {
     const memberStats = members.map(member => {
       const yesVotes = surveys.reduce((count, survey) => {
-        const vote = survey.votes?.find((v: any) => v.userUid === member.uid)
+        const vote = survey.votes?.find((v: IVote) => v.userUid === member.uid)
         return count + (vote && vote.vote === true ? 1 : 0)
       }, 0)
 
@@ -267,7 +256,7 @@ export function useChartHelpers() {
   /**
    * Generate options for responsive charts
    */
-  const getResponsiveOptions = (title?: string): ChartOptions => ({
+  const getResponsiveOptions = (title?: string): IChartOptions => ({
     ...defaultOptions,
     plugins: {
       ...defaultOptions.plugins,
@@ -298,7 +287,7 @@ export function useChartHelpers() {
   /**
    * Generate options for doughnut/pie charts
    */
-  const getDoughnutOptions = (title?: string): ChartOptions => ({
+  const getDoughnutOptions = (title?: string): IChartOptions => ({
     ...defaultOptions,
     plugins: {
       ...defaultOptions.plugins,
@@ -328,7 +317,7 @@ export function useChartHelpers() {
   /**
    * Format number for chart tooltips
    */
-  const formatTooltipValue = (value: number, context: any): string => {
+  const formatTooltipValue = (value: number, context: TooltipItem<ChartType>): string => {
     const label = context.label || ''
     const datasetLabel = context.dataset.label || ''
 
