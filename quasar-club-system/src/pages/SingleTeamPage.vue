@@ -38,6 +38,28 @@
           />
         </div>
       </div>
+
+      <!-- Danger Zone (Creator Only) -->
+      <div v-if="canDeleteTeam" class="q-mt-xl">
+        <q-card flat bordered class="border-negative">
+          <q-card-section>
+            <div class="row items-center q-gutter-sm">
+              <q-icon name="warning" color="negative" size="1.5rem" />
+              <div class="text-subtitle1 text-weight-bold text-negative">{{ $t('team.single.delete.dangerZone') }}</div>
+            </div>
+            <div class="text-body2 text-grey-7 q-mt-xs">{{ $t('team.single.delete.dangerDescription') }}</div>
+          </q-card-section>
+          <q-card-actions>
+            <q-btn
+              outline
+              color="negative"
+              icon="delete_forever"
+              :label="$t('team.single.delete.button')"
+              @click="showDeleteDialog = true"
+            />
+          </q-card-actions>
+        </q-card>
+      </div>
     </div>
 
     <div v-else class="text-center q-mt-xl">
@@ -65,40 +87,66 @@
         </q-card-actions>
       </q-card>
     </q-dialog>
+
+    <!-- Delete Team Confirmation Dialog -->
+    <q-dialog v-model="showDeleteDialog">
+      <q-card style="min-width: 380px;">
+        <q-card-section class="row items-center q-pb-none">
+          <q-icon name="delete_forever" color="negative" size="2em" class="q-mr-md" />
+          <span class="text-h6 text-negative">{{ $t('team.single.delete.confirmTitle') }}</span>
+        </q-card-section>
+
+        <q-card-section>
+          <div class="text-body2 q-mb-md">{{ $t('team.single.delete.confirmMessage') }}</div>
+          <q-input
+            v-model="deleteConfirmName"
+            :label="$t('team.single.delete.typeTeamName')"
+            :hint="team?.name"
+            filled
+            dense
+          />
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('common.cancel')" color="grey-7" v-close-popup />
+          <q-btn
+            unelevated
+            :label="$t('team.single.delete.button')"
+            color="negative"
+            :disable="deleteConfirmName !== team?.name"
+            :loading="isDeleting"
+            @click="handleDeleteTeam"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  deleteDoc,
-  doc,
-  updateDoc,
-  arrayUnion,
-  arrayRemove,
-  getDoc
-} from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
-import { useNotifications } from '@/composable/useNotificationsComposable.js'
+import { queryByIdsInChunks } from '@/utils/firestoreUtils'
+import { useNotifications } from '@/composable/useNotificationsComposable'
+import { useTeamFirebase } from '@/services/teamFirebase'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
+import { RouteEnum } from '@/enums/routesEnum'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
 import TeamInvitationComponent from '@/components/team/TeamInvitationComponent.vue'
 import TeamInvitationPendingComponent from '@/components/team/TeamInvitationPendingComponent.vue'
 
 const route = useRoute()
-const { currentUser } = useAuthComposable()
+const router = useRouter()
+const { currentUser, isAdmin } = useAuthComposable()
 const $q = useQuasar()
 const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
+const teamFirebase = useTeamFirebase()
+const { deleteTeam } = useTeamUseCases()
 
 // State
 const loading = ref(true)
@@ -108,6 +156,9 @@ const pendingInvitations = ref([])
 const sendingInvite = ref(false)
 const showRemoveDialog = ref(false)
 const memberToRemove = ref(null)
+const showDeleteDialog = ref(false)
+const deleteConfirmName = ref('')
+const isDeleting = ref(false)
 
 // Form
 const inviteForm = reactive({
@@ -117,13 +168,14 @@ const inviteForm = reactive({
 
 // Computed
 const teamId = computed(() => route.params.teamId)
-const { isCurrentUserPowerUser }  = useAuthComposable();
+const { isCurrentUserPowerUser }  = useAuthComposable()
+const canDeleteTeam = computed(() => team.value?.creator === currentUser.value?.uid || isAdmin.value)
 
 const loadTeam = async () => {
   try {
-    const teamDoc = await getDoc(doc(db, 'teams', teamId.value))
-    if (teamDoc.exists()) {
-      team.value = { id: teamDoc.id, ...teamDoc.data() }
+    const teamData = await teamFirebase.getTeamById(teamId.value)
+    if (teamData) {
+      team.value = { id: teamId.value, ...teamData }
       await loadTeamMembers()
       if (isCurrentUserPowerUser.value) {
         await loadPendingInvitations()
@@ -149,28 +201,7 @@ const loadTeamMembers = async () => {
       return
     }
 
-    const allUsers = []
-
-    // Split members into chunks of 30 (Firestore IN query limit)
-    const chunkSize = 30
-    for (let i = 0; i < members.length; i += chunkSize) {
-      const chunk = members.slice(i, i + chunkSize)
-
-      const usersQuery = query(
-        collection(db, 'users'),
-        where('__name__', 'in', chunk)
-      )
-      const usersSnapshot = await getDocs(usersQuery)
-
-      const chunkUsers = usersSnapshot.docs.map(doc => ({
-        uid: doc.id,
-        ...doc.data()
-      }))
-
-      allUsers.push(...chunkUsers)
-    }
-
-    teamMembers.value = allUsers
+    teamMembers.value = await queryByIdsInChunks('users', members)
   } catch (error) {
     console.error('Error loading team members:', error)
   }
@@ -178,16 +209,7 @@ const loadTeamMembers = async () => {
 
 const loadPendingInvitations = async () => {
   try {
-    const invitationsQuery = query(
-      collection(db, 'teamInvitations'),
-      where('teamId', '==', teamId.value),
-      where('status', '==', 'pending')
-    )
-    const invitationsSnapshot = await getDocs(invitationsQuery)
-    pendingInvitations.value = invitationsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }))
+    pendingInvitations.value = await teamFirebase.loadPendingInvitations(teamId.value)
   } catch (error) {
     console.error('Error loading pending invitations:', error)
   }
@@ -198,13 +220,9 @@ const sendInvitation = async () => {
     sendingInvite.value = true
 
     // Check if user exists
-    const usersQuery = query(
-      collection(db, 'users'),
-      where('email', '==', inviteForm.email)
-    )
-    const usersSnapshot = await getDocs(usersQuery)
+    const targetUser = await teamFirebase.findUserByEmail(inviteForm.email)
 
-    if (usersSnapshot.empty) {
+    if (!targetUser) {
       $q.notify({
         type: 'negative',
         message: t('team.single.invite.userNotFound'),
@@ -212,8 +230,6 @@ const sendInvitation = async () => {
       })
       return
     }
-
-    const targetUser = usersSnapshot.docs[0]
 
     // Check if user is already a member
     if (team.value.members?.includes(targetUser.id)) {
@@ -226,15 +242,9 @@ const sendInvitation = async () => {
     }
 
     // Check if invitation already exists
-    const existingInviteQuery = query(
-      collection(db, 'teamInvitations'),
-      where('teamId', '==', teamId.value),
-      where('inviteeEmail', '==', inviteForm.email),
-      where('status', '==', 'pending')
-    )
-    const existingInviteSnapshot = await getDocs(existingInviteQuery)
+    const alreadyInvited = await teamFirebase.checkExistingInvitation(teamId.value, inviteForm.email)
 
-    if (!existingInviteSnapshot.empty) {
+    if (alreadyInvited) {
       $q.notify({
         type: 'negative',
         message: t('team.single.invite.alreadyInvited'),
@@ -256,7 +266,7 @@ const sendInvitation = async () => {
       createdAt: new Date()
     }
 
-    const invitationRef = await addDoc(collection(db, 'teamInvitations'), invitationData)
+    const invitationRef = await teamFirebase.sendTeamInvitation(invitationData)
 
     // Create notification for the invitee
     await createTeamInvitationNotification({
@@ -289,7 +299,7 @@ const sendInvitation = async () => {
 
 const cancelInvitation = async (invitation) => {
   try {
-    await deleteDoc(doc(db, 'teamInvitations', invitation.id))
+    await teamFirebase.cancelInvitation(invitation.id)
     $q.notify({
       type: 'positive',
       message: t('team.single.pendingInvites.cancelled'),
@@ -313,11 +323,7 @@ const confirmRemoveMember = (member) => {
 
 const removeMember = async () => {
   try {
-    const teamRef = doc(db, 'teams', teamId.value)
-    await updateDoc(teamRef, {
-      members: arrayRemove(memberToRemove.value.uid),
-      powerusers: arrayRemove(memberToRemove.value.uid)
-    })
+    await teamFirebase.removeMember(teamId.value, memberToRemove.value.uid)
 
     $q.notify({
       type: 'positive',
@@ -341,10 +347,7 @@ const removeMember = async () => {
 
 const promoteToPowerUser = async (member) => {
   try {
-    const teamRef = doc(db, 'teams', teamId.value)
-    await updateDoc(teamRef, {
-      powerusers: arrayUnion(member.uid)
-    })
+    await teamFirebase.promoteToPowerUser(teamId.value, member.uid)
 
     $q.notify({
       type: 'positive',
@@ -370,6 +373,30 @@ const updateInviteEmail = (value) => {
 
 const updateInviteMessage = (value) => {
   inviteForm.message = value
+}
+
+const handleDeleteTeam = async () => {
+  if (deleteConfirmName.value !== team.value?.name) return
+  isDeleting.value = true
+  try {
+    await deleteTeam(teamId.value)
+    $q.notify({
+      type: 'positive',
+      message: t('team.single.delete.success'),
+      icon: 'check'
+    })
+    showDeleteDialog.value = false
+    router.push(RouteEnum.TEAM.path)
+  } catch (error) {
+    console.error('Error deleting team:', error)
+    $q.notify({
+      type: 'negative',
+      message: t('team.single.delete.error'),
+      icon: 'error'
+    })
+  } finally {
+    isDeleting.value = false
+  }
 }
 
 onMounted(() => {

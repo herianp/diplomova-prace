@@ -127,7 +127,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
-import { useTeamComposable } from '@/composable/useTeamComposable'
+import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 
 const props = defineProps({
   survey: {
@@ -140,7 +140,7 @@ const emits = defineEmits(['updated', 'deleted', 'close'])
 
 const { t } = useI18n()
 const $q = useQuasar()
-const { updateSurvey, deleteSurvey } = useTeamComposable()
+const { updateSurvey, deleteSurvey } = useSurveyUseCases()
 
 // Form state
 const formData = ref({

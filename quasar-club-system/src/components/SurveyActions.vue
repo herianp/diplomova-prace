@@ -23,7 +23,7 @@
         @click="$emit('open-settings')"
         class="action-btn"
       >
-        <q-tooltip>Settings</q-tooltip>
+        <q-tooltip>{{ $t('survey.actions.settings') }}</q-tooltip>
       </q-btn>
 
       <!-- 👍 Yes -->
@@ -37,7 +37,7 @@
         @click="$emit('vote', true)"
         class="action-btn vote-btn"
       >
-        <q-tooltip>Vote Yes</q-tooltip>
+        <q-tooltip>{{ $t('survey.actions.voteYes') }}</q-tooltip>
       </q-btn>
 
       <!-- 👎 No -->
@@ -51,7 +51,7 @@
         @click="$emit('vote', false)"
         class="action-btn vote-btn"
       >
-        <q-tooltip>Vote No</q-tooltip>
+        <q-tooltip>{{ $t('survey.actions.voteNo') }}</q-tooltip>
       </q-btn>
     </template>
   </div>

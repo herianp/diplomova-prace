@@ -13,6 +13,7 @@ export function useAuthComposable() {
 
   const currentUser = computed(() => authStore.user)
   const isLoading = computed(() => authStore.isLoading)
+  const isAdmin = computed(() => authStore.isAdmin)
 
   const isCurrentUserPowerUser = computed(() => {
     return teamStore.currentTeam?.powerusers?.includes(currentUser.value?.uid) || false
@@ -33,7 +34,6 @@ export function useAuthComposable() {
     try {
       await authUseCases.signOut()
       router.push(RouteEnum.LOGIN.path)
-      console.log('User signed out successfully')
     } catch (error: any) {
       console.error(`Logout Error: ${error.message}`)
       throw error
@@ -61,6 +61,7 @@ export function useAuthComposable() {
   return {
     currentUser,
     isLoading,
+    isAdmin,
     isCurrentUserPowerUser,
     loginUser,
     logoutUser,

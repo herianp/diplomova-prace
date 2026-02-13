@@ -1,23 +1,21 @@
-import { addDoc, collection } from 'firebase/firestore'
-import { db } from '@/firebase/config.ts'
+import { useNotificationFirebase } from '@/services/notificationFirebase'
+import { INotification } from '@/interfaces/interfaces'
 
 export const useNotifications = () => {
+  const notificationFirebase = useNotificationFirebase()
 
-  const createNotification = async (notification) => {
-    try {
-      await addDoc(collection(db, 'notifications'), {
-        ...notification,
-        read: false,
-        createdAt: new Date()
-      })
-    } catch (error) {
-      console.error('Error creating notification:', error)
-      throw error
-    }
+  const createNotification = async (notification: Partial<INotification>): Promise<void> => {
+    await notificationFirebase.createNotification(notification)
   }
 
-  const createTeamInvitationNotification = async (invitation) => {
-    const notificationData = {
+  const createTeamInvitationNotification = async (invitation: {
+    inviteeId: string
+    inviterName: string
+    teamName: string
+    teamId: string
+    id: string
+  }): Promise<void> => {
+    const notificationData: Partial<INotification> = {
       userId: invitation.inviteeId,
       type: 'team_invitation',
       title: 'Team Invitation',
@@ -29,7 +27,7 @@ export const useNotifications = () => {
     return await createNotification(notificationData)
   }
 
-  const createSurveyNotification = async (survey, userIds) => {
+  const createSurveyNotification = async (survey: { id: string; title: string; teamId: string }, userIds: string[]): Promise<void> => {
     const notifications = userIds.map(userId => ({
       userId,
       type: 'survey_created',
@@ -39,7 +37,6 @@ export const useNotifications = () => {
       teamId: survey.teamId
     }))
 
-    // Batch create notifications
     const promises = notifications.map(notification => createNotification(notification))
     await Promise.all(promises)
   }

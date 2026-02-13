@@ -1,29 +1,29 @@
 <template>
   <div class="recent-surveys q-mb-lg">
     <q-card flat bordered class="full-width">
-      <q-card-section class="q-pa-none">
-        <div class="row items-center q-pa-md">
+      <q-card-section>
+        <div class="row items-center q-mb-md">
+          <q-icon name="history" size="sm" color="primary" class="q-mr-sm" />
           <div class="col">
-            <h5 class="q-ma-none">{{ $t('dashboard.recentSurveys') }}</h5>
-            <p class="text-grey-7 q-ma-none">{{ $t('dashboard.last5Surveys') }}</p>
+            <div class="text-subtitle1 text-weight-medium">{{ $t('dashboard.recentSurveys') }}</div>
+            <div class="text-caption text-grey-6">{{ $t('dashboard.last5Surveys') }}</div>
           </div>
-          <div class="col-auto">
-            <q-btn
-              flat
-              round
-              icon="refresh"
-              @click="refreshData"
-              :loading="isLoading"
-            />
-          </div>
-        </div>
-
-        <div class="q-px-md q-pb-md overflow-auto">
-          <SurveyHistoryList
-            :surveys="surveys"
-            :current-user-uid="currentUserUid"
+          <q-btn
+            flat
+            round
+            dense
+            icon="refresh"
+            color="grey-7"
+            size="sm"
+            @click="refreshData"
+            :loading="isLoading"
           />
         </div>
+
+        <SurveyHistoryList
+          :surveys="surveys"
+          :current-user-uid="currentUserUid"
+        />
       </q-card-section>
     </q-card>
   </div>
@@ -53,20 +53,3 @@ const refreshData = () => {
   emit('refresh')
 }
 </script>
-
-<style scoped>
-.recent-surveys {
-  animation: fadeInUp 0.8s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

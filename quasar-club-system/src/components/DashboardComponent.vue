@@ -1,69 +1,92 @@
 <template>
   <div class="dashboard-container">
-    <!-- Team Header -->
-    <div class="team-header q-mb-lg">
-      <q-card flat bordered class="q-pa-md">
-        <div class="row items-center">
-          <div class="col">
-            <h4 class="q-ma-none text-warning">{{ currentTeam?.name || 'No Team Selected' }}</h4>
-            <h6 class="text-grey-7 q-ma-none">{{ $t('dashboard.teamOverview') }}</h6>
-          </div>
-          <div class="col-auto">
-            <q-chip
-              :color="isCurrentUserPowerUser ? 'positive' : 'info'"
-              text-color="white"
-              :label="isCurrentUserPowerUser ? $t('dashboard.powerUser') : $t('dashboard.member')"
-              icon="person"
-              size="lg"
-            />
-          </div>
+    <!-- Loading Skeleton -->
+    <template v-if="!currentTeam">
+      <div class="q-mb-md">
+        <q-skeleton type="text" width="50%" class="q-mb-xs" />
+        <q-skeleton type="text" width="30%" />
+      </div>
+      <div class="row q-col-gutter-sm q-mb-lg">
+        <div v-for="n in 4" :key="n" class="col-6 col-md-3">
+          <q-card flat bordered class="q-pa-md">
+            <q-skeleton type="text" width="60%" class="q-mb-sm" />
+            <q-skeleton type="rect" height="32px" />
+          </q-card>
         </div>
+      </div>
+      <q-card flat bordered class="q-pa-md">
+        <q-skeleton type="rect" height="200px" />
       </q-card>
-    </div>
+    </template>
 
-    <!-- Survey Filters -->
-    <div class="survey-filters q-mb-lg">
-      <SurveyFilterMenu
-        v-model="filters"
-        @filters-changed="onFiltersChanged"
+    <template v-else>
+      <!-- Welcome Header -->
+      <div class="welcome-section q-mb-lg">
+        <div class="row items-center justify-between">
+          <div class="col">
+            <div class="text-h5 text-weight-bold">
+              {{ currentTeam?.name || 'No Team Selected' }}
+            </div>
+            <div class="text-body2 text-grey-7">
+              {{ $t('dashboard.teamOverview') }}
+            </div>
+          </div>
+          <q-chip
+            :color="isCurrentUserPowerUser ? 'positive' : 'grey-4'"
+            :text-color="isCurrentUserPowerUser ? 'white' : 'grey-8'"
+            :icon="isCurrentUserPowerUser ? 'shield' : 'person'"
+            :label="isCurrentUserPowerUser ? $t('dashboard.powerUser') : $t('dashboard.member')"
+            dense
+          />
+        </div>
+      </div>
+
+      <!-- Survey Filters -->
+      <div class="q-mb-lg">
+        <SurveyFilterMenu
+          v-model="filters"
+          @filters-changed="onFiltersChanged"
+        />
+      </div>
+
+      <!-- Metrics Cards -->
+      <DashboardMetrics :filtered-surveys="filteredSurveys" />
+
+      <!-- Recent Surveys History -->
+      <RecentSurveysGraph
+        :surveys="filteredRecentSurveys"
+        :current-user-uid="currentUser?.uid"
+        :is-loading="isLoading"
+        @refresh="refreshData"
       />
-    </div>
 
-    <!-- Metrics Cards -->
-    <DashboardMetrics :filtered-surveys="filteredSurveys" />
-
-    <!-- Recent Surveys History -->
-    <RecentSurveysGraph
-      :surveys="filteredRecentSurveys"
-      :current-user-uid="currentUser?.uid"
-      :is-loading="isLoading"
-      @refresh="refreshData"
-    />
-
-    <!-- Charts Section -->
-    <div class="charts-section">
+      <!-- Charts Section -->
       <div class="row q-col-gutter-md">
-        <!-- Graph: Trends -->
         <div class="col-12 col-md-6">
           <q-card flat bordered>
             <q-card-section>
-              <h6 class="q-ma-none q-mb-md">{{ $t('dashboard.votingTrends') }}</h6>
+              <div class="row items-center q-mb-md">
+                <q-icon name="bar_chart" size="sm" color="primary" class="q-mr-sm" />
+                <div class="text-subtitle1 text-weight-medium">{{ $t('dashboard.votingTrends') }}</div>
+              </div>
               <VotingChart :surveys="filteredRecentSurveys" :user-uid="currentUser?.uid" />
             </q-card-section>
           </q-card>
         </div>
 
-        <!-- Graph: Type of survey -->
         <div class="col-12 col-md-6">
           <q-card flat bordered>
             <q-card-section>
-              <h6 class="q-ma-none q-mb-md">{{ $t('dashboard.surveyTypes') }}</h6>
+              <div class="row items-center q-mb-md">
+                <q-icon name="donut_large" size="sm" color="primary" class="q-mr-sm" />
+                <div class="text-subtitle1 text-weight-medium">{{ $t('dashboard.surveyTypes') }}</div>
+              </div>
               <SurveyTypesChart :surveys="filteredSurveys" />
             </q-card-section>
           </q-card>
         </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
@@ -71,6 +94,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
+import { useReadiness } from '@/composable/useReadiness'
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics.vue'
 import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
@@ -82,6 +106,7 @@ import { useSurveyFilters } from '@/composable/useSurveyFilters'
 
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
+const { waitForTeam } = useReadiness()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
 const { filters, createFilteredSurveys, createRecentFilteredSurveys, updateFilters } = useSurveyFilters()
@@ -104,13 +129,8 @@ const onFiltersChanged = (newFilters) => {
 const refreshData = async () => {
   isLoading.value = true
   try {
-    // Refresh surveys data - add delay to ensure auth is ready
     if (currentTeam.value?.id && authStore.user?.uid) {
-      setTimeout(() => {
-        if (currentTeam.value?.id && authStore.user?.uid) {
-          setSurveysListener(currentTeam.value.id)
-        }
-      }, 400)
+      setSurveysListener(currentTeam.value.id)
     }
   } catch (error) {
     console.error('Error refreshing dashboard data:', error)
@@ -119,11 +139,9 @@ const refreshData = async () => {
   }
 }
 
-onMounted(() => {
-  // Wait for auth and team setup before loading dashboard data
-  setTimeout(() => {
-    refreshData()
-  }, 500)
+onMounted(async () => {
+  await waitForTeam()
+  refreshData()
 })
 </script>
 
@@ -133,30 +151,9 @@ onMounted(() => {
   padding: 1rem;
 }
 
-.team-header .q-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.team-header .text-grey-7 {
-  color: rgba(255, 255, 255, 0.8) !important;
-}
-
-
-
-.charts-section {
-  animation: fadeInUp 1s ease-out;
-}
-
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+@media (min-width: 600px) {
+  .dashboard-container {
+    padding: 1.5rem;
   }
 }
 </style>

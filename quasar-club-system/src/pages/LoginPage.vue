@@ -9,10 +9,14 @@
 import { ref } from "vue";
 import { useAuthStore } from "@/stores/authStore.ts";
 import LoginFormNew from '@/components/new/LoginFormNew.vue'
-import { useAuthComposable } from '@/composable/useAuthComposable.js'
+import { useAuthComposable } from '@/composable/useAuthComposable'
+import { useQuasar } from 'quasar'
+import { useI18n } from 'vue-i18n'
 
 const authStore = useAuthStore();
 const { loginUser } = useAuthComposable();
+const $q = useQuasar()
+const { t } = useI18n()
 
 const credentials = ref({
   email: '',
@@ -21,7 +25,11 @@ const credentials = ref({
 
 async function submitLogin() {
   if (!credentials.value.email || !credentials.value.password) {
-    alert('Please fill in all fields');
+    $q.notify({
+      type: 'warning',
+      message: t('common.fillAllFields'),
+      icon: 'warning'
+    })
     return;
   }
   await loginUser(credentials.value.email, credentials.value.password);

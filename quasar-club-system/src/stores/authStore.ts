@@ -2,14 +2,14 @@ import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { User } from 'firebase/auth'
 
-const getInitialUser = () => ({
-  uid: '1',
-});
-
 export const useAuthStore = defineStore("auth", () => {
-  const user = ref<User | null>(getInitialUser())
+  const user = ref<User | null>(null)
   const isLoading = ref(false)
-  const isAdmin = ref(true)
+  const isAdmin = ref(false)
+
+  // Readiness flags
+  const isAuthReady = ref(false)
+  const isTeamReady = ref(false)
 
   // Auth state listener unsubscribe function
   const authUnsubscribe = ref<(() => void) | null>(null)
@@ -27,6 +27,14 @@ export const useAuthStore = defineStore("auth", () => {
     isAdmin.value = admin
   }
 
+  const setAuthReady = (ready: boolean) => {
+    isAuthReady.value = ready
+  }
+
+  const setTeamReady = (ready: boolean) => {
+    isTeamReady.value = ready
+  }
+
   const setAuthUnsubscribe = (unsubscribeFn: (() => void) | null) => {
     authUnsubscribe.value = unsubscribeFn
   }
@@ -39,6 +47,8 @@ export const useAuthStore = defineStore("auth", () => {
     user.value = null
     isLoading.value = false
     isAdmin.value = false
+    isAuthReady.value = false
+    isTeamReady.value = false
   }
 
   return {
@@ -46,11 +56,15 @@ export const useAuthStore = defineStore("auth", () => {
     user,
     isLoading,
     isAdmin,
+    isAuthReady,
+    isTeamReady,
     authUnsubscribe,
     // Pure state mutations
     setUser,
     setLoading,
     setAdmin,
+    setAuthReady,
+    setTeamReady,
     setAuthUnsubscribe,
     cleanup
   }

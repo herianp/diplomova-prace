@@ -1,9 +1,30 @@
 // app global css in SCSS form
 
-html, body, #q-app {
-  background-color: var(--q-color-secondary);
+// ============================================================
+// Design tokens as CSS custom properties
+// ============================================================
+:root {
+  --app-bg: #f0f2f5;
+  --card-radius: 12px;
+  --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --gradient-primary: linear-gradient(135deg, #1A237E 0%, #283593 100%);
+  --gradient-accent: linear-gradient(135deg, #FF6D00 0%, #FF9100 100%);
+  --gradient-success: linear-gradient(135deg, #00C853 0%, #69F0AE 100%);
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.25s ease;
 }
 
+// ============================================================
+// Base
+// ============================================================
+html, body, #q-app {
+  background-color: var(--app-bg);
+}
+
+// ============================================================
+// Utility classes
+// ============================================================
 .min-w-250 {
   min-width: 250px;
 }
@@ -24,43 +45,10 @@ html, body, #q-app {
   max-width: 350px;
 }
 
-//PowerUser
-.powerUser-navbar {
-  width: 100%;
-  background-color: #007bff; /* Bootstrap Primary Blue */
-  padding: 1rem;
-  color: white;
-  display: flex;
-  justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.powerUser-navbar ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.powerUser-navbar li {
-  margin: 0 1rem;
-}
-
-.powerUser-navbar a {
-  color: white;
-  text-decoration: none;
-  font-weight: bold;
-  transition: color 0.3s;
-}
-
-.powerUser-navbar a:hover {
-  color: #ffc107; /* Bootstrap Warning Yellow */
-}
-
 .clickable-card {
   cursor: pointer;
-  transition: box-shadow 0.2s ease;
+  transition: box-shadow var(--transition-normal);
 }
 .clickable-card:hover {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow-hover);
 }

@@ -35,8 +35,10 @@
                 :key="preset.key"
                 :label="preset.label"
                 size="sm"
-                outline
-                color="primary"
+                :outline="activePresetKey !== preset.key"
+                :unelevated="activePresetKey === preset.key"
+                :color="activePresetKey === preset.key ? 'primary' : 'primary'"
+                :text-color="activePresetKey === preset.key ? 'white' : undefined"
                 @click="applyDatePreset(preset)"
                 dense
                 class="col-auto"
@@ -168,6 +170,7 @@ const showDateFromPicker = ref(false)
 const showDateToPicker = ref(false)
 const tempDateFrom = ref('')
 const tempDateTo = ref('')
+const activePresetKey = ref('')
 
 const localFilters = reactive({
   searchName: props.modelValue.searchName || '',
@@ -178,10 +181,21 @@ const localFilters = reactive({
 // Date presets using the new helper
 const datePresets = computed(() => getDatePresets(t))
 
+// Detect which preset matches the current date range
+const detectActivePreset = () => {
+  const presets = datePresets.value
+  const match = presets.find(p => p.from === localFilters.dateFrom && p.to === localFilters.dateTo)
+  activePresetKey.value = match ? match.key : ''
+}
+
 // Watch for external changes to modelValue
 watch(() => props.modelValue, (newValue) => {
   Object.assign(localFilters, newValue)
+  detectActivePreset()
 }, { deep: true })
+
+// Detect on init
+detectActivePreset()
 
 // Methods
 const onFilterChange = () => {
@@ -200,17 +214,20 @@ const onDateToSelect = (date) => {
 
 const setDateFrom = () => {
   localFilters.dateFrom = tempDateFrom.value
+  activePresetKey.value = ''
   onFilterChange()
 }
 
 const setDateTo = () => {
   localFilters.dateTo = tempDateTo.value
+  activePresetKey.value = ''
   onFilterChange()
 }
 
 const applyDatePreset = (preset) => {
   localFilters.dateFrom = preset.from
   localFilters.dateTo = preset.to
+  activePresetKey.value = preset.key
   onFilterChange()
 }
 
@@ -220,6 +237,7 @@ const clearFilters = () => {
   localFilters.dateTo = ''
   tempDateFrom.value = ''
   tempDateTo.value = ''
+  activePresetKey.value = ''
   onFilterChange()
 }
 

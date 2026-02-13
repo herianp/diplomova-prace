@@ -11,9 +11,7 @@
         <!-- 🔔 Notifications Dropdown -->
         <NotificationsDropdown />
 
-        <q-avatar size="30px">
-          <img src="https://cdn.quasar.dev/img/avatar.png" alt="img" />
-        </q-avatar>
+        <UserAvatarMenu />
       </q-toolbar>
     </q-header>
 
@@ -31,6 +29,7 @@ import { ref } from "vue";
 import CustomDrawer from "@/components/new/CustomDrawer.vue";
 import TeamDropdown from '@/components/new/TeamDropdown.vue'
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown.vue'
+import UserAvatarMenu from '@/components/UserAvatarMenu.vue'
 
 const drawerOpen = ref(true);
 </script>

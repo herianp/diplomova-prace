@@ -1,7 +1,7 @@
 <template>
   <div class="metrics-row q-mb-lg">
-    <div class="row q-col-gutter-md items-stretch">
-      <div class="col-12 col-sm-6 col-md">
+    <div class="row q-col-gutter-sm items-stretch">
+      <div class="col-6 col-md">
         <MetricCard
           :title="$t('dashboard.totalSurveys')"
           :value="totalSurveys"
@@ -9,7 +9,7 @@
           color="primary"
         />
       </div>
-      <div class="col-12 col-sm-6 col-md">
+      <div class="col-6 col-md">
         <MetricCard
           :title="$t('dashboard.teamMembers')"
           :value="activeTeamMembers"
@@ -17,7 +17,7 @@
           color="secondary"
         />
       </div>
-      <div class="col-12 col-sm-6 col-md">
+      <div class="col-6 col-md">
         <MetricCard
           :title="$t('dashboard.myVotes')"
           :value="myTotalVotes"
@@ -25,7 +25,7 @@
           color="accent"
         />
       </div>
-      <div class="col-12 col-sm-6 col-md">
+      <div class="col-6 col-md">
         <MetricCard
           :title="$t('dashboard.personalParticipation')"
           :value="personalParticipationRate + '%'"
@@ -37,8 +37,8 @@
         <MetricCard
           :title="$t('dashboard.teamParticipation')"
           :value="teamParticipationRate + '%'"
-          icon="trending_up"
-          color="positive"
+          icon="groups"
+          color="info"
         />
       </div>
     </div>
@@ -59,11 +59,11 @@ const props = defineProps({
 })
 
 const authStore = useAuthStore()
-const { 
-  calculateTotalSurveys, 
-  calculateActiveTeamMembers, 
-  calculatePersonalMetrics, 
-  calculateTeamParticipationRate 
+const {
+  calculateTotalSurveys,
+  calculateActiveTeamMembers,
+  calculatePersonalMetrics,
+  calculateTeamParticipationRate
 } = useSurveyMetrics()
 
 const currentUser = computed(() => authStore.user)
@@ -73,31 +73,14 @@ const totalSurveys = computed(() => calculateTotalSurveys(props.filteredSurveys)
 
 const activeTeamMembers = computed(() => calculateActiveTeamMembers(props.filteredSurveys))
 
-const personalMetrics = computed(() => 
+const personalMetrics = computed(() =>
   calculatePersonalMetrics(props.filteredSurveys, currentUser.value?.uid)
 )
 
 const myTotalVotes = computed(() => personalMetrics.value.myTotalVotes)
 const personalParticipationRate = computed(() => personalMetrics.value.personalParticipationRate)
 
-const teamParticipationRate = computed(() => 
+const teamParticipationRate = computed(() =>
   calculateTeamParticipationRate(props.filteredSurveys, activeTeamMembers.value)
 )
 </script>
-
-<style scoped>
-.metrics-row {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-</style>

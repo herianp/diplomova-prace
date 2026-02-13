@@ -47,7 +47,7 @@ async function handleCreateTeam(payload) {
   try {
     await createTeam(payload.title, currentUser.value.uid);
   } catch (err) {
-    console.log(`err ${err}`);
+    console.error(`err ${err}`);
   }
 }
 
@@ -80,11 +80,11 @@ const handleCancel = () => {
   font-size: 0.875rem;
 }
 
-.team-create-menu .q-expansion-item__header {
+.team-create-menu :deep(.q-expansion-item__header) {
   padding: 12px 16px;
 }
 
-.team-create-menu .q-expansion-item__content {
+.team-create-menu :deep(.q-expansion-item__content) {
   padding: 0;
 }
 
