@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18' # Matching your Azure file
+          node-version: '20'
           cache: 'yarn' # Cache yarn dependencies for faster builds
           cache-dependency-path: './quasar-club-system/yarn.lock' # <-- ADD THIS LINE to tell the cache where your lock file is
 
