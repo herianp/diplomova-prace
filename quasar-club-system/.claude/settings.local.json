@@ -18,7 +18,8 @@
       "mcp__firebase__firebase_validate_security_rules",
       "mcp__firebase__auth_get_users",
       "mcp__firebase__auth_update_user",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(git rm:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
