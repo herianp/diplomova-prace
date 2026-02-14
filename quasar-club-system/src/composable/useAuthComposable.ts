@@ -24,8 +24,10 @@ export function useAuthComposable() {
     try {
       await authUseCases.signIn(email, password)
       router.push(RouteEnum.DASHBOARD.path)
-    } catch (error: any) {
-      console.error(`Login Error: ${error.code} - ${error.message}`)
+    } catch (error: unknown) {
+      console.error('Login Error:', error)
+      // Error notification already shown by use case
+      // Composable just logs and re-throws for component
       throw error
     }
   }
@@ -34,8 +36,9 @@ export function useAuthComposable() {
     try {
       await authUseCases.signOut()
       router.push(RouteEnum.LOGIN.path)
-    } catch (error: any) {
-      console.error(`Logout Error: ${error.message}`)
+    } catch (error: unknown) {
+      console.error('Logout Error:', error)
+      // Error notification already shown by use case
       throw error
     }
   }
@@ -44,8 +47,9 @@ export function useAuthComposable() {
     try {
       await authUseCases.signUp(email, password, name)
       router.push(RouteEnum.DASHBOARD.path)
-    } catch (error: any) {
-      console.error(`Registration Error: ${error.code} - ${error.message}`)
+    } catch (error: unknown) {
+      console.error('Registration Error:', error)
+      // Error notification already shown by use case
       throw error
     }
   }

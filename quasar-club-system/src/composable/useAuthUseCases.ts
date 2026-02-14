@@ -5,6 +5,8 @@ import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { RouteEnum } from '@/enums/routesEnum'
 import { useRouter } from 'vue-router'
 import { User } from 'firebase/auth'
+import { notifyError } from '@/services/notificationService'
+import { AuthError, FirestoreError } from '@/errors'
 
 export function useAuthUseCases() {
   const authStore = useAuthStore()
@@ -26,8 +28,20 @@ export function useAuthUseCases() {
         try {
           const { setTeamListener } = useTeamUseCases()
           await setTeamListener(user.uid)
-        } catch (error: any) {
+        } catch (error: unknown) {
           console.error('Error setting up team listener:', error)
+          if (error instanceof FirestoreError) {
+            const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+            notifyError(error.message, {
+              retry: shouldRetry,
+              onRetry: shouldRetry ? async () => {
+                const { setTeamListener } = useTeamUseCases()
+                await setTeamListener(user.uid)
+              } : undefined
+            })
+          } else {
+            notifyError('errors.unexpected')
+          }
         }
       } else {
         authStore.setUser(null)
@@ -47,8 +61,18 @@ export function useAuthUseCases() {
       const user = await loginUser(email, password)
       authStore.setUser(user)
       return user
-    } catch (error) {
+    } catch (error: unknown) {
       authStore.setUser(null)
+      if (error instanceof AuthError) {
+        // Show notification with retry only for network errors
+        const shouldRetry = error.code === 'auth/network-request-failed'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => signIn(email, password) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
       throw error
     } finally {
       authStore.setLoading(false)
@@ -61,8 +85,18 @@ export function useAuthUseCases() {
       const user = await registerUser(email, password, name)
       authStore.setUser(user)
       return user
-    } catch (error) {
+    } catch (error: unknown) {
       authStore.setUser(null)
+      if (error instanceof AuthError) {
+        // Show notification with retry only for network errors
+        const shouldRetry = error.code === 'auth/network-request-failed'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => signUp(email, password, name) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
       throw error
     } finally {
       authStore.setLoading(false)
@@ -74,15 +108,37 @@ export function useAuthUseCases() {
       await logoutUser()
       authStore.setUser(null)
       teamStore.clearData()
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error signing out:', error)
+      if (error instanceof AuthError) {
+        const shouldRetry = error.code === 'auth/network-request-failed'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => signOut() : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
       throw error
     }
   }
 
   const refreshCurrentUser = async (): Promise<void> => {
-    const user = await refreshUser()
-    authStore.setUser(user)
+    try {
+      const user = await refreshUser()
+      authStore.setUser(user)
+    } catch (error: unknown) {
+      if (error instanceof AuthError) {
+        const shouldRetry = error.code === 'auth/network-request-failed'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => refreshCurrentUser() : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const getCurrentAuthUser = (): User | null => {
