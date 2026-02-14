@@ -12,6 +12,8 @@ import {
   Unsubscribe,
 } from 'firebase/firestore'
 import { ISurvey, IVote, SurveyStatus, ISurveyNotificationData } from '@/interfaces/interfaces'
+import { mapFirestoreError } from '@/errors/errorMapper'
+import { ListenerError } from '@/errors'
 
 export function useSurveyFirebase() {
   const getSurveysByTeamId = (teamId: string, callback: (surveys: ISurvey[]) => void): Unsubscribe => {
@@ -21,13 +23,9 @@ export function useSurveyFirebase() {
       const surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       callback(surveys)
     }, (error) => {
-      console.error('Error in surveys listener:', error)
-      // If there's a permission error, call callback with empty array
-      // This prevents the app from crashing and allows it to continue functioning
-      if (error.code === 'permission-denied') {
-        console.warn('Permission denied for surveys - calling callback with empty array')
-        callback([])
-      }
+      const listenerError = new ListenerError('surveys', 'errors.listener.failed', { code: error.code })
+      console.warn('Survey listener error:', listenerError.message)
+      callback([]) // Graceful degradation
     })
   }
 
@@ -39,18 +37,20 @@ export function useSurveyFirebase() {
       if (!surveyDoc.exists()) return null
 
       return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
-    } catch (error) {
-      console.error('Error getting survey:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      console.error('Error getting survey:', firestoreError.message)
+      throw firestoreError
     }
   }
 
   const deleteSurvey = async (surveyId: string) => {
     try {
       await deleteDoc(doc(db, 'surveys', surveyId))
-    } catch (error) {
-      console.error('Error deleting survey:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      console.error('Error deleting survey:', firestoreError.message)
+      throw firestoreError
     }
   }
 
@@ -70,18 +70,20 @@ export function useSurveyFirebase() {
         teamId: newSurvey.teamId,
         teamMembers
       }
-    } catch (error) {
-      console.error('Error adding survey:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error adding survey:', firestoreError.message)
+      throw firestoreError
     }
   }
 
   const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>): Promise<void> => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), updatedSurvey)
-    } catch (error) {
-      console.error('Error updating survey:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error updating survey:', firestoreError.message)
+      throw firestoreError
     }
   }
 
@@ -109,9 +111,10 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(surveyRef, { votes: updatedVotes })
-    } catch (error) {
-      console.error('Error adding/updating vote:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error adding/updating vote:', firestoreError.message)
+      throw firestoreError
     }
   }
 
@@ -141,9 +144,10 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
-    } catch (error) {
-      console.error('Error updating survey status:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error updating survey status:', firestoreError.message)
+      throw firestoreError
     }
   }
 
@@ -160,18 +164,20 @@ export function useSurveyFirebase() {
       }
 
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
-    } catch (error) {
-      console.error('Error verifying survey:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error verifying survey:', firestoreError.message)
+      throw firestoreError
     }
   }
 
   const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), { votes })
-    } catch (error) {
-      console.error('Error updating survey votes:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error updating survey votes:', firestoreError.message)
+      throw firestoreError
     }
   }
 

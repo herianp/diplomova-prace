@@ -10,6 +10,8 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { IMessage } from '@/interfaces/interfaces'
+import { mapFirestoreError } from '@/errors/errorMapper'
+import { ListenerError } from '@/errors'
 
 export function useMessageFirebase() {
   /**
@@ -34,8 +36,9 @@ export function useMessageFirebase() {
       })) as IMessage[]
       onData(messages)
     }, (error) => {
-      console.error('Error loading messages:', error)
-      if (onError) onError(error as Error)
+      const listenerError = new ListenerError('messages', 'errors.listener.failed', { code: error.code })
+      console.error('Error loading messages:', listenerError.message)
+      if (onError) onError(listenerError)
     })
   }
 
@@ -48,13 +51,19 @@ export function useMessageFirebase() {
     authorName: string,
     content: string
   ): Promise<void> => {
-    await addDoc(collection(db, 'messages'), {
-      content,
-      authorId,
-      authorName,
-      teamId,
-      createdAt: serverTimestamp()
-    })
+    try {
+      await addDoc(collection(db, 'messages'), {
+        content,
+        authorId,
+        authorName,
+        teamId,
+        createdAt: serverTimestamp()
+      })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error sending message:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   return {
