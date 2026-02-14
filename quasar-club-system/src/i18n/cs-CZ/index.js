@@ -265,10 +265,17 @@ export default {
     delete: "Smazat",
     update: "Aktualizovat",
     back: "Zpět",
-    fillAllFields: "Prosím vyplňte všechna pole"
+    fillAllFields: "Prosím vyplňte všechna pole",
+    retry: "Zkusit znovu",
+    retrySuccess: "Operace proběhla úspěšně",
+    dismiss: "Zavřít"
   },
   validation: {
     required: "Toto pole je povinné"
+  },
+  errors: {
+    unexpected: "Došlo k neočekávané chybě",
+    maxRetriesReached: "Maximální počet pokusů byl dosažen"
   },
   notifications: {
     title: "Oznámení",

@@ -265,10 +265,17 @@ export default {
     delete: "Delete",
     update: "Update",
     back: "Back",
-    fillAllFields: "Please fill in all fields"
+    fillAllFields: "Please fill in all fields",
+    retry: "Retry",
+    retrySuccess: "Operation completed successfully",
+    dismiss: "Dismiss"
   },
   validation: {
     required: "This field is required"
+  },
+  errors: {
+    unexpected: "An unexpected error occurred",
+    maxRetriesReached: "Maximum retry attempts reached"
   },
   notifications: {
     title: "Notifications",
