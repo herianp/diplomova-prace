@@ -34,10 +34,14 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. User can retry failed operations via retry button in error notification toast
   4. Application continues running after auth/Firestore errors instead of white screen crash
   5. Password change flow shows specific error message when reauthentication fails due to wrong password
-**Plans**: TBD
+**Plans**: 5 plans in 4 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 01-01-PLAN.md — Error class hierarchy and i18n messages (Wave 1)
+- [ ] 01-02-PLAN.md — Notification service and global error handler (Wave 1)
+- [ ] 01-03-PLAN.md — Firebase service migration to typed errors (Wave 2)
+- [ ] 01-04-PLAN.md — Use case migration with error notifications (Wave 3)
+- [ ] 01-05-PLAN.md — Password change flow hardening (Wave 4)
 
 ### Phase 2: Listener Registry System
 **Goal**: Centrally manage all Firestore listener lifecycles to eliminate memory leaks and race conditions
@@ -161,7 +165,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Error System Foundation | 0/TBD | Not started | - |
+| 1. Error System Foundation | 0/5 | Not started | - |
 | 2. Listener Registry System | 0/TBD | Not started | - |
 | 3. Code Quality & TypeScript | 0/TBD | Not started | - |
 | 4. Data Model Migration | 0/TBD | Not started | - |
