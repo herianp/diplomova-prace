@@ -15,6 +15,7 @@ import {
 import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { IUser } from "@/interfaces/interfaces";
 import { mapFirebaseAuthError } from '@/errors/errorMapper'
+import { AuthError } from '@/errors'
 
 export function useAuthFirebase() {
   const authStateListener = (callback: (user: User | null) => void): Unsubscribe => {
@@ -122,10 +123,12 @@ export function useAuthFirebase() {
   };
 
   const changeUserPassword = async (currentPassword: string, newPassword: string): Promise<void> => {
-    try {
-      const auth = getAuth();
-      if (!auth.currentUser?.email) throw new Error('No authenticated user');
+    const auth = getAuth();
+    if (!auth.currentUser?.email) {
+      throw new AuthError('no-user', 'errors.auth.noUser')
+    }
 
+    try {
       // Re-authenticate user first
       const credential = EmailAuthProvider.credential(
         auth.currentUser.email,
@@ -133,12 +136,11 @@ export function useAuthFirebase() {
       );
       await reauthenticateWithCredential(auth.currentUser, credential);
 
-      // Update password
+      // Update password after successful reauthentication
       await updatePassword(auth.currentUser, newPassword);
     } catch (error: unknown) {
-      const authError = mapFirebaseAuthError(error)
-      console.error('Error changing password:', authError.message)
-      throw authError
+      // Map Firebase error to AuthError with proper i18n key
+      throw mapFirebaseAuthError(error)
     }
   };
 
