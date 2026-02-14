@@ -17,6 +17,8 @@ import {
   DocumentReference,
 } from 'firebase/firestore'
 import { ITeam, ITeamInvitation } from '@/interfaces/interfaces'
+import { mapFirestoreError } from '@/errors/errorMapper'
+import { ListenerError } from '@/errors'
 
 export function useTeamFirebase() {
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -32,9 +34,10 @@ export function useTeamFirebase() {
         surveys: [],
       }
       await addDoc(collection(db, 'teams'), newTeam)
-    } catch (error) {
-      console.error('Error creating team:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error creating team:', firestoreError.message)
+      throw firestoreError
     }
   }
 
@@ -70,9 +73,10 @@ export function useTeamFirebase() {
 
       // Delete the team document itself
       await deleteDoc(doc(db, 'teams', teamId))
-    } catch (error) {
-      console.error('Error deleting team:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      console.error('Error deleting team:', firestoreError.message)
+      throw firestoreError
     }
   }
 
@@ -82,6 +86,10 @@ export function useTeamFirebase() {
     return onSnapshot(teamsQuery, (snapshot) => {
       const teams = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
       callback(teams)
+    }, (error) => {
+      const listenerError = new ListenerError('teams', 'errors.listener.failed', { originalError: error.message })
+      console.error('Team listener error:', listenerError.message)
+      callback([]) // Graceful degradation
     })
   }
 
@@ -94,68 +102,111 @@ export function useTeamFirebase() {
 
       const teamData = teamDoc.data()
       return { id: teamDoc.id, ...teamData } as ITeam
-    } catch (error) {
-      console.error('Error getting team document:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      console.error('Error getting team document:', firestoreError.message)
+      throw firestoreError
     }
   }
 
   const loadPendingInvitations = async (teamId: string): Promise<ITeamInvitation[]> => {
-    const invitationsQuery = query(
-      collection(db, 'teamInvitations'),
-      where('teamId', '==', teamId),
-      where('status', '==', 'pending')
-    )
-    const snapshot = await getDocs(invitationsQuery)
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as ITeamInvitation[]
+    try {
+      const invitationsQuery = query(
+        collection(db, 'teamInvitations'),
+        where('teamId', '==', teamId),
+        where('status', '==', 'pending')
+      )
+      const snapshot = await getDocs(invitationsQuery)
+      return snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as ITeamInvitation[]
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      console.error('Error loading pending invitations:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   const findUserByEmail = async (email: string): Promise<{ id: string; data: Record<string, unknown> } | null> => {
-    const usersQuery = query(
-      collection(db, 'users'),
-      where('email', '==', email)
-    )
-    const snapshot = await getDocs(usersQuery)
-    if (snapshot.empty) return null
-    const userDoc = snapshot.docs[0]
-    return { id: userDoc.id, data: userDoc.data() }
+    try {
+      const usersQuery = query(
+        collection(db, 'users'),
+        where('email', '==', email)
+      )
+      const snapshot = await getDocs(usersQuery)
+      if (snapshot.empty) return null
+      const userDoc = snapshot.docs[0]
+      return { id: userDoc.id, data: userDoc.data() }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      console.error('Error finding user by email:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   const checkExistingInvitation = async (teamId: string, email: string): Promise<boolean> => {
-    const existingInviteQuery = query(
-      collection(db, 'teamInvitations'),
-      where('teamId', '==', teamId),
-      where('inviteeEmail', '==', email),
-      where('status', '==', 'pending')
-    )
-    const snapshot = await getDocs(existingInviteQuery)
-    return !snapshot.empty
+    try {
+      const existingInviteQuery = query(
+        collection(db, 'teamInvitations'),
+        where('teamId', '==', teamId),
+        where('inviteeEmail', '==', email),
+        where('status', '==', 'pending')
+      )
+      const snapshot = await getDocs(existingInviteQuery)
+      return !snapshot.empty
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      console.error('Error checking existing invitation:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   const sendTeamInvitation = async (invitationData: Omit<ITeamInvitation, 'id'>): Promise<DocumentReference> => {
-    return await addDoc(collection(db, 'teamInvitations'), invitationData)
+    try {
+      return await addDoc(collection(db, 'teamInvitations'), invitationData)
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error sending team invitation:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   const cancelInvitation = async (invitationId: string): Promise<void> => {
-    await deleteDoc(doc(db, 'teamInvitations', invitationId))
+    try {
+      await deleteDoc(doc(db, 'teamInvitations', invitationId))
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      console.error('Error canceling invitation:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   const removeMember = async (teamId: string, memberUid: string): Promise<void> => {
-    const teamRef = doc(db, 'teams', teamId)
-    await updateDoc(teamRef, {
-      members: arrayRemove(memberUid),
-      powerusers: arrayRemove(memberUid)
-    })
+    try {
+      const teamRef = doc(db, 'teams', teamId)
+      await updateDoc(teamRef, {
+        members: arrayRemove(memberUid),
+        powerusers: arrayRemove(memberUid)
+      })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error removing member:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   const promoteToPowerUser = async (teamId: string, memberUid: string): Promise<void> => {
-    const teamRef = doc(db, 'teams', teamId)
-    await updateDoc(teamRef, {
-      powerusers: arrayUnion(memberUid)
-    })
+    try {
+      const teamRef = doc(db, 'teams', teamId)
+      await updateDoc(teamRef, {
+        powerusers: arrayUnion(memberUid)
+      })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      console.error('Error promoting to power user:', firestoreError.message)
+      throw firestoreError
+    }
   }
 
   return {

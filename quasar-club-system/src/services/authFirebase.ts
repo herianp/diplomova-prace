@@ -14,6 +14,7 @@ import {
 } from "firebase/auth";
 import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { IUser } from "@/interfaces/interfaces";
+import { mapFirebaseAuthError } from '@/errors/errorMapper'
 
 export function useAuthFirebase() {
   const authStateListener = (callback: (user: User | null) => void): Unsubscribe => {
@@ -24,18 +25,20 @@ export function useAuthFirebase() {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       return userCredential.user;
-    } catch (error) {
-      console.error(`Login Error: ${error.code} - ${error.message}`);
-      throw error;
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error('Login Error:', authError.code, authError.message)
+      throw authError
     }
   };
 
   const logoutUser = async (): Promise<void> => {
     try {
       await signOut(auth);
-    } catch (error) {
-      console.error(`Logout Error: ${error.message}`);
-      throw error;
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error('Logout Error:', authError.message)
+      throw authError
     }
   };
 
@@ -47,9 +50,10 @@ export function useAuthFirebase() {
       await createUserInFirestore(user, name);
 
       return user;
-    } catch (error) {
-      console.error(`Registration Error: ${error.code} - ${error.message}`);
-      throw error;
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error('Registration Error:', authError.code, authError.message)
+      throw authError
     }
   };
 
@@ -64,9 +68,10 @@ export function useAuthFirebase() {
 
     try {
       await setDoc(doc(db, "users", user.uid), userDoc);
-    } catch (error) {
-      console.error("Error adding user to Firestore:", error);
-      throw error;
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error("Error adding user to Firestore:", authError.message)
+      throw authError
     }
   };
 
@@ -91,37 +96,50 @@ export function useAuthFirebase() {
         return userDoc.data() as IUser;
       }
       return null;
-    } catch (error) {
-      console.error("Error getting user from Firestore:", error);
-      throw error;
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error("Error getting user from Firestore:", authError.message)
+      throw authError
     }
   };
 
   const updateUserProfile = async (uid: string, displayName: string): Promise<void> => {
-    const auth = getAuth();
-    if (!auth.currentUser) throw new Error('No authenticated user');
+    try {
+      const auth = getAuth();
+      if (!auth.currentUser) throw new Error('No authenticated user');
 
-    // Update Firebase Auth profile
-    await updateProfile(auth.currentUser, { displayName });
+      // Update Firebase Auth profile
+      await updateProfile(auth.currentUser, { displayName });
 
-    // Update Firestore user document
-    const userRef = doc(db, 'users', uid);
-    await updateDoc(userRef, { displayName });
+      // Update Firestore user document
+      const userRef = doc(db, 'users', uid);
+      await updateDoc(userRef, { displayName });
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error('Error updating user profile:', authError.message)
+      throw authError
+    }
   };
 
   const changeUserPassword = async (currentPassword: string, newPassword: string): Promise<void> => {
-    const auth = getAuth();
-    if (!auth.currentUser?.email) throw new Error('No authenticated user');
+    try {
+      const auth = getAuth();
+      if (!auth.currentUser?.email) throw new Error('No authenticated user');
 
-    // Re-authenticate user first
-    const credential = EmailAuthProvider.credential(
-      auth.currentUser.email,
-      currentPassword
-    );
-    await reauthenticateWithCredential(auth.currentUser, credential);
+      // Re-authenticate user first
+      const credential = EmailAuthProvider.credential(
+        auth.currentUser.email,
+        currentPassword
+      );
+      await reauthenticateWithCredential(auth.currentUser, credential);
 
-    // Update password
-    await updatePassword(auth.currentUser, newPassword);
+      // Update password
+      await updatePassword(auth.currentUser, newPassword);
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      console.error('Error changing password:', authError.message)
+      throw authError
+    }
   };
 
   return {
