@@ -271,6 +271,8 @@ import { useScreenComposable } from '@/composable/useScreenComposable'
 import { useAuthFirebase } from '@/services/authFirebase'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
+import { AuthError } from '@/errors'
+import { notifyError, notifySuccess } from '@/services/notificationService'
 
 const authStore = useAuthStore()
 const { refreshUser, logoutUser } = useAuthComposable()
@@ -371,11 +373,7 @@ const changePassword = async () => {
       passwordForm.newPassword
     )
 
-    $q.notify({
-      type: 'positive',
-      message: t('settings.password.changeSuccess'),
-      icon: 'check_circle'
-    })
+    notifySuccess('settings.password.changeSuccess')
 
     // Clear form
     passwordForm.currentPassword = ''
@@ -385,18 +383,17 @@ const changePassword = async () => {
   } catch (error) {
     console.error('Error changing password:', error)
 
-    let errorMessage = t('settings.password.changeError')
-    if (error.code === 'auth/wrong-password') {
-      errorMessage = t('settings.password.wrongPassword')
-    } else if (error.code === 'auth/weak-password') {
-      errorMessage = t('settings.password.weakPassword')
-    }
+    if (error instanceof AuthError) {
+      // Map specific auth error codes
+      const shouldRetry = error.code === 'auth/network-request-failed'
 
-    $q.notify({
-      type: 'negative',
-      message: errorMessage,
-      icon: 'error'
-    })
+      notifyError(error.message, {
+        retry: shouldRetry,
+        onRetry: shouldRetry ? () => changePassword() : undefined
+      })
+    } else {
+      notifyError('errors.unexpected')
+    }
   } finally {
     changingPassword.value = false
   }
