@@ -1,4 +1,7 @@
+import errors from './errors.js'
+
 export default {
+  errors,
   app: {
     title: "Klubový manažer"
   },
@@ -269,13 +272,6 @@ export default {
     retry: "Zkusit znovu",
     retrySuccess: "Operace proběhla úspěšně",
     dismiss: "Zavřít"
-  },
-  validation: {
-    required: "Toto pole je povinné"
-  },
-  errors: {
-    unexpected: "Došlo k neočekávané chybě",
-    maxRetriesReached: "Maximální počet pokusů byl dosažen"
   },
   notifications: {
     title: "Oznámení",

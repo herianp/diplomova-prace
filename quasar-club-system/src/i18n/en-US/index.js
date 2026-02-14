@@ -1,4 +1,7 @@
+import errors from './errors.js'
+
 export default {
+  errors,
   app: {
     title: "Club Manager"
   },
@@ -269,13 +272,6 @@ export default {
     retry: "Retry",
     retrySuccess: "Operation completed successfully",
     dismiss: "Dismiss"
-  },
-  validation: {
-    required: "This field is required"
-  },
-  errors: {
-    unexpected: "An unexpected error occurred",
-    maxRetriesReached: "Maximum retry attempts reached"
   },
   notifications: {
     title: "Notifications",
