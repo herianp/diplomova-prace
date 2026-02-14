@@ -4,30 +4,27 @@ Club can manage players in many ways.
 
 ## Install the dependencies
 ```bash
-npm install
+yarn install
 ```
 
 ### Start the app in development mode (hot-code reloading, error reporting, etc.)
 ```bash
-quasar dev
+yarn dev
 ```
-
 
 ### Lint the files
 ```bash
-npm run lint
+yarn lint
 ```
-
 
 ### Format the files
 ```bash
-npm run format
+yarn format
 ```
-
 
 ### Build the app for production
 ```bash
-quasar build
+yarn build
 ```
 
 ### Customize the configuration
