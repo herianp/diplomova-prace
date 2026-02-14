@@ -2,6 +2,8 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { ITeam } from '@/interfaces/interfaces'
+import { notifyError } from '@/services/notificationService'
+import { FirestoreError } from '@/errors'
 
 export function useTeamUseCases() {
   const authStore = useAuthStore()
@@ -39,15 +41,38 @@ export function useTeamUseCases() {
   }
 
   const createTeam = async (teamName: string, userId: string): Promise<void> => {
-    return teamFirebase.createTeam(teamName, userId)
+    try {
+      return await teamFirebase.createTeam(teamName, userId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => createTeam(teamName, userId) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const deleteTeam = async (teamId: string): Promise<void> => {
-    await teamFirebase.deleteTeam(teamId)
-    // Clear currentTeam if the deleted team was selected
-    if (teamStore.currentTeam?.id === teamId) {
-      const remaining = teamStore.teams.filter(t => t.id !== teamId)
-      teamStore.setCurrentTeam(remaining.length > 0 ? remaining[0] : null)
+    try {
+      await teamFirebase.deleteTeam(teamId)
+      // Clear currentTeam if the deleted team was selected
+      if (teamStore.currentTeam?.id === teamId) {
+        const remaining = teamStore.teams.filter(t => t.id !== teamId)
+        teamStore.setCurrentTeam(remaining.length > 0 ? remaining[0] : null)
+      }
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        // NO retry for destructive operations
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
     }
   }
 
@@ -56,8 +81,21 @@ export function useTeamUseCases() {
   }
 
   const getTeamByIdAndSetCurrentTeam = async (teamId: string): Promise<void> => {
-    const team = await teamFirebase.getTeamById(teamId)
-    teamStore.setCurrentTeam(team)
+    try {
+      const team = await teamFirebase.getTeamById(teamId)
+      teamStore.setCurrentTeam(team)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => getTeamByIdAndSetCurrentTeam(teamId) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const clearTeamData = () => {

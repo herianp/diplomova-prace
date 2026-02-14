@@ -4,6 +4,8 @@ import { useNotifications } from '@/composable/useNotificationsComposable'
 import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
+import { notifyError } from '@/services/notificationService'
+import { FirestoreError } from '@/errors'
 
 export function useSurveyUseCases() {
   const teamStore = useTeamStore()
@@ -30,7 +32,17 @@ export function useSurveyUseCases() {
   }
 
   const deleteSurvey = async (surveyId: string): Promise<void> => {
-    return surveyFirebase.deleteSurvey(surveyId)
+    try {
+      return await surveyFirebase.deleteSurvey(surveyId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        // NO retry for destructive operations
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const addSurvey = async (newSurvey: ISurvey): Promise<void> => {
@@ -51,20 +63,56 @@ export function useSurveyUseCases() {
       if (teamMembers.length > 0) {
         await createSurveyNotification(surveyData, teamMembers)
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error adding survey:', error)
+      if (error instanceof FirestoreError) {
+        // Retry for transient errors only
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => addSurvey(newSurvey) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
       throw error
     }
   }
 
   const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>): Promise<void> => {
-    return surveyFirebase.updateSurvey(surveyId, updatedSurvey)
+    try {
+      return await surveyFirebase.updateSurvey(surveyId, updatedSurvey)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => updateSurvey(surveyId, updatedSurvey) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const voteOnSurvey = async (surveyId: string, userUid: string, newVote: boolean) => {
     const survey = teamStore.surveys.find((s) => s.id === surveyId)
     if (survey) {
-      await surveyFirebase.addVote(surveyId, userUid, newVote, survey.votes)
+      try {
+        await surveyFirebase.addVote(surveyId, userUid, newVote, survey.votes)
+      } catch (error: unknown) {
+        if (error instanceof FirestoreError) {
+          const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+          notifyError(error.message, {
+            retry: shouldRetry,
+            onRetry: shouldRetry ? () => voteOnSurvey(surveyId, userUid, newVote) : undefined
+          })
+        } else {
+          notifyError('errors.unexpected')
+        }
+        throw error
+      }
     }
   }
 
@@ -74,20 +122,72 @@ export function useSurveyUseCases() {
       const isUserVoteExists = survey.votes.find(v => v.userUid === userUid)
       const votes = survey.votes || []
 
-      await surveyFirebase.addSurveyVote(surveyId, userUid, newVote, votes, isUserVoteExists)
+      try {
+        await surveyFirebase.addSurveyVote(surveyId, userUid, newVote, votes, isUserVoteExists)
+      } catch (error: unknown) {
+        if (error instanceof FirestoreError) {
+          const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+          notifyError(error.message, {
+            retry: shouldRetry,
+            onRetry: shouldRetry ? () => addSurveyVoteUseCase(surveyId, userUid, newVote) : undefined
+          })
+        } else {
+          notifyError('errors.unexpected')
+        }
+        throw error
+      }
     }
   }
 
   const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string): Promise<void> => {
-    return surveyFirebase.updateSurveyStatus(surveyId, status, verifiedBy)
+    try {
+      return await surveyFirebase.updateSurveyStatus(surveyId, status, verifiedBy)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => updateSurveyStatus(surveyId, status, verifiedBy) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]): Promise<void> => {
-    return surveyFirebase.verifySurvey(surveyId, verifiedBy, updatedVotes)
+    try {
+      return await surveyFirebase.verifySurvey(surveyId, verifiedBy, updatedVotes)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => verifySurvey(surveyId, verifiedBy, updatedVotes) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const updateSurveyVotes = async (surveyId: string, votes: IVote[]): Promise<void> => {
-    return surveyFirebase.updateSurveyVotes(surveyId, votes)
+    try {
+      return await surveyFirebase.updateSurveyVotes(surveyId, votes)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => updateSurveyVotes(surveyId, votes) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   return {
