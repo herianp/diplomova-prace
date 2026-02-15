@@ -2,18 +2,20 @@ import { ref, computed, watch } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
-import { 
-  isSurveyExpired, 
-  getSurveyStatus, 
+import {
+  isSurveyExpired,
+  getSurveyStatus,
   getSurveysNeedingVerification,
-  needsVerification 
+  needsVerification
 } from '@/utils/surveyStatusUtils'
 import { ISurvey, SurveyStatus } from '@/interfaces/interfaces'
+import { createLogger } from 'src/utils/logger'
 
 /**
  * Composable for managing survey status and automated expiration checks
  */
 export function useSurveyStatusManager() {
+  const log = createLogger('useSurveyStatusManager')
   const teamStore = useTeamStore()
   const authStore = useAuthStore()
   const { updateSurveyStatus } = useSurveyUseCases()
@@ -90,14 +92,17 @@ export function useSurveyStatusManager() {
             await updateSurveyStatus(survey.id!, SurveyStatus.CLOSED)
           }
         } catch (error) {
-          console.error(`Failed to update status for survey ${survey.id}:`, error)
+          log.error('Failed to update survey status', {
+            error: error instanceof Error ? error.message : String(error),
+            surveyId: survey.id
+          })
         }
       }
-      
+
       lastExpirationCheck.value = new Date()
 
     } catch (error) {
-      console.error('Error processing expired surveys:', error)
+      log.error('Failed to process expired surveys', { error: error instanceof Error ? error.message : String(error) })
     } finally {
       isProcessingExpiration.value = false
     }

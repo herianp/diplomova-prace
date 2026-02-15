@@ -1,8 +1,10 @@
 import { ref, computed, Ref } from 'vue'
 import { ITeamMember, ITeam, IPlayerOption, ISurvey, IVote, IMemberStats } from '@/interfaces/interfaces'
 import { queryByIdsInChunks } from '@/utils/firestoreUtils'
+import { createLogger } from 'src/utils/logger'
 
 export function useTeamMemberUtils() {
+  const log = createLogger('useTeamMemberUtils')
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -22,7 +24,10 @@ export function useTeamMemberUtils() {
       return await queryByIdsInChunks<ITeamMember>('users', memberIds)
     } catch (err) {
       error.value = 'Error loading team members'
-      console.error('Error loading team members:', err)
+      log.error('Failed to load team members', {
+        error: err instanceof Error ? err.message : String(err),
+        memberCount: memberIds.length
+      })
       return []
     } finally {
       loading.value = false

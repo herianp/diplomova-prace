@@ -7,8 +7,10 @@ import { db } from '@/firebase/config'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
 export function useSurveyUseCases() {
+  const log = createLogger('useSurveyUseCases')
   const teamStore = useTeamStore()
   const { createSurveyNotification } = useNotifications()
   const surveyFirebase = useSurveyFirebase()
@@ -60,7 +62,11 @@ export function useSurveyUseCases() {
         await createSurveyNotification(surveyData, teamMembers)
       }
     } catch (error: unknown) {
-      console.error('Error adding survey:', error)
+      log.error('Failed to add survey', {
+        error: error instanceof Error ? error.message : String(error),
+        teamId: newSurvey.teamId,
+        title: newSurvey.title
+      })
       if (error instanceof FirestoreError) {
         // Retry for transient errors only
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

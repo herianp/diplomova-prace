@@ -8,8 +8,10 @@ import { User } from 'firebase/auth'
 import { notifyError } from '@/services/notificationService'
 import { AuthError, FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
 export function useAuthUseCases() {
+  const log = createLogger('useAuthUseCases')
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const router = useRouter()
@@ -43,7 +45,10 @@ export function useAuthUseCases() {
           const { setTeamListener } = useTeamUseCases()
           await setTeamListener(user.uid)
         } catch (error: unknown) {
-          console.error('Error setting up team listener:', error)
+          log.error('Failed to setup team listener', {
+            error: error instanceof Error ? error.message : String(error),
+            userId: user.uid
+          })
           if (error instanceof FirestoreError) {
             const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
             notifyError(error.message, {
@@ -126,7 +131,7 @@ export function useAuthUseCases() {
       authStore.setUser(null)
       teamStore.clearData()
     } catch (error: unknown) {
-      console.error('Error signing out:', error)
+      log.error('Failed to sign out', { error: error instanceof Error ? error.message : String(error) })
       if (error instanceof AuthError) {
         const shouldRetry = error.code === 'auth/network-request-failed'
         notifyError(error.message, {
