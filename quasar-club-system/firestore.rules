@@ -138,6 +138,22 @@ service cloud.firestore {
           get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
         allow read, delete: if isAppAdmin();
       }
+
+      // Subcollection: audit logs - power users read, authenticated create
+      match /auditLogs/{logId} {
+        // Power users can read audit logs for their team
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+
+        // Authenticated team members can create audit logs (system creates during operations)
+        // Validates: teamId matches parent, actorUid matches authenticated user
+        allow create: if request.auth != null &&
+          request.resource.data.teamId == teamId &&
+          request.resource.data.actorUid == request.auth.uid;
+
+        // App admin full access
+        allow read, delete: if isAppAdmin();
+      }
     }
     
     // Secure access to the 'users' collection - users can only access their own data
