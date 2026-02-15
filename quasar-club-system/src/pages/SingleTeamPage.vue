@@ -200,8 +200,9 @@ const loadTeam = async () => {
 }
 
 const loadTeamMembers = async () => {
+  const members = team.value.members || []
+
   try {
-    const members = team.value.members || []
     if (!members.length) {
       teamMembers.value = []
       return

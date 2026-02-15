@@ -349,8 +349,9 @@ const markAsRead = async (notification) => {
 const markAllAsRead = async () => {
   markingAllRead.value = true
 
+  const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
+
   try {
-    const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
     await notificationFirebase.markAllNotificationsAsRead(unreadIds)
 
     $q.notify({

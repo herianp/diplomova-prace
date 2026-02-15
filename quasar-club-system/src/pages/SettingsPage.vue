@@ -358,7 +358,7 @@ const saveProfile = async () => {
   } catch (error) {
     log.error('Failed to update profile', {
       error: error instanceof Error ? error.message : String(error),
-      userId: currentUser.value?.uid
+      userId: user.value?.uid
     })
     $q.notify({
       type: 'negative',
@@ -389,7 +389,7 @@ const changePassword = async () => {
   } catch (error) {
     log.error('Failed to change password', {
       error: error instanceof Error ? error.message : String(error),
-      userId: currentUser.value?.uid
+      userId: user.value?.uid
     })
 
     if (error instanceof AuthError) {
@@ -439,7 +439,7 @@ const signOut = async () => {
   } catch (error) {
     log.error('Failed to sign out', {
       error: error instanceof Error ? error.message : String(error),
-      userId: currentUser.value?.uid
+      userId: user.value?.uid
     })
     $q.notify({
       type: 'negative',
