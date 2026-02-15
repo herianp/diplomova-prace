@@ -167,3 +167,12 @@ export class ListenerRegistry {
  * Module-level singleton instance
  */
 export const listenerRegistry = new ListenerRegistry()
+
+// Expose debug interface in development mode
+if (import.meta.env.DEV) {
+  (window as any).__listenerDebug = {
+    getActive: () => listenerRegistry.getActiveListeners(),
+    getDebugInfo: () => listenerRegistry.getDebugInfo(),
+    getCount: () => listenerRegistry.getCount()
+  }
+}
