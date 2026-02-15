@@ -103,10 +103,12 @@ Plans:
   2. User sees explicit permission denied notification instead of silent empty results when Firestore rules reject query
   3. Team admin can delete team with 1000+ surveys/fines/members without transaction batch size errors
   4. Application waits for auth state confirmation before initializing team listeners (no permission-denied flash)
-**Plans**: TBD
+**Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 05-01-PLAN.md — Audit log foundation: interface, service, security rules (Wave 1)
+- [ ] 05-02-PLAN.md — Permission error surfacing, cascade delete enhancement, SEC-04 verification (Wave 1)
+- [ ] 05-03-PLAN.md — Audit log integration into existing sensitive operations (Wave 2)
 
 ### Phase 6: Performance
 **Goal**: Optimize chart rendering and eliminate resource waste from accumulated listeners
