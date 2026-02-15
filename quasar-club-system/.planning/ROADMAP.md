@@ -12,7 +12,7 @@ This roadmap transforms an existing Vue 3 + Quasar + Firebase club management sy
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Error System Foundation** - Typed error hierarchy and centralized handling
+- [x] **Phase 1: Error System Foundation** - Typed error hierarchy and centralized handling
 - [ ] **Phase 2: Listener Registry System** - Centralized lifecycle management for Firestore listeners
 - [ ] **Phase 3: Code Quality & TypeScript** - Strict mode enablement and structured logging
 - [ ] **Phase 4: Data Model Migration** - Move votes from arrays to subcollections
@@ -37,11 +37,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 5 plans in 4 waves
 
 Plans:
-- [ ] 01-01-PLAN.md — Error class hierarchy and i18n messages (Wave 1)
-- [ ] 01-02-PLAN.md — Notification service and global error handler (Wave 1)
-- [ ] 01-03-PLAN.md — Firebase service migration to typed errors (Wave 2)
-- [ ] 01-04-PLAN.md — Use case migration with error notifications (Wave 3)
-- [ ] 01-05-PLAN.md — Password change flow hardening (Wave 4)
+- [x] 01-01-PLAN.md — Error class hierarchy and i18n messages (Wave 1)
+- [x] 01-02-PLAN.md — Notification service and global error handler (Wave 1)
+- [x] 01-03-PLAN.md — Firebase service migration to typed errors (Wave 2)
+- [x] 01-04-PLAN.md — Use case migration with error notifications (Wave 3)
+- [x] 01-05-PLAN.md — Password change flow hardening (Wave 4)
 
 ### Phase 2: Listener Registry System
 **Goal**: Centrally manage all Firestore listener lifecycles to eliminate memory leaks and race conditions
@@ -53,10 +53,12 @@ Plans:
   3. User sees permission error notification instead of empty dashboard when Firestore rules deny access
   4. User does not see race condition errors on login (auth state resolved before data listeners start)
   5. Developer can inspect active listeners via ListenerRegistry debug method showing count and metadata
-**Plans**: TBD
+**Plans**: 3 plans in 3 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 02-01-PLAN.md — ListenerRegistry singleton and Promise-based auth coordination (Wave 1)
+- [ ] 02-02-PLAN.md — Migrate all listeners to registry and team switching cleanup (Wave 2)
+- [ ] 02-03-PLAN.md — App.vue safety net and developer debug interface (Wave 3)
 
 ### Phase 3: Code Quality & TypeScript
 **Goal**: Enable TypeScript strict mode and replace console logging with structured logging system
@@ -165,8 +167,8 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Error System Foundation | 0/5 | Not started | - |
-| 2. Listener Registry System | 0/TBD | Not started | - |
+| 1. Error System Foundation | 5/5 | Complete | 2026-02-14 |
+| 2. Listener Registry System | 0/3 | Not started | - |
 | 3. Code Quality & TypeScript | 0/TBD | Not started | - |
 | 4. Data Model Migration | 0/TBD | Not started | - |
 | 5. Security & Audit | 0/TBD | Not started | - |
