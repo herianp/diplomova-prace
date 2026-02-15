@@ -13,7 +13,7 @@ This roadmap transforms an existing Vue 3 + Quasar + Firebase club management sy
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Error System Foundation** - Typed error hierarchy and centralized handling
-- [ ] **Phase 2: Listener Registry System** - Centralized lifecycle management for Firestore listeners
+- [x] **Phase 2: Listener Registry System** - Centralized lifecycle management for Firestore listeners
 - [ ] **Phase 3: Code Quality & TypeScript** - Strict mode enablement and structured logging
 - [ ] **Phase 4: Data Model Migration** - Move votes from arrays to subcollections
 - [ ] **Phase 5: Security & Audit** - Audit trail and permission error boundaries
@@ -69,10 +69,13 @@ Plans:
   2. Developer sees structured log entries with context (userId, teamId, operation) instead of raw console.error output
   3. i18n translation key typos caught at compile time (type error for missing keys)
   4. Firebase config TODO comment resolved with documented environment variable or constant
-**Plans**: TBD
+**Plans**: 4 plans in 3 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 03-01-PLAN.md — TypeScript strict mode and Firebase config TODO (Wave 1)
+- [ ] 03-02-PLAN.md — i18n TypeScript conversion with type-safe keys (Wave 1)
+- [ ] 03-03-PLAN.md — Structured logging setup and service layer migration (Wave 2)
+- [ ] 03-04-PLAN.md — Structured logging migration for composables, components, pages (Wave 3)
 
 ### Phase 4: Data Model Migration
 **Goal**: Migrate survey votes from document arrays to subcollections to support unlimited team growth
@@ -169,7 +172,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. Error System Foundation | 5/5 | Complete | 2026-02-14 |
 | 2. Listener Registry System | 3/3 | Complete | 2026-02-15 |
-| 3. Code Quality & TypeScript | 0/TBD | Not started | - |
+| 3. Code Quality & TypeScript | 0/4 | Not started | - |
 | 4. Data Model Migration | 0/TBD | Not started | - |
 | 5. Security & Audit | 0/TBD | Not started | - |
 | 6. Performance | 0/TBD | Not started | - |
