@@ -19,6 +19,7 @@ import { mapFirestoreError } from '@/errors/errorMapper'
 import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
 import { isFeatureEnabled } from '@/config/featureFlags'
+import { useAuditLogFirebase } from '@/services/auditLogFirebase'
 
 const log = createLogger('surveyFirebase')
 
@@ -94,9 +95,27 @@ export function useSurveyFirebase() {
     }
   }
 
-  const deleteSurvey = async (surveyId: string) => {
+  const deleteSurvey = async (
+    surveyId: string,
+    auditContext?: { teamId: string; actorUid: string; actorDisplayName: string; surveyTitle?: string }
+  ) => {
     try {
       await deleteDoc(doc(db, 'surveys', surveyId))
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId: auditContext.teamId,
+          operation: 'survey.delete',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: surveyId,
+          entityType: 'survey',
+          before: auditContext.surveyTitle ? { title: auditContext.surveyTitle } : undefined
+        })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
       log.error('Failed to delete survey', { surveyId, error: firestoreError.message })
@@ -248,7 +267,12 @@ export function useSurveyFirebase() {
     }
   }
 
-  const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]) => {
+  const verifySurvey = async (
+    surveyId: string,
+    verifiedBy: string,
+    updatedVotes?: IVote[],
+    auditContext?: { teamId: string; actorDisplayName: string }
+  ) => {
     try {
       const updateData: Partial<ISurvey> = {
         status: SurveyStatus.CLOSED,
@@ -282,6 +306,21 @@ export function useSurveyFirebase() {
       } else {
         // Array-only mode
         await updateDoc(doc(db, 'surveys', surveyId), updateData)
+      }
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId: auditContext.teamId,
+          operation: 'vote.verify',
+          actorUid: verifiedBy,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: surveyId,
+          entityType: 'vote',
+          metadata: updatedVotes ? { voteCount: updatedVotes.length } : undefined
+        })
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')

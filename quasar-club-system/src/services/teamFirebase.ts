@@ -21,6 +21,7 @@ import { ITeam, ITeamInvitation } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
+import { useAuditLogFirebase } from '@/services/auditLogFirebase'
 
 const log = createLogger('teamFirebase')
 
@@ -246,13 +247,32 @@ export function useTeamFirebase() {
     }
   }
 
-  const removeMember = async (teamId: string, memberUid: string): Promise<void> => {
+  const removeMember = async (
+    teamId: string,
+    memberUid: string,
+    auditContext?: { actorUid: string; actorDisplayName: string; memberDisplayName?: string }
+  ): Promise<void> => {
     try {
       const teamRef = doc(db, 'teams', teamId)
       await updateDoc(teamRef, {
         members: arrayRemove(memberUid),
         powerusers: arrayRemove(memberUid)
       })
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId,
+          operation: 'member.remove',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: memberUid,
+          entityType: 'member',
+          metadata: auditContext.memberDisplayName ? { memberDisplayName: auditContext.memberDisplayName } : undefined
+        })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to remove member', { teamId, memberUid, error: firestoreError.message })
