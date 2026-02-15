@@ -19,7 +19,20 @@
       "mcp__firebase__auth_get_users",
       "mcp__firebase__auth_update_user",
       "Bash(grep:*)",
-      "Bash(git rm:*)"
+      "Bash(git rm:*)",
+      "Skill(gsd:map-codebase)",
+      "Skill(gsd:new-project)",
+      "Skill(gsd:plan-phase)",
+      "WebSearch",
+      "Skill(gsd:execute-phase)",
+      "Bash(node:*)",
+      "Bash(yarn build)",
+      "Bash(git add:*)",
+      "Bash(yarn quasar build:*)",
+      "Bash(git commit:*)",
+      "Bash([ -f \"src/services/notificationService.ts\" ])",
+      "Bash([ -f \"src/boot/errorHandler.ts\" ])",
+      "Bash(quasar build:*)"
     ]
   },
   "enableAllProjectMcpServers": true,
