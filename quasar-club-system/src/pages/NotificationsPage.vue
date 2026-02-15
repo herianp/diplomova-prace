@@ -294,6 +294,8 @@ const loadNotifications = () => {
 }
 
 const loadMoreNotifications = async () => {
+  // PRF-04: Verified - pagination stops when hasMore is false
+  // Button hidden via v-if="hasMore", guard prevents redundant Firestore queries (Phase 06)
   if (!lastDoc || !hasMore.value) return
 
   loadingMore.value = true

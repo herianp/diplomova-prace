@@ -90,6 +90,8 @@ const avatarColor = computed(() => {
 
 const selectTeam = () => {
   // Clean up all team-scoped listeners before switching
+  // PRF-03: Verified - team-scoped listeners cleaned up before switching teams
+  // Prevents memory accumulation from accumulated listeners (Phase 06)
   listenerRegistry.unregisterByScope('team')
 
   teamStore.setCurrentTeam(props.team)
