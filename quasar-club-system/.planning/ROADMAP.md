@@ -87,10 +87,12 @@ Plans:
   3. Developer can toggle feature flag to switch between array-based and subcollection-based reads for rollback safety
   4. Vote submission uses single addOrUpdateVote function regardless of backend storage (duplicates removed)
   5. Teams with 30+ members see complete vote lists without IN query limit errors
-**Plans**: TBD
+**Plans**: 3 plans in 3 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 04-01-PLAN.md — Feature flags, security rules, vote function consolidation (Wave 1)
+- [ ] 04-02-PLAN.md — Subcollection read/write logic with dual-write support (Wave 2)
+- [ ] 04-03-PLAN.md — Migration script and data integrity verification (Wave 3)
 
 ### Phase 5: Security & Audit
 **Goal**: Add audit trail for sensitive operations and surface permission errors to users
