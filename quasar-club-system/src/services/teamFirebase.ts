@@ -84,7 +84,7 @@ export function useTeamFirebase() {
     const teamsQuery = query(collection(db, 'teams'), where('members', 'array-contains', userId))
 
     return onSnapshot(teamsQuery, (snapshot) => {
-      const teams = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      const teams = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as ITeam))
       callback(teams)
     }, (error) => {
       const listenerError = new ListenerError('teams', 'errors.listener.failed', { originalError: error.message })

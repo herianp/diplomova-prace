@@ -1,11 +1,11 @@
-import { defineBoot } from '#q-app/wrappers'
+import { boot } from 'quasar/wrappers'
 import { createI18n } from 'vue-i18n'
 import messages from 'src/i18n'
 import type { MessageSchema } from 'src/i18n'
 
 export type AvailableLocale = 'cs-CZ' | 'en-US'
 
-export default defineBoot(({ app }) => {
+export default boot(({ app }) => {
   const savedLocale = localStorage.getItem('language') as AvailableLocale | null
 
   const i18n = createI18n<[MessageSchema], AvailableLocale>({
@@ -13,7 +13,7 @@ export default defineBoot(({ app }) => {
     fallbackLocale: 'en-US',
     globalInjection: true,
     legacy: true, // Keep legacy mode for template $t() support
-    messages,
+    messages: messages as any,
   })
 
   app.use(i18n)

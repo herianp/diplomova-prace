@@ -20,7 +20,7 @@ export function useSurveyFirebase() {
     const surveysQuery = query(collection(db, 'surveys'), where('teamId', '==', teamId))
 
     return onSnapshot(surveysQuery, (snapshot) => {
-      const surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }))
+      const surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as ISurvey))
       callback(surveys)
     }, (error) => {
       const listenerError = new ListenerError('surveys', 'errors.listener.failed', { code: error.code })
@@ -128,7 +128,7 @@ export function useSurveyFirebase() {
     userUid: string,
     newVote: boolean,
     votes: IVote[],
-    _isUserVoteExists: IVote,
+    _isUserVoteExists: IVote | undefined,
   ) => {
     // Convert legacy parameter to standard format and delegate to unified function
     return addOrUpdateVote(surveyId, userUid, newVote, votes)

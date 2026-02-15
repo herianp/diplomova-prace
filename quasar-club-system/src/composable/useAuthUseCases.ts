@@ -85,7 +85,7 @@ export function useAuthUseCases() {
         const shouldRetry = error.code === 'auth/network-request-failed'
         notifyError(error.message, {
           retry: shouldRetry,
-          onRetry: shouldRetry ? () => signIn(email, password) : undefined
+          onRetry: shouldRetry ? async () => { await signIn(email, password) } : undefined
         })
       } else {
         notifyError('errors.unexpected')
@@ -109,7 +109,7 @@ export function useAuthUseCases() {
         const shouldRetry = error.code === 'auth/network-request-failed'
         notifyError(error.message, {
           retry: shouldRetry,
-          onRetry: shouldRetry ? () => signUp(email, password, name) : undefined
+          onRetry: shouldRetry ? async () => { await signUp(email, password, name) } : undefined
         })
       } else {
         notifyError('errors.unexpected')

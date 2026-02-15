@@ -1,4 +1,4 @@
-import { Notify } from 'quasar'
+import { Notify, QNotifyCreateOptions } from 'quasar'
 import { useI18n } from 'vue-i18n'
 
 interface NotifyErrorOptions {
@@ -21,7 +21,7 @@ export const notifyError = (
   const maxRetries = 3
   const currentRetryCount = options.retryCount || 0
 
-  const notifyConfig: any = {
+  const notifyConfig: QNotifyCreateOptions = {
     type: 'negative',
     message: t(messageKey, options.context || {}),
     position: 'top',

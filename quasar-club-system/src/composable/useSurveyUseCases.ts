@@ -125,7 +125,7 @@ export function useSurveyUseCases() {
           const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
           notifyError(error.message, {
             retry: shouldRetry,
-            onRetry: shouldRetry ? () => addSurveyVoteUseCase(surveyId, userUid, newVote) : undefined
+            onRetry: shouldRetry ? async () => { await addSurveyVoteUseCase(surveyId, userUid, newVote) } : undefined
           })
         } else {
           notifyError('errors.unexpected')

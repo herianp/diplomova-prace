@@ -16,7 +16,8 @@ export function useAuthComposable() {
   const isAdmin = computed(() => authStore.isAdmin)
 
   const isCurrentUserPowerUser = computed(() => {
-    return teamStore.currentTeam?.powerusers?.includes(currentUser.value?.uid) || false
+    const uid = currentUser.value?.uid
+    return uid ? (teamStore.currentTeam?.powerusers?.includes(uid) || false) : false
   })
 
   // Delegate to use cases with navigation logic

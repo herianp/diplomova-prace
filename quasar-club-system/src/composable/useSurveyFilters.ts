@@ -66,7 +66,7 @@ export function useSurveyFilters() {
    */
   const createFilteredSurveys = (surveys: Ref<ISurvey[]>, customFilters?: Ref<SurveyFilters>) => {
     return computed(() => {
-      const surveysValue = Array.isArray(surveys.value) ? surveys.value : surveys
+      const surveysValue = surveys.value
       const filtersValue = customFilters?.value || filters.value
 
       const filtered = filterSurveys(surveysValue, filtersValue)
@@ -81,7 +81,7 @@ export function useSurveyFilters() {
    */
   const createRecentFilteredSurveys = (surveys: Ref<ISurvey[]>, limit = 5, customFilters?: Ref<SurveyFilters>) => {
     return computed(() => {
-      const surveysValue = Array.isArray(surveys.value) ? surveys.value : surveys
+      const surveysValue = surveys.value
       const filtersValue = customFilters?.value || filters.value
 
       const filtered = filterSurveys(surveysValue, filtersValue)
@@ -89,7 +89,7 @@ export function useSurveyFilters() {
       // Sort by creation date: newest first (descending order) and limit
       return filtered
         .slice()
-        .sort((a, b) => parseInt(b.createdDate) - parseInt(a.createdDate))
+        .sort((a, b) => parseInt(b.createdDate || '0') - parseInt(a.createdDate || '0'))
         .slice(0, limit)
     })
   }
@@ -143,6 +143,3 @@ export function useSurveyFilters() {
     updateFilters
   }
 }
-
-// Re-export types for convenience
-export type { SurveyFilters }
