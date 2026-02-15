@@ -26,8 +26,36 @@ export function useSurveyFirebase() {
   const getSurveysByTeamId = (teamId: string, callback: (surveys: ISurvey[]) => void): Unsubscribe => {
     const surveysQuery = query(collection(db, 'surveys'), where('teamId', '==', teamId))
 
-    return onSnapshot(surveysQuery, (snapshot) => {
-      const surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as ISurvey))
+    return onSnapshot(surveysQuery, async (snapshot) => {
+      let surveys = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as ISurvey))
+
+      // If using subcollection for votes, enrich surveys with subcollection data
+      if (isFeatureEnabled('USE_VOTE_SUBCOLLECTIONS')) {
+        try {
+          // Parallelize subcollection reads across all surveys
+          surveys = await Promise.all(
+            surveys.map(async (survey) => {
+              try {
+                const subcollectionVotes = await getVotesFromSubcollection(survey.id)
+                return { ...survey, votes: subcollectionVotes }
+              } catch (error) {
+                // If subcollection read fails, fall back to array votes
+                log.warn('Failed to read votes from subcollection, using array fallback', {
+                  surveyId: survey.id,
+                  error: error instanceof Error ? error.message : String(error)
+                })
+                return survey
+              }
+            })
+          )
+        } catch (error) {
+          log.warn('Failed to enrich surveys with subcollection votes', {
+            teamId,
+            error: error instanceof Error ? error.message : String(error)
+          })
+        }
+      }
+
       callback(surveys)
     }, (error) => {
       const listenerError = new ListenerError('surveys', 'errors.listener.failed', { code: error.code })
