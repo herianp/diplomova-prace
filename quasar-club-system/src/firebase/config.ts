@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getPerformance } from "firebase/performance";
 
 /**
  * Firebase Configuration
@@ -39,4 +40,10 @@ const db = getFirestore(app);
 // Initialize Authentication and get a reference to the service
 const auth = getAuth(app);
 
-export { analytics, db, auth};
+/**
+ * Initialize Performance Monitoring (automatic web vitals: FCP, LCP, CLS, FID)
+ * Tracks page load times and web vitals in Firebase Console.
+ */
+const perf = getPerformance(app);
+
+export { analytics, db, auth, perf };
