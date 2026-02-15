@@ -106,9 +106,9 @@ Plans:
 **Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] 05-01-PLAN.md — Audit log foundation: interface, service, security rules (Wave 1)
-- [ ] 05-02-PLAN.md — Permission error surfacing, cascade delete enhancement, SEC-04 verification (Wave 1)
-- [ ] 05-03-PLAN.md — Audit log integration into existing sensitive operations (Wave 2)
+- [x] 05-01-PLAN.md — Audit log foundation: interface, service, security rules (Wave 1)
+- [x] 05-02-PLAN.md — Permission error surfacing, cascade delete enhancement, SEC-04 verification (Wave 1)
+- [x] 05-03-PLAN.md — Audit log integration into existing sensitive operations (Wave 2)
 
 ### Phase 6: Performance
 **Goal**: Optimize chart rendering and eliminate resource waste from accumulated listeners
@@ -119,10 +119,11 @@ Plans:
   2. Developer sees Firebase Performance Monitoring dashboard showing page load times and API latencies
   3. User switches teams without memory accumulation (listeners from previous team unsubscribed)
   4. Notification page stops fetching when scrolled to bottom (pagination boundary respected)
-**Plans**: TBD
+**Plans**: 2 plans in 2 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 06-01-PLAN.md — VueUse install, Firebase Performance Monitoring, lazy chart composable for ReportsCharts (Wave 1)
+- [ ] 06-02-PLAN.md — Dashboard lazy loading, PRF-03 listener cleanup verification, PRF-04 pagination verification (Wave 2)
 
 ### Phase 7: Test Infrastructure
 **Goal**: Configure Firebase emulators and Vitest for local testing without hitting production
@@ -179,7 +180,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. Code Quality & TypeScript | 4/4 | Complete | 2026-02-15 |
 | 4. Data Model Migration | 3/3 | Complete | 2026-02-15 |
 | 5. Security & Audit | 3/3 | Complete | 2026-02-15 |
-| 6. Performance | 0/TBD | Not started | - |
+| 6. Performance | 0/2 | Not started | - |
 | 7. Test Infrastructure | 0/TBD | Not started | - |
 | 8. Test Implementation | 0/TBD | Not started | - |
 | 9. CI/CD Pipeline | 0/TBD | Not started | - |
