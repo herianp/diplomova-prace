@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 4 of 9 (Data Model Migration)
-Plan: 2 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-15 — Completed 04-02-PLAN.md (Subcollection Vote Backend Implementation)
+Plan: 3 of 3 in current phase
+Status: Complete
+Last activity: 2026-02-15 — Completed 04-03-PLAN.md (Migration Scripts for Vote Subcollections)
 
-Progress: [████░░░░░░] 33% (3/9 phases complete, 2/2 plans in current phase complete)
+Progress: [████░░░░░░] 44% (4/9 phases complete, 3/3 plans in current phase complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 14
-- Average duration: 10.9 minutes
-- Total execution time: 2.5 hours
+- Total plans completed: 15
+- Average duration: 10.2 minutes
+- Total execution time: 2.6 hours
 
 **By Phase:**
 
@@ -30,11 +30,11 @@ Progress: [████░░░░░░] 33% (3/9 phases complete, 2/2 plans i
 | 01-error-system-foundation | 5 | 102.4 min | 20.5 min |
 | 02-listener-registry-system | 3 | 9.6 min | 3.2 min |
 | 03-code-quality-typescript | 4 | 35.0 min | 8.8 min |
-| 04-data-model-migration | 2 | 5.0 min | 2.5 min |
+| 04-data-model-migration | 3 | 7.0 min | 2.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 03-02 (6min), 03-03 (9min), 03-04 (11min), 04-01 (3min), 04-02 (2min)
-- Trend: Phase 04 velocity very high - subcollection backend implemented in 2 minutes
+- Last 5 plans: 03-03 (9min), 03-04 (11min), 04-01 (3min), 04-02 (2min), 04-03 (2min)
+- Trend: Phase 04 completed with consistently high velocity (avg 2.3 min/plan)
 
 *Updated after each plan completion*
 
@@ -85,6 +85,13 @@ Recent decisions affecting current work:
 - [Phase 04-02]: Parallelize subcollection reads using Promise.all for performance
 - [Phase 04-02]: Implement fallback to array votes if subcollection read fails for reliability
 - [Phase 04-02]: Handle subcollection enrichment in listener layer for transparent source swapping
+- [Phase 04-03]: Use set() instead of create() for idempotent migration (safe to re-run)
+- [Phase 04-03]: Chunk batches at 499 operations (Firestore limit is 500)
+- [Phase 04-03]: Rate limit: 200ms between batches, 1s pause every 10 batches to avoid quota errors
+- [Phase 04-03]: Continue migration on per-survey errors instead of aborting entire process
+- [Phase 04-03]: Verification script is strictly read-only (no write operations)
+- [Phase 04-03]: Check three dimensions: count equality, value equality, orphan detection
+- [Phase 04-03]: Use structured logging with dedicated scopes (migration, migration-verify)
 
 ### Pending Todos
 
@@ -97,11 +104,11 @@ None yet.
 - Windows emulator compatibility: Firebase emulator suite on MINGW64_NT needs verification (Phase 7)
 
 **Resolved risks:**
-- ~~Phase 4 migration complexity: Firestore dual-write pattern needs validation during planning~~ - Feature flags created, security rules deployed (04-01)
+- ~~Phase 4 migration complexity: Firestore dual-write pattern needs validation during planning~~ - Feature flags created, security rules deployed (04-01), migration scripts ready (04-03)
 - ~~TypeScript strict mode impact: May reveal extensive type errors requiring incremental fixes~~ - Strict mode enabled with manageable errors (03-01)
 
 ## Session Continuity
 
 Last session: 2026-02-15 (plan execution)
-Stopped at: Completed 04-02-PLAN.md - Subcollection Vote Backend Implementation (2 tasks, 2 minutes)
-Resume file: .planning/phases/04-data-model-migration/04-02-SUMMARY.md
+Stopped at: Completed 04-03-PLAN.md - Migration Scripts for Vote Subcollections (2 tasks, 2 minutes)
+Resume file: .planning/phases/04-data-model-migration/04-03-SUMMARY.md
