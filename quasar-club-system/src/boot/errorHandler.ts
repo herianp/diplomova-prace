@@ -1,6 +1,9 @@
 import { boot } from 'quasar/wrappers'
 import { notifyError } from 'src/services/notificationService'
 import { AppError, AuthError, FirestoreError } from 'src/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('errorHandler')
 
 /**
  * Vue global error handler boot file
@@ -8,7 +11,11 @@ import { AppError, AuthError, FirestoreError } from 'src/errors'
  */
 export default boot(({ app }) => {
   app.config.errorHandler = (err: unknown, instance, info) => {
-    console.error('Global error handler:', err, info)
+    log.error('Global error handler caught error', {
+      error: err instanceof Error ? err.message : String(err),
+      info,
+      errorType: err instanceof AppError ? err.constructor.name : 'Unknown'
+    })
 
     // Check error type and show appropriate notification
     if (err instanceof AuthError || err instanceof FirestoreError) {

@@ -14,6 +14,9 @@ import {
 import { ISurvey, IVote, SurveyStatus, ISurveyNotificationData } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('surveyFirebase')
 
 export function useSurveyFirebase() {
   const getSurveysByTeamId = (teamId: string, callback: (surveys: ISurvey[]) => void): Unsubscribe => {
@@ -24,7 +27,7 @@ export function useSurveyFirebase() {
       callback(surveys)
     }, (error) => {
       const listenerError = new ListenerError('surveys', 'errors.listener.failed', { code: error.code })
-      console.warn('Survey listener error:', listenerError.message)
+      log.warn('Survey listener failed', { teamId, code: error.code, error: listenerError.message })
       callback([]) // Graceful degradation
     })
   }
@@ -39,7 +42,7 @@ export function useSurveyFirebase() {
       return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error getting survey:', firestoreError.message)
+      log.error('Failed to get survey', { surveyId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -49,7 +52,7 @@ export function useSurveyFirebase() {
       await deleteDoc(doc(db, 'surveys', surveyId))
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting survey:', firestoreError.message)
+      log.error('Failed to delete survey', { surveyId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -72,7 +75,7 @@ export function useSurveyFirebase() {
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error adding survey:', firestoreError.message)
+      log.error('Failed to add survey', { teamId: newSurvey.teamId, title: newSurvey.title, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -82,7 +85,7 @@ export function useSurveyFirebase() {
       await updateDoc(doc(db, 'surveys', surveyId), updatedSurvey)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error updating survey:', firestoreError.message)
+      log.error('Failed to update survey', { surveyId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -113,7 +116,7 @@ export function useSurveyFirebase() {
       await updateDoc(surveyRef, { votes: updatedVotes })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error adding/updating vote:', firestoreError.message)
+      log.error('Failed to add/update vote', { surveyId, userUid, vote: newVote, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -146,7 +149,7 @@ export function useSurveyFirebase() {
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error updating survey status:', firestoreError.message)
+      log.error('Failed to update survey status', { surveyId, status, verifiedBy, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -166,7 +169,7 @@ export function useSurveyFirebase() {
       await updateDoc(doc(db, 'surveys', surveyId), updateData)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error verifying survey:', firestoreError.message)
+      log.error('Failed to verify survey', { surveyId, verifiedBy, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -176,7 +179,7 @@ export function useSurveyFirebase() {
       await updateDoc(doc(db, 'surveys', surveyId), { votes })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error updating survey votes:', firestoreError.message)
+      log.error('Failed to update survey votes', { surveyId, voteCount: votes.length, error: firestoreError.message })
       throw firestoreError
     }
   }

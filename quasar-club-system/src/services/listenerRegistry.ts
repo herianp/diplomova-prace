@@ -1,4 +1,7 @@
 import { Unsubscribe } from 'firebase/firestore'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('listenerRegistry')
 
 /**
  * Listener ID type covering all listener categories in the app
@@ -49,7 +52,7 @@ export class ListenerRegistry {
   ): void {
     // Auto-cleanup existing listener with same ID
     if (this.listeners.has(id)) {
-      console.warn(`[ListenerRegistry] Auto-cleanup: listener '${id}' already exists, removing old one`)
+      log.warn('Auto-cleanup: listener already exists, removing old one', { id })
       this.unregister(id)
     }
 
@@ -60,7 +63,7 @@ export class ListenerRegistry {
       context
     })
 
-    console.log(`[ListenerRegistry] Registered listener '${id}'`, context)
+    log.debug('Registered listener', { id, ...context })
   }
 
   /**
@@ -77,11 +80,11 @@ export class ListenerRegistry {
     try {
       metadata.unsubscribe()
     } catch (error) {
-      console.error(`[ListenerRegistry] Error unsubscribing '${id}':`, error)
+      log.error('Error unsubscribing listener', { id, error: error instanceof Error ? error.message : String(error) })
     }
 
     this.listeners.delete(id)
-    console.log(`[ListenerRegistry] Unregistered listener '${id}'`)
+    log.debug('Unregistered listener', { id })
     return true
   }
 
@@ -89,7 +92,7 @@ export class ListenerRegistry {
    * Unregister all active listeners
    */
   unregisterAll(): void {
-    console.log(`[ListenerRegistry] Unregistering all ${this.listeners.size} listeners`)
+    log.info('Unregistering all listeners', { count: this.listeners.size })
     const ids = Array.from(this.listeners.keys())
     ids.forEach(id => this.unregister(id))
   }
@@ -116,7 +119,7 @@ export class ListenerRegistry {
 
     const idsToUnregister = scope === 'team' ? teamScopedIds : userScopedIds
 
-    console.log(`[ListenerRegistry] Unregistering ${scope}-scoped listeners`)
+    log.info('Unregistering scoped listeners', { scope })
     idsToUnregister.forEach(id => {
       if (this.isActive(id)) {
         this.unregister(id)

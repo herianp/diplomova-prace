@@ -12,6 +12,9 @@ import { db } from '@/firebase/config'
 import { IMessage } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('messageFirebase')
 
 export function useMessageFirebase() {
   /**
@@ -37,7 +40,7 @@ export function useMessageFirebase() {
       onData(messages)
     }, (error) => {
       const listenerError = new ListenerError('messages', 'errors.listener.failed', { code: error.code })
-      console.error('Error loading messages:', listenerError.message)
+      log.error('Messages listener failed', { teamId, code: error.code, error: listenerError.message })
       if (onError) onError(listenerError)
     })
   }
@@ -61,7 +64,7 @@ export function useMessageFirebase() {
       })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error sending message:', firestoreError.message)
+      log.error('Failed to send message', { teamId, authorId, error: firestoreError.message })
       throw firestoreError
     }
   }

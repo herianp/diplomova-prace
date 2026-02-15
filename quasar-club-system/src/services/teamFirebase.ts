@@ -19,6 +19,9 @@ import {
 import { ITeam, ITeamInvitation } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('teamFirebase')
 
 export function useTeamFirebase() {
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
@@ -36,7 +39,7 @@ export function useTeamFirebase() {
       await addDoc(collection(db, 'teams'), newTeam)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error creating team:', firestoreError.message)
+      log.error('Failed to create team', { teamName, userId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -75,7 +78,7 @@ export function useTeamFirebase() {
       await deleteDoc(doc(db, 'teams', teamId))
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting team:', firestoreError.message)
+      log.error('Failed to delete team', { teamId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -88,7 +91,7 @@ export function useTeamFirebase() {
       callback(teams)
     }, (error) => {
       const listenerError = new ListenerError('teams', 'errors.listener.failed', { originalError: error.message })
-      console.error('Team listener error:', listenerError.message)
+      log.error('Teams listener failed', { userId, code: error.code, error: listenerError.message })
       callback([]) // Graceful degradation
     })
   }
@@ -104,7 +107,7 @@ export function useTeamFirebase() {
       return { id: teamDoc.id, ...teamData } as ITeam
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error getting team document:', firestoreError.message)
+      log.error('Failed to get team document', { teamId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -123,7 +126,7 @@ export function useTeamFirebase() {
       })) as ITeamInvitation[]
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error loading pending invitations:', firestoreError.message)
+      log.error('Failed to load pending invitations', { teamId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -140,7 +143,7 @@ export function useTeamFirebase() {
       return { id: userDoc.id, data: userDoc.data() }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error finding user by email:', firestoreError.message)
+      log.error('Failed to find user by email', { email, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -157,7 +160,7 @@ export function useTeamFirebase() {
       return !snapshot.empty
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error checking existing invitation:', firestoreError.message)
+      log.error('Failed to check existing invitation', { teamId, email, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -167,7 +170,7 @@ export function useTeamFirebase() {
       return await addDoc(collection(db, 'teamInvitations'), invitationData)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error sending team invitation:', firestoreError.message)
+      log.error('Failed to send team invitation', { teamId: invitationData.teamId, email: invitationData.inviteeEmail, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -177,7 +180,7 @@ export function useTeamFirebase() {
       await deleteDoc(doc(db, 'teamInvitations', invitationId))
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error canceling invitation:', firestoreError.message)
+      log.error('Failed to cancel invitation', { invitationId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -191,7 +194,7 @@ export function useTeamFirebase() {
       })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error removing member:', firestoreError.message)
+      log.error('Failed to remove member', { teamId, memberUid, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -204,7 +207,7 @@ export function useTeamFirebase() {
       })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error promoting to power user:', firestoreError.message)
+      log.error('Failed to promote to power user', { teamId, memberUid, error: firestoreError.message })
       throw firestoreError
     }
   }

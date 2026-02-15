@@ -16,6 +16,9 @@ import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
 import { IUser } from "@/interfaces/interfaces";
 import { mapFirebaseAuthError } from '@/errors/errorMapper'
 import { AuthError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('authFirebase')
 
 export function useAuthFirebase() {
   const authStateListener = (callback: (user: User | null) => void): Unsubscribe => {
@@ -42,7 +45,7 @@ export function useAuthFirebase() {
       return userCredential.user;
     } catch (error: unknown) {
       const authError = mapFirebaseAuthError(error)
-      console.error('Login Error:', authError.code, authError.message)
+      log.error('Login failed', { code: authError.code, error: authError.message, email })
       throw authError
     }
   };
@@ -52,7 +55,7 @@ export function useAuthFirebase() {
       await signOut(auth);
     } catch (error: unknown) {
       const authError = mapFirebaseAuthError(error)
-      console.error('Logout Error:', authError.message)
+      log.error('Logout failed', { error: authError.message })
       throw authError
     }
   };
@@ -67,7 +70,7 @@ export function useAuthFirebase() {
       return user;
     } catch (error: unknown) {
       const authError = mapFirebaseAuthError(error)
-      console.error('Registration Error:', authError.code, authError.message)
+      log.error('Registration failed', { code: authError.code, error: authError.message, email })
       throw authError
     }
   };
@@ -85,7 +88,7 @@ export function useAuthFirebase() {
       await setDoc(doc(db, "users", user.uid), userDoc);
     } catch (error: unknown) {
       const authError = mapFirebaseAuthError(error)
-      console.error("Error adding user to Firestore:", authError.message)
+      log.error('Failed to create user in Firestore', { uid: user.uid, error: authError.message })
       throw authError
     }
   };
@@ -113,7 +116,7 @@ export function useAuthFirebase() {
       return null;
     } catch (error: unknown) {
       const authError = mapFirebaseAuthError(error)
-      console.error("Error getting user from Firestore:", authError.message)
+      log.error('Failed to get user from Firestore', { uid, error: authError.message })
       throw authError
     }
   };
@@ -131,7 +134,7 @@ export function useAuthFirebase() {
       await updateDoc(userRef, { displayName });
     } catch (error: unknown) {
       const authError = mapFirebaseAuthError(error)
-      console.error('Error updating user profile:', authError.message)
+      log.error('Failed to update user profile', { uid, displayName, error: authError.message })
       throw authError
     }
   };

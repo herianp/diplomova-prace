@@ -18,6 +18,9 @@ import { db } from '@/firebase/config'
 import { INotification } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('notificationFirebase')
 
 export function useNotificationFirebase() {
   /**
@@ -44,7 +47,7 @@ export function useNotificationFirebase() {
       onData(notifications, last)
     }, (error) => {
       const listenerError = new ListenerError('notifications', 'errors.listener.failed', { code: error.code })
-      console.error('Error loading notifications:', listenerError.message)
+      log.error('Notifications listener failed', { userId, code: error.code, error: listenerError.message })
       if (onError) onError(listenerError)
     })
   }
@@ -78,7 +81,7 @@ export function useNotificationFirebase() {
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error loading more notifications:', firestoreError.message)
+      log.error('Failed to load more notifications', { userId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -94,7 +97,7 @@ export function useNotificationFirebase() {
       })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error marking notification as read:', firestoreError.message)
+      log.error('Failed to mark notification as read', { notificationId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -117,7 +120,7 @@ export function useNotificationFirebase() {
       await batch.commit()
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error marking all notifications as read:', firestoreError.message)
+      log.error('Failed to mark all notifications as read', { count: notificationIds.length, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -158,7 +161,12 @@ export function useNotificationFirebase() {
       await batch.commit()
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error responding to invitation:', firestoreError.message)
+      log.error('Failed to respond to invitation', {
+        invitationId: notification.invitationId,
+        teamId: notification.teamId,
+        response,
+        error: firestoreError.message
+      })
       throw firestoreError
     }
   }
@@ -175,7 +183,7 @@ export function useNotificationFirebase() {
       })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error creating notification:', firestoreError.message)
+      log.error('Failed to create notification', { type: notification.type, userId: notification.userId, error: firestoreError.message })
       throw firestoreError
     }
   }

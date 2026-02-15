@@ -13,6 +13,9 @@ import {
 import { IFineRule, IFine, IPayment, ICashboxHistoryEntry } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('cashboxFirebase')
 
 export function useCashboxFirebase() {
   // ============================================================
@@ -26,7 +29,7 @@ export function useCashboxFirebase() {
       callback(rules)
     }, (error) => {
       const listenerError = new ListenerError('fineRules', 'errors.listener.failed', { code: error.code })
-      console.warn('FineRules listener error:', listenerError.message)
+      log.warn('FineRules listener failed', { teamId, code: error.code, error: listenerError.message })
       callback([])
     })
   }
@@ -38,7 +41,7 @@ export function useCashboxFirebase() {
       return snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFineRule[]
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
-      console.error('Error loading fine rules:', firestoreError.message)
+      log.error('Failed to load fine rules', { teamId, error: firestoreError.message })
       return []
     }
   }
@@ -48,7 +51,7 @@ export function useCashboxFirebase() {
       await addDoc(collection(doc(db, 'teams', teamId), 'fineRules'), rule)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error adding fine rule:', firestoreError.message)
+      log.error('Failed to add fine rule', { teamId, ruleName: rule.name, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -58,7 +61,7 @@ export function useCashboxFirebase() {
       await updateDoc(doc(db, 'teams', teamId, 'fineRules', ruleId), data)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error updating fine rule:', firestoreError.message)
+      log.error('Failed to update fine rule', { teamId, ruleId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -68,7 +71,7 @@ export function useCashboxFirebase() {
       await deleteDoc(doc(db, 'teams', teamId, 'fineRules', ruleId))
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting fine rule:', firestoreError.message)
+      log.error('Failed to delete fine rule', { teamId, ruleId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -84,7 +87,7 @@ export function useCashboxFirebase() {
       callback(fines)
     }, (error) => {
       const listenerError = new ListenerError('fines', 'errors.listener.failed', { code: error.code })
-      console.warn('Fines listener error:', listenerError.message)
+      log.warn('Fines listener failed', { teamId, code: error.code, error: listenerError.message })
       callback([])
     })
   }
@@ -94,7 +97,7 @@ export function useCashboxFirebase() {
       await addDoc(collection(doc(db, 'teams', teamId), 'fines'), fine)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error adding fine:', firestoreError.message)
+      log.error('Failed to add fine', { teamId, playerId: fine.playerId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -104,7 +107,7 @@ export function useCashboxFirebase() {
       await deleteDoc(doc(db, 'teams', teamId, 'fines', fineId))
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting fine:', firestoreError.message)
+      log.error('Failed to delete fine', { teamId, fineId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -123,7 +126,7 @@ export function useCashboxFirebase() {
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error bulk adding fines:', firestoreError.message)
+      log.error('Failed to bulk add fines', { teamId, count: fines.length, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -139,7 +142,7 @@ export function useCashboxFirebase() {
       callback(payments)
     }, (error) => {
       const listenerError = new ListenerError('payments', 'errors.listener.failed', { code: error.code })
-      console.warn('Payments listener error:', listenerError.message)
+      log.warn('Payments listener failed', { teamId, code: error.code, error: listenerError.message })
       callback([])
     })
   }
@@ -149,7 +152,7 @@ export function useCashboxFirebase() {
       await deleteDoc(doc(db, 'teams', teamId, 'payments', paymentId))
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting payment:', firestoreError.message)
+      log.error('Failed to delete payment', { teamId, paymentId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -159,7 +162,7 @@ export function useCashboxFirebase() {
       await addDoc(collection(doc(db, 'teams', teamId), 'payments'), payment)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error adding payment:', firestoreError.message)
+      log.error('Failed to add payment', { teamId, playerId: payment.playerId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -179,7 +182,7 @@ export function useCashboxFirebase() {
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting all fines:', firestoreError.message)
+      log.error('Failed to delete all fines', { teamId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -195,7 +198,7 @@ export function useCashboxFirebase() {
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
-      console.error('Error deleting all payments:', firestoreError.message)
+      log.error('Failed to delete all payments', { teamId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -212,7 +215,7 @@ export function useCashboxFirebase() {
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error bulk adding payments:', firestoreError.message)
+      log.error('Failed to bulk add payments', { teamId, count: payments.length, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -226,7 +229,7 @@ export function useCashboxFirebase() {
       await addDoc(collection(doc(db, 'teams', teamId), 'cashboxHistory'), entry)
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      console.error('Error adding cashbox history entry:', firestoreError.message)
+      log.error('Failed to add cashbox history entry', { teamId, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -244,7 +247,7 @@ export function useCashboxFirebase() {
       callback(entries)
     }, (error) => {
       const listenerError = new ListenerError('cashboxHistory', 'errors.listener.failed', { code: error.code })
-      console.warn('CashboxHistory listener error:', listenerError.message)
+      log.warn('CashboxHistory listener failed', { teamId, code: error.code, error: listenerError.message })
       callback([])
     })
   }
