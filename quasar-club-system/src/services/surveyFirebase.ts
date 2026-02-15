@@ -9,12 +9,16 @@ import {
   updateDoc,
   where,
   getDoc,
+  getDocs,
+  setDoc,
+  writeBatch,
   Unsubscribe,
 } from 'firebase/firestore'
 import { ISurvey, IVote, SurveyStatus, ISurveyNotificationData } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
+import { isFeatureEnabled } from '@/config/featureFlags'
 
 const log = createLogger('surveyFirebase')
 
@@ -90,30 +94,92 @@ export function useSurveyFirebase() {
     }
   }
 
+  // Internal helper: Write vote to subcollection
+  // NOTE: Subcollection architecture eliminates IN query limit issues (DAT-03).
+  // Votes are queried per-survey via getDocs on the subcollection, not by user ID list.
+  const addVoteToSubcollection = async (surveyId: string, userUid: string, vote: boolean): Promise<void> => {
+    const voteRef = doc(db, 'surveys', surveyId, 'votes', userUid)
+    await setDoc(voteRef, {
+      userUid,
+      vote,
+      updatedAt: new Date()
+    }, { merge: true })
+  }
+
+  // Internal helper: Dual-write vote to both array and subcollection atomically
+  const addVoteDualWrite = async (surveyId: string, userUid: string, newVote: boolean, votes: IVote[]): Promise<void> => {
+    const batch = writeBatch(db)
+    const surveyRef = doc(db, 'surveys', surveyId)
+    const voteRef = doc(db, 'surveys', surveyId, 'votes', userUid)
+
+    // Prepare updated array votes
+    const existingVote = votes.find((vote) => vote.userUid === userUid)
+    let updatedVotes: IVote[]
+
+    if (existingVote) {
+      updatedVotes = votes.map((vote) =>
+        vote.userUid === userUid ? { ...vote, vote: newVote } : vote
+      )
+    } else {
+      updatedVotes = [...votes, { userUid, vote: newVote }]
+    }
+
+    // Operation 1: Update array in survey document
+    batch.update(surveyRef, { votes: updatedVotes })
+
+    // Operation 2: Write to subcollection
+    batch.set(voteRef, {
+      userUid,
+      vote: newVote,
+      updatedAt: new Date()
+    }, { merge: true })
+
+    // Commit atomically
+    await batch.commit()
+  }
+
+  // Read all votes from subcollection
+  const getVotesFromSubcollection = async (surveyId: string): Promise<IVote[]> => {
+    const votesCollection = collection(db, 'surveys', surveyId, 'votes')
+    const votesSnapshot = await getDocs(votesCollection)
+    return votesSnapshot.docs.map((doc) => ({
+      userUid: doc.id,
+      vote: doc.data().vote
+    }))
+  }
+
   // Unified voting function - handles both new votes and vote updates
   const addOrUpdateVote = async (surveyId: string, userUid: string, newVote: boolean, votes: IVote[]) => {
     try {
-      const surveyRef = doc(db, 'surveys', surveyId)
+      // Check if vote unchanged (optimization - works for both backends)
       const existingVote = votes.find((vote) => vote.userUid === userUid)
-
-      // If user already voted with the same value, no need to update
       if (existingVote && existingVote.vote === newVote) {
         return
       }
 
-      let updatedVotes: IVote[]
-
-      if (existingVote) {
-        // Update existing vote
-        updatedVotes = votes.map((vote) =>
-          vote.userUid === userUid ? { ...vote, vote: newVote } : vote,
-        )
+      if (isFeatureEnabled('DUAL_WRITE_VOTES')) {
+        // Transition mode: Write to both array and subcollection atomically
+        await addVoteDualWrite(surveyId, userUid, newVote, votes)
+      } else if (isFeatureEnabled('USE_VOTE_SUBCOLLECTIONS')) {
+        // Post-migration mode: Write only to subcollection
+        await addVoteToSubcollection(surveyId, userUid, newVote)
       } else {
-        // Add new vote
-        updatedVotes = [...votes, { userUid, vote: newVote }]
-      }
+        // Current array-only mode (default)
+        const surveyRef = doc(db, 'surveys', surveyId)
+        let updatedVotes: IVote[]
 
-      await updateDoc(surveyRef, { votes: updatedVotes })
+        if (existingVote) {
+          // Update existing vote
+          updatedVotes = votes.map((vote) =>
+            vote.userUid === userUid ? { ...vote, vote: newVote } : vote
+          )
+        } else {
+          // Add new vote
+          updatedVotes = [...votes, { userUid, vote: newVote }]
+        }
+
+        await updateDoc(surveyRef, { votes: updatedVotes })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to add/update vote', { surveyId, userUid, vote: newVote, error: firestoreError.message })
@@ -151,7 +217,29 @@ export function useSurveyFirebase() {
         updateData.votes = updatedVotes
       }
 
-      await updateDoc(doc(db, 'surveys', surveyId), updateData)
+      // If dual-write enabled and votes provided, also write to subcollection
+      if (isFeatureEnabled('DUAL_WRITE_VOTES') && updatedVotes) {
+        const batch = writeBatch(db)
+        const surveyRef = doc(db, 'surveys', surveyId)
+
+        // Update survey document
+        batch.update(surveyRef, updateData)
+
+        // Write each vote to subcollection
+        updatedVotes.forEach((vote) => {
+          const voteRef = doc(db, 'surveys', surveyId, 'votes', vote.userUid)
+          batch.set(voteRef, {
+            userUid: vote.userUid,
+            vote: vote.vote,
+            updatedAt: new Date()
+          }, { merge: true })
+        })
+
+        await batch.commit()
+      } else {
+        // Array-only mode
+        await updateDoc(doc(db, 'surveys', surveyId), updateData)
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to verify survey', { surveyId, verifiedBy, error: firestoreError.message })
@@ -161,7 +249,29 @@ export function useSurveyFirebase() {
 
   const updateSurveyVotes = async (surveyId: string, votes: IVote[]) => {
     try {
-      await updateDoc(doc(db, 'surveys', surveyId), { votes })
+      // If dual-write enabled, sync votes to subcollection as well
+      if (isFeatureEnabled('DUAL_WRITE_VOTES')) {
+        const batch = writeBatch(db)
+        const surveyRef = doc(db, 'surveys', surveyId)
+
+        // Update array
+        batch.update(surveyRef, { votes })
+
+        // Write each vote to subcollection
+        votes.forEach((vote) => {
+          const voteRef = doc(db, 'surveys', surveyId, 'votes', vote.userUid)
+          batch.set(voteRef, {
+            userUid: vote.userUid,
+            vote: vote.vote,
+            updatedAt: new Date()
+          }, { merge: true })
+        })
+
+        await batch.commit()
+      } else {
+        // Array-only mode
+        await updateDoc(doc(db, 'surveys', surveyId), { votes })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to update survey votes', { surveyId, voteCount: votes.length, error: firestoreError.message })
@@ -179,5 +289,6 @@ export function useSurveyFirebase() {
     updateSurveyStatus,
     verifySurvey,
     updateSurveyVotes,
+    getVotesFromSubcollection,
   }
 }
