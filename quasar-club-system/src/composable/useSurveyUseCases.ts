@@ -102,7 +102,7 @@ export function useSurveyUseCases() {
     const survey = teamStore.surveys.find((s) => s.id === surveyId)
     if (survey) {
       try {
-        await surveyFirebase.addVote(surveyId, userUid, newVote, survey.votes)
+        await surveyFirebase.addOrUpdateVote(surveyId, userUid, newVote, survey.votes)
       } catch (error: unknown) {
         if (error instanceof FirestoreError) {
           const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
@@ -118,28 +118,6 @@ export function useSurveyUseCases() {
     }
   }
 
-  const addSurveyVoteUseCase = async (surveyId: string, userUid: string, newVote: boolean) => {
-    const survey = teamStore.surveys.find(s => s.id === surveyId)
-    if (survey) {
-      const isUserVoteExists = survey.votes.find(v => v.userUid === userUid)
-      const votes = survey.votes || []
-
-      try {
-        await surveyFirebase.addSurveyVote(surveyId, userUid, newVote, votes, isUserVoteExists)
-      } catch (error: unknown) {
-        if (error instanceof FirestoreError) {
-          const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
-          notifyError(error.message, {
-            retry: shouldRetry,
-            onRetry: shouldRetry ? async () => { await addSurveyVoteUseCase(surveyId, userUid, newVote) } : undefined
-          })
-        } else {
-          notifyError('errors.unexpected')
-        }
-        throw error
-      }
-    }
-  }
 
   const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string): Promise<void> => {
     try {
@@ -199,7 +177,6 @@ export function useSurveyUseCases() {
     addSurvey,
     updateSurvey,
     voteOnSurvey,
-    addSurveyVoteUseCase,
     updateSurveyStatus,
     verifySurvey,
     updateSurveyVotes

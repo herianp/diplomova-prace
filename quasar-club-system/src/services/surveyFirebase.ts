@@ -121,21 +121,6 @@ export function useSurveyFirebase() {
     }
   }
 
-  // Legacy function names for backward compatibility (can be removed later)
-  const addVote = async (surveyId: string, userUid: string, newVote: boolean, votes: IVote[]) => {
-    return addOrUpdateVote(surveyId, userUid, newVote, votes)
-  }
-
-  const addSurveyVote = async (
-    surveyId: string,
-    userUid: string,
-    newVote: boolean,
-    votes: IVote[],
-    _isUserVoteExists: IVote | undefined,
-  ) => {
-    // Convert legacy parameter to standard format and delegate to unified function
-    return addOrUpdateVote(surveyId, userUid, newVote, votes)
-  }
 
   const updateSurveyStatus = async (surveyId: string, status: SurveyStatus, verifiedBy?: string) => {
     try {
@@ -190,8 +175,7 @@ export function useSurveyFirebase() {
     deleteSurvey,
     addSurvey,
     updateSurvey,
-    addVote,
-    addSurveyVote,
+    addOrUpdateVote,
     updateSurveyStatus,
     verifySurvey,
     updateSurveyVotes,
