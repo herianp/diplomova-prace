@@ -5,8 +5,10 @@ import { ITeam } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
 export function useTeamUseCases() {
+  const log = createLogger('useTeamUseCases')
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
@@ -24,6 +26,18 @@ export function useTeamUseCases() {
           teamStore.setCurrentTeam(teamsList[0])
         }
 
+        if (isFirstCallback) {
+          isFirstCallback = false
+          authStore.setTeamReady(true)
+          resolve()
+        }
+      }, (error) => {
+        // Permission-denied: show user-visible notification (SEC-02)
+        log.error('Team listener permission denied', { userId, error: error.message })
+        notifyError('errors.firestore.permissionDenied', {
+          retry: false
+        })
+        // Still resolve the promise so app doesn't hang
         if (isFirstCallback) {
           isFirstCallback = false
           authStore.setTeamReady(true)

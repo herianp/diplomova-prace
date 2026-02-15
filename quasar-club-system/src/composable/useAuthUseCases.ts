@@ -17,6 +17,15 @@ export function useAuthUseCases() {
   const router = useRouter()
   const { authStateListener, authStateReady, loginUser, logoutUser, registerUser, refreshUser, getCurrentUser } = useAuthFirebase()
 
+  /**
+   * Initializes auth state using Promise-based coordination (Phase 2).
+   * SEC-04: Auth state is confirmed via authStateReady() BEFORE any team
+   * listeners start. The authStateListener callback (line 36) only triggers
+   * setTeamListener AFTER auth state is fully resolved, eliminating
+   * permission-denied flash on cold start.
+   *
+   * Verified: 2026-02-15 (Phase 5 planning)
+   */
   const initializeAuth = async () => {
     // Step 1: Wait for initial auth state (Promise-based coordination)
     const initialUser = await authStateReady()

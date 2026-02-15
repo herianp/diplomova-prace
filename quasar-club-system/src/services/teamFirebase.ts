@@ -15,10 +15,11 @@ import {
   writeBatch,
   Unsubscribe,
   DocumentReference,
+  CollectionReference,
 } from 'firebase/firestore'
 import { ITeam, ITeamInvitation } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
-import { ListenerError } from '@/errors'
+import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
 
 const log = createLogger('teamFirebase')
@@ -83,16 +84,25 @@ export function useTeamFirebase() {
     }
   }
 
-  const getTeamsByUserId = (userId: string, callback: (teams: ITeam[]) => void): Unsubscribe => {
+  const getTeamsByUserId = (
+    userId: string,
+    callback: (teams: ITeam[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const teamsQuery = query(collection(db, 'teams'), where('members', 'array-contains', userId))
 
     return onSnapshot(teamsQuery, (snapshot) => {
       const teams = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as ITeam))
       callback(teams)
     }, (error) => {
-      const listenerError = new ListenerError('teams', 'errors.listener.failed', { originalError: error.message })
-      log.error('Teams listener failed', { userId, code: error.code, error: listenerError.message })
-      callback([]) // Graceful degradation
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Teams listener failed', { userId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
+      }
     })
   }
 

@@ -12,7 +12,7 @@ import {
 } from 'firebase/firestore'
 import { IFineRule, IFine, IPayment, ICashboxHistoryEntry } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
-import { ListenerError } from '@/errors'
+import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
 
 const log = createLogger('cashboxFirebase')
@@ -22,15 +22,24 @@ export function useCashboxFirebase() {
   // Fine Rules
   // ============================================================
 
-  const listenToFineRules = (teamId: string, callback: (rules: IFineRule[]) => void): Unsubscribe => {
+  const listenToFineRules = (
+    teamId: string,
+    callback: (rules: IFineRule[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const rulesRef = collection(doc(db, 'teams', teamId), 'fineRules')
     return onSnapshot(rulesRef, (snapshot) => {
       const rules = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFineRule[]
       callback(rules)
     }, (error) => {
-      const listenerError = new ListenerError('fineRules', 'errors.listener.failed', { code: error.code })
-      log.warn('FineRules listener failed', { teamId, code: error.code, error: listenerError.message })
-      callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('FineRules listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
+      }
     })
   }
 
@@ -80,15 +89,24 @@ export function useCashboxFirebase() {
   // Fines
   // ============================================================
 
-  const listenToFines = (teamId: string, callback: (fines: IFine[]) => void): Unsubscribe => {
+  const listenToFines = (
+    teamId: string,
+    callback: (fines: IFine[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const finesRef = collection(doc(db, 'teams', teamId), 'fines')
     return onSnapshot(finesRef, (snapshot) => {
       const fines = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFine[]
       callback(fines)
     }, (error) => {
-      const listenerError = new ListenerError('fines', 'errors.listener.failed', { code: error.code })
-      log.warn('Fines listener failed', { teamId, code: error.code, error: listenerError.message })
-      callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Fines listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
+      }
     })
   }
 
@@ -135,15 +153,24 @@ export function useCashboxFirebase() {
   // Payments
   // ============================================================
 
-  const listenToPayments = (teamId: string, callback: (payments: IPayment[]) => void): Unsubscribe => {
+  const listenToPayments = (
+    teamId: string,
+    callback: (payments: IPayment[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const paymentsRef = collection(doc(db, 'teams', teamId), 'payments')
     return onSnapshot(paymentsRef, (snapshot) => {
       const payments = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IPayment[]
       callback(payments)
     }, (error) => {
-      const listenerError = new ListenerError('payments', 'errors.listener.failed', { code: error.code })
-      log.warn('Payments listener failed', { teamId, code: error.code, error: listenerError.message })
-      callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Payments listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
+      }
     })
   }
 
@@ -234,7 +261,11 @@ export function useCashboxFirebase() {
     }
   }
 
-  const listenToCashboxHistory = (teamId: string, callback: (entries: ICashboxHistoryEntry[]) => void): Unsubscribe => {
+  const listenToCashboxHistory = (
+    teamId: string,
+    callback: (entries: ICashboxHistoryEntry[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const historyRef = collection(doc(db, 'teams', teamId), 'cashboxHistory')
     return onSnapshot(historyRef, (snapshot) => {
       const entries = snapshot.docs
@@ -246,9 +277,14 @@ export function useCashboxFirebase() {
       })
       callback(entries)
     }, (error) => {
-      const listenerError = new ListenerError('cashboxHistory', 'errors.listener.failed', { code: error.code })
-      log.warn('CashboxHistory listener failed', { teamId, code: error.code, error: listenerError.message })
-      callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('CashboxHistory listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
+      }
     })
   }
 
