@@ -273,3 +273,29 @@ export interface ICashboxHistoryEntry {
     createdAt: Date
   }>
 }
+
+// ============================================================
+// Audit Log
+// ============================================================
+
+export type AuditOperation =
+  | 'survey.delete'
+  | 'fine.create'
+  | 'fine.update'
+  | 'fine.delete'
+  | 'member.remove'
+  | 'vote.verify'
+
+export interface IAuditLog {
+  id?: string
+  teamId: string
+  operation: AuditOperation
+  actorUid: string
+  actorDisplayName: string
+  timestamp: Date
+  entityId: string
+  entityType: 'survey' | 'fine' | 'member' | 'vote'
+  before?: Record<string, unknown>
+  after?: Record<string, unknown>
+  metadata?: Record<string, unknown>
+}

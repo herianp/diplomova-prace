@@ -16,14 +16,18 @@ import {
 } from 'firebase/firestore'
 import { ISurvey, IVote, SurveyStatus, ISurveyNotificationData } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
-import { ListenerError } from '@/errors'
+import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
 import { isFeatureEnabled } from '@/config/featureFlags'
 
 const log = createLogger('surveyFirebase')
 
 export function useSurveyFirebase() {
-  const getSurveysByTeamId = (teamId: string, callback: (surveys: ISurvey[]) => void): Unsubscribe => {
+  const getSurveysByTeamId = (
+    teamId: string,
+    callback: (surveys: ISurvey[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const surveysQuery = query(collection(db, 'surveys'), where('teamId', '==', teamId))
 
     return onSnapshot(surveysQuery, async (snapshot) => {
@@ -35,6 +39,12 @@ export function useSurveyFirebase() {
           // Parallelize subcollection reads across all surveys
           surveys = await Promise.all(
             surveys.map(async (survey) => {
+              // Skip surveys without ID (shouldn't happen but protects against undefined)
+              if (!survey.id) {
+                log.warn('Survey missing ID, skipping subcollection enrichment', { survey })
+                return survey
+              }
+
               try {
                 const subcollectionVotes = await getVotesFromSubcollection(survey.id)
                 return { ...survey, votes: subcollectionVotes }
@@ -58,9 +68,14 @@ export function useSurveyFirebase() {
 
       callback(surveys)
     }, (error) => {
-      const listenerError = new ListenerError('surveys', 'errors.listener.failed', { code: error.code })
-      log.warn('Survey listener failed', { teamId, code: error.code, error: listenerError.message })
-      callback([]) // Graceful degradation
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Survey listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
+      }
     })
   }
 
