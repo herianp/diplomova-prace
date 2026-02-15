@@ -4,6 +4,7 @@ import { useTeamFirebase } from '@/services/teamFirebase'
 import { ITeam } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 export function useTeamUseCases() {
   const authStore = useAuthStore()
@@ -12,11 +13,6 @@ export function useTeamUseCases() {
 
   const setTeamListener = (userId: string): Promise<void> => {
     return new Promise((resolve) => {
-      // Clear existing listener
-      if (teamStore.unsubscribeTeams) {
-        teamStore.unsubscribeTeams()
-      }
-
       let isFirstCallback = true
 
       // Set up new listener
@@ -35,8 +31,8 @@ export function useTeamUseCases() {
         }
       })
 
-      // Store unsubscribe function
-      teamStore.setTeamsUnsubscribe(unsubscribe)
+      // Register with listener registry
+      listenerRegistry.register('teams', unsubscribe, { userId })
     })
   }
 

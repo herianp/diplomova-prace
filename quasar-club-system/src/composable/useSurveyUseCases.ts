@@ -6,6 +6,7 @@ import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 export function useSurveyUseCases() {
   const teamStore = useTeamStore()
@@ -13,18 +14,13 @@ export function useSurveyUseCases() {
   const surveyFirebase = useSurveyFirebase()
 
   const setSurveysListener = (teamId: string) => {
-    // Clear existing listener
-    if (teamStore.unsubscribeSurveys) {
-      teamStore.unsubscribeSurveys()
-    }
-
     // Set up new listener
     const unsubscribe = surveyFirebase.getSurveysByTeamId(teamId, (surveysList) => {
       teamStore.setSurveys(surveysList)
     })
 
-    // Store unsubscribe function
-    teamStore.setSurveysUnsubscribe(unsubscribe)
+    // Register with listener registry
+    listenerRegistry.register('surveys', unsubscribe, { teamId })
   }
 
   const getSurveyById = async (surveyId: string): Promise<ISurvey | null> => {
