@@ -11,9 +11,6 @@ export const useAuthStore = defineStore("auth", () => {
   const isAuthReady = ref(false)
   const isTeamReady = ref(false)
 
-  // Auth state listener unsubscribe function
-  const authUnsubscribe = ref<(() => void) | null>(null)
-
   // Pure state mutations (no business logic)
   const setUser = (newUser: User | null) => {
     user.value = newUser
@@ -35,15 +32,7 @@ export const useAuthStore = defineStore("auth", () => {
     isTeamReady.value = ready
   }
 
-  const setAuthUnsubscribe = (unsubscribeFn: (() => void) | null) => {
-    authUnsubscribe.value = unsubscribeFn
-  }
-
   const cleanup = () => {
-    if (authUnsubscribe.value) {
-      authUnsubscribe.value()
-      authUnsubscribe.value = null
-    }
     user.value = null
     isLoading.value = false
     isAdmin.value = false
@@ -58,14 +47,12 @@ export const useAuthStore = defineStore("auth", () => {
     isAdmin,
     isAuthReady,
     isTeamReady,
-    authUnsubscribe,
     // Pure state mutations
     setUser,
     setLoading,
     setAdmin,
     setAuthReady,
     setTeamReady,
-    setAuthUnsubscribe,
     cleanup
   }
 })

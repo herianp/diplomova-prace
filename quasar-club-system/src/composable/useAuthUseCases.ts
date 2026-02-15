@@ -7,14 +7,30 @@ import { useRouter } from 'vue-router'
 import { User } from 'firebase/auth'
 import { notifyError } from '@/services/notificationService'
 import { AuthError, FirestoreError } from '@/errors'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 export function useAuthUseCases() {
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const router = useRouter()
-  const { authStateListener, loginUser, logoutUser, registerUser, refreshUser, getCurrentUser } = useAuthFirebase()
+  const { authStateListener, authStateReady, loginUser, logoutUser, registerUser, refreshUser, getCurrentUser } = useAuthFirebase()
 
-  const initializeAuth = () => {
+  const initializeAuth = async () => {
+    // Step 1: Wait for initial auth state (Promise-based coordination)
+    const initialUser = await authStateReady()
+
+    if (initialUser) {
+      authStore.setUser(initialUser)
+
+      // Check admin custom claim
+      const tokenResult = await initialUser.getIdTokenResult()
+      authStore.setAdmin(tokenResult.claims.admin === true)
+    }
+
+    // Auth state is now resolved - safe to set ready flag
+    authStore.setAuthReady(true)
+
+    // Step 2: Set up continuous auth listener for ongoing changes
     const unsubscribe = authStateListener(async (user: User | null) => {
       if (user) {
         authStore.setUser(user)
@@ -22,8 +38,6 @@ export function useAuthUseCases() {
         // Check admin custom claim
         const tokenResult = await user.getIdTokenResult()
         authStore.setAdmin(tokenResult.claims.admin === true)
-
-        authStore.setAuthReady(true)
 
         try {
           const { setTeamListener } = useTeamUseCases()
@@ -46,13 +60,16 @@ export function useAuthUseCases() {
       } else {
         authStore.setUser(null)
         authStore.setAdmin(false)
-        authStore.setAuthReady(true)
         router.push(RouteEnum.HOME.path)
         teamStore.clearData()
+
+        // Cleanup all listeners on logout (addresses LST-05)
+        listenerRegistry.unregisterAll()
       }
     })
 
-    authStore.setAuthUnsubscribe(unsubscribe)
+    // Register auth listener with centralized registry
+    listenerRegistry.register('auth', unsubscribe)
   }
 
   const signIn = async (email: string, password: string): Promise<User> => {

@@ -22,6 +22,20 @@ export function useAuthFirebase() {
     return onAuthStateChanged(auth, callback);
   };
 
+  /**
+   * Promise-based auth state initialization
+   * Resolves with the initial auth state (user or null) immediately
+   * Used to ensure auth is ready before starting data listeners
+   */
+  const authStateReady = (): Promise<User | null> => {
+    return new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        unsubscribe();
+        resolve(user);
+      });
+    });
+  };
+
   const loginUser = async (email: string, password: string): Promise<User> => {
     try {
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -146,6 +160,7 @@ export function useAuthFirebase() {
 
   return {
     authStateListener,
+    authStateReady,
     loginUser,
     logoutUser,
     registerUser,
