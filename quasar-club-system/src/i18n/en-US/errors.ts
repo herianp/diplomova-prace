@@ -27,4 +27,4 @@ export default {
   },
   unexpected: 'Unexpected error. Please try again.',
   maxRetriesReached: 'Maximum retry attempts reached'
-}
+} as const

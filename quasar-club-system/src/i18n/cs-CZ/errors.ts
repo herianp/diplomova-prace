@@ -27,4 +27,4 @@ export default {
   },
   unexpected: 'Neočekávaná chyba. Zkuste to prosím znovu.',
   maxRetriesReached: 'Maximální počet pokusů byl dosažen'
-}
+} as const

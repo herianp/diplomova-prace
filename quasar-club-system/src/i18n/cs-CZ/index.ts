@@ -1,4 +1,4 @@
-import errors from './errors.js'
+import errors from './errors'
 
 export default {
   errors,
@@ -525,4 +525,4 @@ export default {
       viewDetails: "Zobrazit detaily"
     }
   }
-}
+} as const
