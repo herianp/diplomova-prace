@@ -56,6 +56,7 @@ import { useRouter } from 'vue-router'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 const router = useRouter()
 const teamStore = useTeamStore()
@@ -88,6 +89,9 @@ const avatarColor = computed(() => {
 })
 
 const selectTeam = () => {
+  // Clean up all team-scoped listeners before switching
+  listenerRegistry.unregisterByScope('team')
+
   teamStore.setCurrentTeam(props.team)
   setSurveysListener(props.team.id)
 }

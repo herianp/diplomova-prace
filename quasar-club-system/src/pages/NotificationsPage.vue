@@ -207,6 +207,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
 import { useNotificationFirebase } from '@/services/notificationFirebase'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 const authStore = useAuthStore()
 const { isMobile } = useScreenComposable()
@@ -225,7 +226,6 @@ const respondingTo = ref(null)
 const filter = ref('all')
 const hasMore = ref(true)
 const pageSize = 20
-let unsubscribe = null
 let lastDoc = null
 
 // Computed
@@ -268,12 +268,9 @@ const filteredNotifications = computed(() => {
 const loadNotifications = () => {
   if (!currentUser.value?.uid) return
 
-  // Clean up previous subscription
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 
-  unsubscribe = notificationFirebase.listenToNotifications(
+  const unsubscribe = notificationFirebase.listenToNotifications(
     currentUser.value.uid,
     pageSize,
     (notifs, last) => {
@@ -282,10 +279,13 @@ const loadNotifications = () => {
       hasMore.value = notifs.length === pageSize
       loading.value = false
     },
-    () => {
+    (error) => {
+      console.error('Notification listener error:', error.message)
       loading.value = false
     }
   )
+
+  listenerRegistry.register('notifications', unsubscribe, { userId: currentUser.value.uid })
 }
 
 const loadMoreNotifications = async () => {
@@ -449,9 +449,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 })
 </script>
 

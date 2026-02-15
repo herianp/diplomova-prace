@@ -146,6 +146,7 @@ import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
 import MessageBubble from '@/components/messages/MessageBubble.vue'
 import MessageDateSeparator from '@/components/messages/MessageDateSeparator.vue'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
@@ -161,7 +162,6 @@ const loading = ref(true)
 const sending = ref(false)
 const scrollArea = ref(null)
 const showScrollButton = ref(false)
-let unsubscribe = null
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
@@ -221,11 +221,9 @@ const loadMessages = () => {
     return
   }
 
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('messages')
 
-  unsubscribe = messageFirebase.listenToMessages(
+  const unsubscribe = messageFirebase.listenToMessages(
     currentTeam.value.id,
     100,
     (msgs) => {
@@ -256,6 +254,8 @@ const loadMessages = () => {
       })
     }
   )
+
+  listenerRegistry.register('messages', unsubscribe, { teamId: currentTeam.value.id })
 }
 
 // Send message
@@ -314,9 +314,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('messages')
 })
 </script>
 

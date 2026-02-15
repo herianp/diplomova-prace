@@ -138,6 +138,7 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
 import { useNotificationFirebase } from '@/services/notificationFirebase'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 const authStore = useAuthStore()
 const $q = useQuasar()
@@ -149,7 +150,6 @@ const notificationFirebase = useNotificationFirebase()
 const notifications = ref([])
 const loading = ref(true)
 const showDropdown = ref(false)
-let unsubscribe = null
 
 // Computed
 const currentUser = computed(() => authStore.user)
@@ -166,13 +166,10 @@ const loadNotifications = async () => {
     return
   }
 
-  // Clean up previous subscription
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 
   try {
-    unsubscribe = notificationFirebase.listenToNotifications(
+    const unsubscribe = notificationFirebase.listenToNotifications(
       currentUser.value.uid,
       10,
       (notifs) => {
@@ -183,11 +180,14 @@ const loadNotifications = async () => {
         })
         loading.value = false
       },
-      () => {
+      (error) => {
+        console.error('Notification dropdown listener error:', error.message)
         notifications.value = []
         loading.value = false
       }
     )
+
+    listenerRegistry.register('notifications', unsubscribe, { userId: currentUser.value.uid })
   } catch (error) {
     console.error('Error setting up notifications listener:', error)
     notifications.value = []
@@ -312,10 +312,7 @@ watch(currentUser, (newUser, oldUser) => {
   } else if (!newUser?.uid) {
     notifications.value = []
     loading.value = false
-    if (unsubscribe) {
-      unsubscribe()
-      unsubscribe = null
-    }
+    listenerRegistry.unregister('notifications')
   }
 })
 
@@ -324,9 +321,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 })
 </script>
 
