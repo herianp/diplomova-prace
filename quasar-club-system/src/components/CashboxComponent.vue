@@ -360,7 +360,8 @@ const onSubmitPayment = async ({ playerId, amount, note }) => {
 
 const onDeleteFine = async (fineId) => {
   try {
-    await cashbox.deleteFine(currentTeam.value.id, fineId)
+    const fine = fines.value.find(f => f.id === fineId)
+    await cashbox.deleteFine(currentTeam.value.id, fineId, fine)
     $q.notify({ type: 'positive', message: t('cashbox.fines.deleteSuccess') })
   } catch {
     $q.notify({ type: 'negative', message: t('cashbox.fines.deleteError') })

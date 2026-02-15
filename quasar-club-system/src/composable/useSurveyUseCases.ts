@@ -8,10 +8,12 @@ import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
 import { createLogger } from 'src/utils/logger'
+import { useAuthStore } from '@/stores/authStore'
 
 export function useSurveyUseCases() {
   const log = createLogger('useSurveyUseCases')
   const teamStore = useTeamStore()
+  const authStore = useAuthStore()
   const { createSurveyNotification } = useNotifications()
   const surveyFirebase = useSurveyFirebase()
 
@@ -31,7 +33,16 @@ export function useSurveyUseCases() {
 
   const deleteSurvey = async (surveyId: string): Promise<void> => {
     try {
-      return await surveyFirebase.deleteSurvey(surveyId)
+      // Get survey for audit context
+      const survey = teamStore.surveys.find((s) => s.id === surveyId)
+      const auditContext = authStore.user ? {
+        teamId: survey?.teamId || teamStore.currentTeam?.id || '',
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown',
+        surveyTitle: survey?.title
+      } : undefined
+
+      return await surveyFirebase.deleteSurvey(surveyId, auditContext)
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         // NO retry for destructive operations
@@ -138,7 +149,14 @@ export function useSurveyUseCases() {
 
   const verifySurvey = async (surveyId: string, verifiedBy: string, updatedVotes?: IVote[]): Promise<void> => {
     try {
-      return await surveyFirebase.verifySurvey(surveyId, verifiedBy, updatedVotes)
+      // Get survey for audit context
+      const survey = teamStore.surveys.find((s) => s.id === surveyId)
+      const auditContext = authStore.user ? {
+        teamId: survey?.teamId || teamStore.currentTeam?.id || '',
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown'
+      } : undefined
+
+      return await surveyFirebase.verifySurvey(surveyId, verifiedBy, updatedVotes, auditContext)
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

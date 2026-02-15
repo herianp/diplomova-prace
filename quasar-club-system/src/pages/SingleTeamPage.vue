@@ -344,7 +344,13 @@ const confirmRemoveMember = (member) => {
 
 const removeMember = async () => {
   try {
-    await teamFirebase.removeMember(teamId.value, memberToRemove.value.uid)
+    const auditContext = currentUser.value ? {
+      actorUid: currentUser.value.uid,
+      actorDisplayName: currentUser.value.displayName || currentUser.value.email || 'Unknown',
+      memberDisplayName: memberToRemove.value.displayName
+    } : undefined
+
+    await teamFirebase.removeMember(teamId.value, memberToRemove.value.uid, auditContext)
 
     $q.notify({
       type: 'positive',

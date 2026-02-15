@@ -14,6 +14,7 @@ import { IFineRule, IFine, IPayment, ICashboxHistoryEntry } from '@/interfaces/i
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
+import { useAuditLogFirebase } from '@/services/auditLogFirebase'
 
 const log = createLogger('cashboxFirebase')
 
@@ -110,9 +111,28 @@ export function useCashboxFirebase() {
     })
   }
 
-  const addFine = async (teamId: string, fine: Omit<IFine, 'id'>): Promise<void> => {
+  const addFine = async (
+    teamId: string,
+    fine: Omit<IFine, 'id'>,
+    auditContext?: { actorUid: string; actorDisplayName: string }
+  ): Promise<void> => {
     try {
       await addDoc(collection(doc(db, 'teams', teamId), 'fines'), fine)
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId,
+          operation: 'fine.create',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: fine.playerId,
+          entityType: 'fine',
+          after: { amount: fine.amount, reason: fine.reason, source: fine.source }
+        })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to add fine', { teamId, playerId: fine.playerId, error: firestoreError.message })
@@ -120,9 +140,28 @@ export function useCashboxFirebase() {
     }
   }
 
-  const deleteFine = async (teamId: string, fineId: string): Promise<void> => {
+  const deleteFine = async (
+    teamId: string,
+    fineId: string,
+    auditContext?: { actorUid: string; actorDisplayName: string; fineAmount?: number; fineReason?: string }
+  ): Promise<void> => {
     try {
       await deleteDoc(doc(db, 'teams', teamId, 'fines', fineId))
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId,
+          operation: 'fine.delete',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: fineId,
+          entityType: 'fine',
+          before: auditContext.fineAmount ? { amount: auditContext.fineAmount, reason: auditContext.fineReason } : undefined
+        })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
       log.error('Failed to delete fine', { teamId, fineId, error: firestoreError.message })

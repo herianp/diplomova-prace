@@ -4,9 +4,11 @@ import { SurveyTypes } from '@/enums/SurveyTypes'
 import { Unsubscribe } from 'firebase/firestore'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
+import { useAuthStore } from '@/stores/authStore'
 
 export function useCashboxUseCases() {
   const cashboxFirebase = useCashboxFirebase()
+  const authStore = useAuthStore()
 
   // ============================================================
   // Listeners
@@ -96,7 +98,12 @@ export function useCashboxUseCases() {
       createdAt: new Date(),
     }
     try {
-      return await cashboxFirebase.addFine(teamId, fine)
+      const auditContext = authStore.user ? {
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown'
+      } : undefined
+
+      return await cashboxFirebase.addFine(teamId, fine, auditContext)
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
@@ -111,9 +118,16 @@ export function useCashboxUseCases() {
     }
   }
 
-  const deleteFine = async (teamId: string, fineId: string): Promise<void> => {
+  const deleteFine = async (teamId: string, fineId: string, fine?: IFine): Promise<void> => {
     try {
-      return await cashboxFirebase.deleteFine(teamId, fineId)
+      const auditContext = authStore.user && fine ? {
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown',
+        fineAmount: fine.amount,
+        fineReason: fine.reason
+      } : undefined
+
+      return await cashboxFirebase.deleteFine(teamId, fineId, auditContext)
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         // NO retry for destructive operations
