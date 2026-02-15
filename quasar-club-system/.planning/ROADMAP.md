@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Error System Foundation** - Typed error hierarchy and centralized handling
 - [x] **Phase 2: Listener Registry System** - Centralized lifecycle management for Firestore listeners
 - [x] **Phase 3: Code Quality & TypeScript** - Strict mode enablement and structured logging
-- [ ] **Phase 4: Data Model Migration** - Move votes from arrays to subcollections
+- [x] **Phase 4: Data Model Migration** - Move votes from arrays to subcollections
 - [ ] **Phase 5: Security & Audit** - Audit trail and permission error boundaries
 - [ ] **Phase 6: Performance** - Lazy chart rendering and optimization
 - [ ] **Phase 7: Test Infrastructure** - Firebase emulator setup and tooling
@@ -90,9 +90,9 @@ Plans:
 **Plans**: 3 plans in 3 waves
 
 Plans:
-- [ ] 04-01-PLAN.md — Feature flags, security rules, vote function consolidation (Wave 1)
-- [ ] 04-02-PLAN.md — Subcollection read/write logic with dual-write support (Wave 2)
-- [ ] 04-03-PLAN.md — Migration script and data integrity verification (Wave 3)
+- [x] 04-01-PLAN.md — Feature flags, security rules, vote function consolidation (Wave 1)
+- [x] 04-02-PLAN.md — Subcollection read/write logic with dual-write support (Wave 2)
+- [x] 04-03-PLAN.md — Migration script and data integrity verification (Wave 3)
 
 ### Phase 5: Security & Audit
 **Goal**: Add audit trail for sensitive operations and surface permission errors to users
@@ -175,7 +175,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. Error System Foundation | 5/5 | Complete | 2026-02-14 |
 | 2. Listener Registry System | 3/3 | Complete | 2026-02-15 |
 | 3. Code Quality & TypeScript | 4/4 | Complete | 2026-02-15 |
-| 4. Data Model Migration | 0/TBD | Not started | - |
+| 4. Data Model Migration | 3/3 | Complete | 2026-02-15 |
 | 5. Security & Audit | 0/TBD | Not started | - |
 | 6. Performance | 0/TBD | Not started | - |
 | 7. Test Infrastructure | 0/TBD | Not started | - |
