@@ -21,6 +21,24 @@ service cloud.firestore {
       allow update: if canTeamExistsAndIsUserAuthenticated(resource.data.teamId) &&
       	isTeamMember(resource.data.teamId) &&
         request.resource.data.votes != null; //todo
+
+      // Subcollection: votes - team members can read all votes and write their own
+      match /votes/{voteId} {
+        // Team members can read all votes for surveys they can access
+        allow read: if request.auth != null &&
+          isTeamMember(get(/databases/$(database)/documents/surveys/$(surveyId)).data.teamId);
+
+        // Team members can create/update their own vote (voteId must equal auth UID)
+        allow create, update: if request.auth != null &&
+          voteId == request.auth.uid &&
+          isTeamMember(get(/databases/$(database)/documents/surveys/$(surveyId)).data.teamId);
+
+        // Power users have full access to votes
+        allow read, write, delete: if isPowerUserForTeam(get(/databases/$(database)/documents/surveys/$(surveyId)).data.teamId);
+
+        // App admin full access
+        allow read, delete: if isAppAdmin();
+      }
     }
 
     // Helper function to check if the user is a global app admin
