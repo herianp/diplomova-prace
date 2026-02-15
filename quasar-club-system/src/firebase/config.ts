@@ -4,8 +4,18 @@ import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+/**
+ * Firebase Configuration
+ *
+ * Uses Vite environment variables for API key (VITE_FIREBASE_API_KEY).
+ * Other config values are non-secret project identifiers.
+ *
+ * Environment setup:
+ * - Development: Set VITE_FIREBASE_API_KEY in .env.local (gitignored)
+ * - Production: Set VITE_FIREBASE_API_KEY in deployment environment
+ *
+ * SDKs in use: firebase/app, firebase/auth, firebase/firestore, firebase/analytics
+ */
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
