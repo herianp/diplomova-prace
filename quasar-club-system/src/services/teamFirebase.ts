@@ -27,6 +27,38 @@ const log = createLogger('teamFirebase')
 export function useTeamFirebase() {
   const generateInvitationCode = () => Math.random().toString(36).substring(2, 8).toUpperCase()
 
+  const BATCH_SIZE = 499
+
+  const deleteCollectionInBatches = async (
+    collectionRef: CollectionReference,
+    label: string
+  ): Promise<number> => {
+    const snapshot = await getDocs(collectionRef)
+    const docs = snapshot.docs
+
+    if (docs.length === 0) return 0
+
+    for (let i = 0; i < docs.length; i += BATCH_SIZE) {
+      const batch = writeBatch(db)
+      const chunk = docs.slice(i, i + BATCH_SIZE)
+      chunk.forEach((d) => batch.delete(d.ref))
+      await batch.commit()
+
+      log.info('Batch delete progress', {
+        label,
+        processed: Math.min(i + BATCH_SIZE, docs.length),
+        total: docs.length
+      })
+
+      // Rate limiting: 200ms pause every 10 batches (~5000 writes)
+      if ((Math.floor(i / BATCH_SIZE) + 1) % 10 === 0) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+      }
+    }
+
+    return docs.length
+  }
+
   const createTeam = async (teamName: string, userId: string) => {
     try {
       const newTeam = {
@@ -47,36 +79,55 @@ export function useTeamFirebase() {
 
   const deleteTeam = async (teamId: string) => {
     try {
-      // Firestore batches are limited to 500 operations, use multiple batches if needed
-      const collectionsToClean = ['surveys', 'messages', 'notifications', 'teamInvitations']
-
-      for (const col of collectionsToClean) {
+      // Delete root-level collections referencing team
+      const rootCollections = ['surveys', 'messages', 'notifications', 'teamInvitations']
+      for (const col of rootCollections) {
         const q = query(collection(db, col), where('teamId', '==', teamId))
         const snapshot = await getDocs(q)
-        // Delete in batches of 499 (leaving room for the team doc in last batch)
-        const docs = snapshot.docs
-        for (let i = 0; i < docs.length; i += 499) {
-          const batch = writeBatch(db)
-          const chunk = docs.slice(i, i + 499)
-          chunk.forEach((d) => batch.delete(d.ref))
-          await batch.commit()
+
+        // Use batch helper for unlimited scale
+        if (snapshot.docs.length > 0) {
+          // Convert query result to a pseudo-collection for batch deletion
+          for (let i = 0; i < snapshot.docs.length; i += BATCH_SIZE) {
+            const batch = writeBatch(db)
+            const chunk = snapshot.docs.slice(i, i + BATCH_SIZE)
+            chunk.forEach((d) => batch.delete(d.ref))
+            await batch.commit()
+
+            log.info('Batch delete progress', {
+              teamId,
+              collection: col,
+              processed: Math.min(i + BATCH_SIZE, snapshot.docs.length),
+              total: snapshot.docs.length
+            })
+
+            if ((Math.floor(i / BATCH_SIZE) + 1) % 10 === 0) {
+              await new Promise(resolve => setTimeout(resolve, 200))
+            }
+          }
         }
       }
 
-      // Delete cashbox subcollections (fineRules, fines, payments)
-      const subcollections = ['fineRules', 'fines', 'payments', 'cashboxTransactions']
+      // Delete subcollections under team document (includes auditLogs from Phase 5)
+      const subcollections = ['fineRules', 'fines', 'payments', 'cashboxTransactions', 'cashboxHistory', 'auditLogs']
       for (const sub of subcollections) {
         const subRef = collection(doc(db, 'teams', teamId), sub)
-        const subSnap = await getDocs(subRef)
-        if (!subSnap.empty) {
-          const batch = writeBatch(db)
-          subSnap.docs.forEach((d) => batch.delete(d.ref))
-          await batch.commit()
-        }
+        await deleteCollectionInBatches(subRef, `${teamId}/${sub}`)
       }
 
-      // Delete the team document itself
+      // Delete votes subcollections for all team surveys (Phase 4 data model)
+      const surveysQuery = query(collection(db, 'surveys'), where('teamId', '==', teamId))
+      const surveysSnapshot = await getDocs(surveysQuery)
+
+      for (const surveyDoc of surveysSnapshot.docs) {
+        const votesRef = collection(doc(db, 'surveys', surveyDoc.id), 'votes')
+        await deleteCollectionInBatches(votesRef, `surveys/${surveyDoc.id}/votes`)
+      }
+
+      // Finally, delete the team document itself
       await deleteDoc(doc(db, 'teams', teamId))
+
+      log.info('Team cascade delete complete', { teamId })
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'delete')
       log.error('Failed to delete team', { teamId, error: firestoreError.message })
