@@ -22,6 +22,7 @@ export default defineRouter(function () {
   // Initialize auth once - this will handle team setup automatically
   if (!authInitialized) {
     const { initializeAuth } = useAuthUseCases()
+    // Fire and forget - router guard waits for isAuthReady via watch
     initializeAuth()
     authInitialized = true
   }

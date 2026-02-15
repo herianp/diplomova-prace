@@ -54,8 +54,8 @@ export function useAuthComposable() {
     }
   }
 
-  const initializeAuth = () => {
-    authUseCases.initializeAuth()
+  const initializeAuth = async () => {
+    await authUseCases.initializeAuth()
   }
 
   const refreshUser = async () => {
