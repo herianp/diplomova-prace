@@ -5,33 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** Phase 1 - Error System Foundation
+**Current focus:** Phase 2 - Listener Registry System
 
 ## Current Position
 
-Phase: 1 of 9 (Error System Foundation)
-Plan: 5 of 5 in current phase
-Status: Phase Complete
-Last activity: 2026-02-14 — Completed 01-05-PLAN.md (Password change error hardening)
+Phase: 2 of 9 (Listener Registry System)
+Plan: 1 of 5 in current phase
+Status: In Progress
+Last activity: 2026-02-15 — Completed 02-01-PLAN.md (Listener Registry Foundation)
 
-Progress: [██░░░░░░░░] 22% (1/9 phases complete, 5/5 plans in current phase)
+Progress: [██░░░░░░░░] 24% (1/9 phases complete, 1/5 plans in current phase)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 5
-- Average duration: 20.5 minutes
-- Total execution time: 1.72 hours
+- Total plans completed: 6
+- Average duration: 17.7 minutes
+- Total execution time: 1.77 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-error-system-foundation | 5 | 102.4 min | 20.5 min |
+| 02-listener-registry-system | 1 | 3.3 min | 3.3 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (10.4min), 01-02 (12min), 01-03 (20min), 01-04 (58min), 01-05 (2min)
-- Trend: Phase 01 complete - final plan was quick cleanup task
+- Last 5 plans: 01-02 (12min), 01-03 (20min), 01-04 (58min), 01-05 (2min), 02-01 (3.3min)
+- Trend: Phase 02 started - foundation plan executed quickly and cleanly
 
 *Updated after each plan completion*
 
@@ -52,6 +53,9 @@ Recent decisions affecting current work:
 - [Phase 01-error-system-foundation]: Retry only for transient errors (network, unavailable, deadline-exceeded) - no retry for destructive operations or permanent errors
 - [Phase 01-05]: Network errors show retry button, permanent errors (wrong password, weak password) don't
 - [Phase 01-05]: No-user check moved outside try-catch for clearer error path in changeUserPassword
+- [Phase 02-01]: Promise-based auth coordination eliminates timing buffers and race conditions
+- [Phase 02-01]: ListenerRegistry manages all listener lifecycle instead of individual stores
+- [Phase 02-01]: Scope-based cleanup enables team-switch cleanup (team vs user scoped listeners)
 
 ### Pending Todos
 
@@ -67,6 +71,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-14 (plan execution)
-Stopped at: Completed 01-05-PLAN.md - Password change error hardening
-Resume file: .planning/phases/01-error-system-foundation/01-05-SUMMARY.md
+Last session: 2026-02-15 (plan execution)
+Stopped at: Completed 02-01-PLAN.md - Listener Registry Foundation
+Resume file: .planning/phases/02-listener-registry-system/02-01-SUMMARY.md
