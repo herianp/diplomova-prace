@@ -208,7 +208,9 @@ import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
 import { useNotificationFirebase } from '@/services/notificationFirebase'
 import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('NotificationsPage')
 const authStore = useAuthStore()
 const { isMobile } = useScreenComposable()
 const $q = useQuasar()
@@ -280,7 +282,10 @@ const loadNotifications = () => {
       loading.value = false
     },
     (error) => {
-      console.error('Notification listener error:', error.message)
+      log.error('Notification listener failed', {
+        error: error instanceof Error ? error.message : String(error),
+        userId: currentUser.value.uid
+      })
       loading.value = false
     }
   )
@@ -305,7 +310,10 @@ const loadMoreNotifications = async () => {
     hasMore.value = result.hasMore
 
   } catch (error) {
-    console.error('Error loading more notifications:', error)
+    log.error('Failed to load more notifications', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: currentUser.value.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.loadMoreError'),
@@ -331,7 +339,10 @@ const markAsRead = async (notification) => {
   try {
     await notificationFirebase.markNotificationAsRead(notification.id)
   } catch (error) {
-    console.error('Error marking notification as read:', error)
+    log.error('Failed to mark notification as read', {
+      error: error instanceof Error ? error.message : String(error),
+      notificationId: notification.id
+    })
   }
 }
 
@@ -349,7 +360,10 @@ const markAllAsRead = async () => {
     })
 
   } catch (error) {
-    console.error('Error marking all as read:', error)
+    log.error('Failed to mark all as read', {
+      error: error instanceof Error ? error.message : String(error),
+      count: unreadIds.length
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.markReadError'),
@@ -375,7 +389,11 @@ const handleInvitationResponse = async (notification, response) => {
     })
 
   } catch (error) {
-    console.error('Error responding to invitation:', error)
+    log.error('Failed to respond to invitation', {
+      error: error instanceof Error ? error.message : String(error),
+      notificationId: notification.id,
+      response
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.invitation.error'),

@@ -147,7 +147,9 @@ import { DateTime } from 'luxon'
 import MessageBubble from '@/components/messages/MessageBubble.vue'
 import MessageDateSeparator from '@/components/messages/MessageDateSeparator.vue'
 import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('MessagesComponent')
 const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { waitForTeam } = useReadiness()
@@ -283,7 +285,11 @@ const sendNewMessage = async () => {
       timeout: 1000
     })
   } catch (error) {
-    console.error('Error sending message:', error)
+    log.error('Failed to send message', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id,
+      authorId: currentUser.value?.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('messages.sendError'),

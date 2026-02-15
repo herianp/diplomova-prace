@@ -137,6 +137,9 @@ import { RouteEnum } from '@/enums/routesEnum'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
 import TeamInvitationComponent from '@/components/team/TeamInvitationComponent.vue'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('SingleTeamPage')
 import TeamInvitationPendingComponent from '@/components/team/TeamInvitationPendingComponent.vue'
 
 const route = useRoute()
@@ -182,7 +185,10 @@ const loadTeam = async () => {
       }
     }
   } catch (error) {
-    console.error('Error loading team:', error)
+    log.error('Failed to load team', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value
+    })
     $q.notify({
       type: 'negative',
       message: t('team.single.loadError'),
@@ -203,7 +209,11 @@ const loadTeamMembers = async () => {
 
     teamMembers.value = await queryByIdsInChunks('users', members)
   } catch (error) {
-    console.error('Error loading team members:', error)
+    log.error('Failed to load team members', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value,
+      memberCount: members.length
+    })
   }
 }
 
@@ -211,7 +221,10 @@ const loadPendingInvitations = async () => {
   try {
     pendingInvitations.value = await teamFirebase.loadPendingInvitations(teamId.value)
   } catch (error) {
-    console.error('Error loading pending invitations:', error)
+    log.error('Failed to load pending invitations', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value
+    })
   }
 }
 
@@ -286,7 +299,11 @@ const sendInvitation = async () => {
     await loadPendingInvitations()
 
   } catch (error) {
-    console.error('Error sending invitation:', error)
+    log.error('Failed to send invitation', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value,
+      email: inviteForm.email
+    })
     $q.notify({
       type: 'negative',
       message: t('team.single.invite.error'),
@@ -307,7 +324,11 @@ const cancelInvitation = async (invitation) => {
     })
     await loadPendingInvitations()
   } catch (error) {
-    console.error('Error cancelling invitation:', error)
+    log.error('Failed to cancel invitation', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value,
+      invitationId: invitation.id
+    })
     $q.notify({
       type: 'negative',
       message: t('team.single.pendingInvites.cancelError'),
@@ -336,7 +357,11 @@ const removeMember = async () => {
     await loadTeam()
 
   } catch (error) {
-    console.error('Error removing member:', error)
+    log.error('Failed to remove member', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value,
+      memberId: memberToRemove.value.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('team.single.members.removeError'),
@@ -358,7 +383,11 @@ const promoteToPowerUser = async (member) => {
     await loadTeam()
 
   } catch (error) {
-    console.error('Error promoting member:', error)
+    log.error('Failed to promote member', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value,
+      memberId: member.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('team.single.members.promoteError'),
@@ -388,7 +417,10 @@ const handleDeleteTeam = async () => {
     showDeleteDialog.value = false
     router.push(RouteEnum.TEAM.path)
   } catch (error) {
-    console.error('Error deleting team:', error)
+    log.error('Failed to delete team', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value
+    })
     $q.notify({
       type: 'negative',
       message: t('team.single.delete.error'),

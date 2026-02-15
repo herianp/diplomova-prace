@@ -103,7 +103,9 @@ import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('DashboardComponent')
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const { waitForTeam } = useReadiness()
@@ -133,7 +135,10 @@ const refreshData = async () => {
       setSurveysListener(currentTeam.value.id)
     }
   } catch (error) {
-    console.error('Error refreshing dashboard data:', error)
+    log.error('Failed to refresh dashboard data', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id
+    })
   } finally {
     isLoading.value = false
   }

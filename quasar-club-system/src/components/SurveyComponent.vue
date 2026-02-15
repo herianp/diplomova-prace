@@ -173,7 +173,9 @@ import MetricCard from '@/components/dashboard/MetricCard.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import SurveyForm from '@/components/modal/SurveyForm.vue'
 import SurveyCard from '@/components/new/SurveyCard.vue'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('SurveyComponent')
 const teamStore = useTeamStore()
 const { waitForTeam } = useReadiness()
 const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
@@ -227,7 +229,11 @@ async function handleSurveySubmit(payload) {
       type: payload.surveyType,
     })
   } catch (err) {
-    console.error('Error creating survey:', err)
+    log.error('Failed to create survey', {
+      error: err instanceof Error ? err.message : String(err),
+      teamId: currentTeam.value?.id,
+      title: payload.title
+    })
     throw err
   }
 }

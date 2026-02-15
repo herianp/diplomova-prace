@@ -75,7 +75,9 @@ import TeamCard from '@/components/new/TeamCard.vue'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { useTeamStore } from '@/stores/teamStore'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('TeamComponent')
 const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
 const { createTeam } = useTeamUseCases()
 const { teams } = storeToRefs(useTeamStore())
@@ -92,7 +94,11 @@ const handleCreateTeam = async () => {
     newTeamName.value = ''
     showCreateDialog.value = false
   } catch (err) {
-    console.error('Error creating team:', err)
+    log.error('Failed to create team', {
+      error: err instanceof Error ? err.message : String(err),
+      teamName: newTeamName.value.trim(),
+      userId: currentUser.value.uid
+    })
   } finally {
     isCreating.value = false
   }

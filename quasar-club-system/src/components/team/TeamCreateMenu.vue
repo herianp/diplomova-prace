@@ -30,6 +30,9 @@ import { ref } from 'vue'
 import TeamForm from '@/components/modal/TeamForm.vue'
 import { useTeamUseCases } from '@/composable/useTeamUseCases.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('TeamCreateMenu')
 
 defineProps({
   isPowerUser: {
@@ -47,7 +50,11 @@ async function handleCreateTeam(payload) {
   try {
     await createTeam(payload.title, currentUser.value.uid);
   } catch (err) {
-    console.error(`err ${err}`);
+    log.error('Failed to create team', {
+      error: err instanceof Error ? err.message : String(err),
+      title: payload.title,
+      userId: currentUser.value.uid
+    });
   }
 }
 

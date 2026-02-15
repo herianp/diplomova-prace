@@ -222,7 +222,9 @@ import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
 import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 import HeaderBanner from '@/components/HeaderBanner.vue'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('SurveyVerificationPage')
 const route = useRoute()
 const router = useRouter()
 const teamStore = useTeamStore()
@@ -269,7 +271,7 @@ const loadSurvey = async () => {
     const surveyData = await getSurveyById(surveyId)
 
     if (!surveyData) {
-      console.error('Survey not found')
+      log.error('Survey not found', { surveyId })
       return
     }
 
@@ -278,7 +280,10 @@ const loadSurvey = async () => {
     initializeMemberVotes()
 
   } catch (error) {
-    console.error('Error loading survey:', error)
+    log.error('Failed to load survey', {
+      error: error instanceof Error ? error.message : String(error),
+      surveyId: route.params.surveyId
+    })
     $q.notify({
       type: 'negative',
       message: t('survey.verification.loadError'),
@@ -298,7 +303,11 @@ const loadTeamMembers = async () => {
 
     teamMembers.value = await queryByIdsInChunks('users', currentTeam.value.members)
   } catch (error) {
-    console.error('Error loading team members:', error)
+    log.error('Failed to load team members', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id,
+      memberCount: currentTeam.value?.members?.length
+    })
     teamMembers.value = []
   }
 }
@@ -365,7 +374,11 @@ const saveSurvey = async () => {
           })
         }
       } catch (fineError) {
-        console.error('Error generating auto-fines:', fineError)
+        log.error('Failed to generate auto-fines', {
+          error: fineError instanceof Error ? fineError.message : String(fineError),
+          surveyId: survey.value.id,
+          teamId: currentTeam.value.id
+        })
       }
     }
 
@@ -379,7 +392,11 @@ const saveSurvey = async () => {
     handleGoBack()
 
   } catch (error) {
-    console.error('Error saving survey:', error)
+    log.error('Failed to save survey', {
+      error: error instanceof Error ? error.message : String(error),
+      surveyId: survey.value.id,
+      teamId: currentTeam.value?.id
+    })
     $q.notify({
       type: 'negative',
       message: t('survey.verification.saveError'),
@@ -411,7 +428,10 @@ const deleteSurvey = async () => {
     handleGoBack()
 
   } catch (error) {
-    console.error('Error deleting survey:', error)
+    log.error('Failed to delete survey', {
+      error: error instanceof Error ? error.message : String(error),
+      surveyId: survey.value.id
+    })
     $q.notify({
       type: 'negative',
       message: t('survey.verification.deleteError'),

@@ -272,6 +272,9 @@ import { useAuthFirebase } from '@/services/authFirebase'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { AuthError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('SettingsPage')
 import { notifyError, notifySuccess } from '@/services/notificationService'
 
 const authStore = useAuthStore()
@@ -353,7 +356,10 @@ const saveProfile = async () => {
 
     editingProfile.value = false
   } catch (error) {
-    console.error('Error updating profile:', error)
+    log.error('Failed to update profile', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: currentUser.value?.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('settings.profile.updateError'),
@@ -381,7 +387,10 @@ const changePassword = async () => {
     passwordForm.confirmPassword = ''
 
   } catch (error) {
-    console.error('Error changing password:', error)
+    log.error('Failed to change password', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: currentUser.value?.uid
+    })
 
     if (error instanceof AuthError) {
       // Map specific auth error codes
@@ -428,7 +437,10 @@ const signOut = async () => {
       icon: 'logout'
     })
   } catch (error) {
-    console.error('Error signing out:', error)
+    log.error('Failed to sign out', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: currentUser.value?.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('settings.account.signOutError'),
