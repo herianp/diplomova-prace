@@ -10,9 +10,9 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 8 of 9 (Test Implementation)
-Plan: 3 of 3 in current phase
+Plan: 5 of 5 in current phase
 Status: In Progress
-Last activity: 2026-02-18 — Completed 08-03-PLAN.md (Survey voting + Cashbox fine rule tests - 31 new tests, 306 total, TST-04 and TST-05 covered)
+Last activity: 2026-02-18 — Completed 08-05-PLAN.md (useCashboxUseCases coverage gap closure - 62 tests total in file, 82.5% function coverage up from 12.5%)
 
 Progress: [█████████░] 88% (7/9 phases complete, 3/3 plans in current phase complete)
 
@@ -34,11 +34,11 @@ Progress: [█████████░] 88% (7/9 phases complete, 3/3 plans i
 | 05-security-audit | 3 | 11.0 min | 3.7 min |
 | 06-performance | 2 | 6.0 min | 3.0 min |
 | 07-test-infrastructure | 2 | 15 min | 7.5 min |
-| 08-test-implementation | 3 | 10.5 min | 3.5 min (complete) |
+| 08-test-implementation | 5 | 14.5 min | 2.9 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 07-02 (6min), 08-01 (3.5min), 08-02 (3min), 08-03 (4min)
-- Trend: Excellent velocity - 08-03 took 4 min for 31 voting+cashbox tests (TST-04, TST-05)
+- Last 5 plans: 08-01 (3.5min), 08-02 (3min), 08-03 (4min), 08-04 (~2min), 08-05 (2min)
+- Trend: Excellent velocity - 08-05 took 2 min for 62 cashbox tests (CRUD + calculations + listeners)
 
 *Updated after each plan completion*
 
@@ -131,6 +131,9 @@ Recent decisions affecting current work:
 - [Phase 08-03]: Test voteOnSurvey transient vs permanent errors via FirestoreError.code: unavailable/deadline-exceeded = retry, permission-denied = no retry
 - [Phase 08-03]: Use BASE_ARGS pattern for generateAutoFines calls to reduce parameter verbosity across many test cases
 - [Phase 08-03]: Test generateAutoFines with both surveyType=undefined (applies all types) and specific survey type filtering
+- [Phase 08-05]: Combined CRUD+calculation tasks in single commit — no meaningful intermediate state
+- [Phase 08-05]: Use toMatchObject for audit context assertions to avoid over-specifying Date fields
+- [Phase 08-05]: Named mock extraction pattern: const mockX = vi.fn() before vi.mock() factory, referenced inside factory
 
 ### Pending Todos
 
@@ -152,5 +155,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18 (plan execution)
-Stopped at: Completed 08-03-PLAN.md - Survey Voting and Cashbox Fine Rule Tests (2 tasks, 4 minutes, 31 new tests, 306 total)
-Resume file: .planning/phases/08-test-implementation/08-03-SUMMARY.md
+Stopped at: Completed 08-05-PLAN.md - useCashboxUseCases Coverage Gap Closure (2 tasks, 2 minutes, 62 tests total, 82.5% function coverage)
+Resume file: .planning/phases/08-test-implementation/08-05-SUMMARY.md
