@@ -11,7 +11,7 @@
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:rules": "firebase emulators:exec --only firestore,auth ./test-rules.sh",
+    "test:rules": "firebase emulators:exec --only firestore,auth \"bash test-rules.sh\"",
     "emulators:start": "firebase emulators:start --only firestore,auth",
     "dev": "quasar dev",
     "build": "quasar build",
