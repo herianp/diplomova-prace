@@ -150,12 +150,14 @@ Plans:
   4. Form validation composable tests verify async validation including debounce scenarios
   5. Listener cleanup tests verify unsubscribe called on component unmount and navigation
   6. Vitest coverage report shows 70%+ for lines, functions, branches, statements
-**Plans**: 3 plans in 2 waves
+**Plans**: 5 plans in 3 waves
 
 Plans:
-- [ ] 08-01-PLAN.md — Coverage config + pure logic tests (ListenerRegistry, useFormValidation) (Wave 1)
-- [ ] 08-02-PLAN.md — Auth flow use case tests (Wave 2)
-- [ ] 08-03-PLAN.md — Survey voting + cashbox fine rule tests (Wave 2)
+- [x] 08-01-PLAN.md — Coverage config + pure logic tests (ListenerRegistry, useFormValidation) (Wave 1)
+- [x] 08-02-PLAN.md — Auth flow use case tests (Wave 2)
+- [x] 08-03-PLAN.md — Survey voting + cashbox fine rule tests (Wave 2)
+- [ ] 08-04-PLAN.md — Gap closure: survey use cases, survey filters, auth branch coverage (Wave 3)
+- [ ] 08-05-PLAN.md — Gap closure: cashbox CRUD, listeners, and calculation tests (Wave 3)
 
 ### Phase 9: CI/CD Pipeline
 **Goal**: Automate testing and deployment via GitHub Actions
