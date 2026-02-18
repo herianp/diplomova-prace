@@ -41,6 +41,7 @@
     "autoprefixer": "^10.4.2",
     "eslint": "^9.39.2",
     "eslint-plugin-vue": "^9.30.0",
+    "firebase-tools": "13.35.1",
     "globals": "^15.12.0",
     "happy-dom": "^20.5.0",
     "postcss": "^8.4.14",
