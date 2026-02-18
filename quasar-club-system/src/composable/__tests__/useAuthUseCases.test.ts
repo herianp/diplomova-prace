@@ -432,4 +432,47 @@ describe('useAuthUseCases', () => {
       expect(mockNotifyError).toHaveBeenCalledWith('Network error', expect.objectContaining({ retry: true, onRetry: expect.any(Function) }))
     })
   })
+
+  // ─── getCurrentAuthUser ───────────────────────────────────────────────────
+
+  describe('getCurrentAuthUser', () => {
+    it('returns the current user from firebase auth', () => {
+      const mockUser = createMockUser()
+      mockGetCurrentUser.mockReturnValue(mockUser)
+
+      const { getCurrentAuthUser } = useAuthUseCases()
+      const result = getCurrentAuthUser()
+
+      expect(mockGetCurrentUser).toHaveBeenCalled()
+      expect(result).toBe(mockUser)
+    })
+
+    it('returns null when no user is authenticated', () => {
+      mockGetCurrentUser.mockReturnValue(null)
+
+      const { getCurrentAuthUser } = useAuthUseCases()
+      const result = getCurrentAuthUser()
+
+      expect(result).toBeNull()
+    })
+  })
+
+  // ─── cleanup ──────────────────────────────────────────────────────────────
+
+  describe('cleanup', () => {
+    it('calls authStore.cleanup() which resets all auth state', () => {
+      const authStore = useAuthStore()
+      authStore.setUser(createMockUser() as any)
+      authStore.setAdmin(true)
+      authStore.setAuthReady(true)
+
+      const { cleanup } = useAuthUseCases()
+      cleanup()
+
+      expect(authStore.user).toBeNull()
+      expect(authStore.isAdmin).toBe(false)
+      expect(authStore.isAuthReady).toBe(false)
+      expect(authStore.isLoading).toBe(false)
+    })
+  })
 })
