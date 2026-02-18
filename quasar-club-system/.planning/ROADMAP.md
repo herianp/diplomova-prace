@@ -150,10 +150,12 @@ Plans:
   4. Form validation composable tests verify async validation including debounce scenarios
   5. Listener cleanup tests verify unsubscribe called on component unmount and navigation
   6. Vitest coverage report shows 70%+ for lines, functions, branches, statements
-**Plans**: TBD
+**Plans**: 3 plans in 2 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 08-01-PLAN.md — Coverage config + pure logic tests (ListenerRegistry, useFormValidation) (Wave 1)
+- [ ] 08-02-PLAN.md — Auth flow use case tests (Wave 2)
+- [ ] 08-03-PLAN.md — Survey voting + cashbox fine rule tests (Wave 2)
 
 ### Phase 9: CI/CD Pipeline
 **Goal**: Automate testing and deployment via GitHub Actions
@@ -183,5 +185,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. Security & Audit | 3/3 | Complete | 2026-02-15 |
 | 6. Performance | 2/2 | Complete | 2026-02-15 |
 | 7. Test Infrastructure | 2/2 | Complete | 2026-02-18 |
-| 8. Test Implementation | 0/TBD | Not started | - |
+| 8. Test Implementation | 0/3 | Planned | - |
 | 9. CI/CD Pipeline | 0/TBD | Not started | - |
