@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** Phase 6 - Performance Optimization (complete)
+**Current focus:** Phase 7 - Test Infrastructure (in progress)
 
 ## Current Position
 
-Phase: 6 of 9 (Performance Optimization)
-Plan: 2 of 2 in current phase
-Status: Complete
-Last activity: 2026-02-15 — Completed 06-02-PLAN.md (Dashboard Lazy Loading & Performance Verification)
+Phase: 7 of 9 (Test Infrastructure)
+Plan: 1 of 3 in current phase
+Status: In Progress
+Last activity: 2026-02-18 — Completed 07-01-PLAN.md (Emulator Setup + Teams/Users Rules Tests)
 
-Progress: [██████░░░░] 67% (6/9 phases complete, 2/2 plans in current phase complete)
+Progress: [███████░░░] 74% (6/9 phases complete, 1/3 plans in current phase complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 20
+- Total plans completed: 21
 - Average duration: 8.5 minutes
-- Total execution time: 2.8 hours
+- Total execution time: ~3.0 hours
 
 **By Phase:**
 
@@ -33,10 +33,11 @@ Progress: [██████░░░░] 67% (6/9 phases complete, 2/2 plans i
 | 04-data-model-migration | 3 | 7.0 min | 2.3 min |
 | 05-security-audit | 3 | 11.0 min | 3.7 min |
 | 06-performance | 2 | 6.0 min | 3.0 min |
+| 07-test-infrastructure | 1 | 9 min | 9.0 min (plan 1 of 3) |
 
 **Recent Trend:**
-- Last 5 plans: 05-01 (3min), 05-02 (4min), 05-03 (4min), 06-01 (4min), 06-02 (2min)
-- Trend: Excellent velocity - Phase 06 complete in 6 minutes total (verification-heavy tasks)
+- Last 5 plans: 05-03 (4min), 06-01 (4min), 06-02 (2min), 07-01 (9min)
+- Trend: Good velocity - 07-01 took 9 min including infrastructure blockers resolved
 
 *Updated after each plan completion*
 
@@ -112,6 +113,10 @@ Recent decisions affecting current work:
 - [Phase 06-01]: Threshold 0.1 with 50px rootMargin for early chart rendering (starts before full visibility for smooth UX)
 - [Phase 06-01]: hasRendered flag prevents re-observation after first intersection (charts persist after scrolling)
 - [Phase 06-01]: Individual visibility watchers per chart instead of single observer for independent lifecycle control
+- [Phase 07-01]: Use firebase-tools@13.35.1 locally (Java 17 compat) - global v15.5.1 requires Java 21
+- [Phase 07-01]: bash test-rules.sh via firebase emulators:exec for Windows cmd.exe compatibility
+- [Phase 07-01]: setDoc for write permission tests instead of updateDoc (avoids NOT_FOUND in emulator)
+- [Phase 07-01]: Teams read+write rule grants delete to all members; outsider-deny is the correct assertion
 
 ### Pending Todos
 
@@ -121,14 +126,15 @@ None yet.
 
 **Known risks from research:**
 - Phase 5 Sentry integration: Quasar-specific setup may differ from standard Vue 3 (verify during planning)
-- Windows emulator compatibility: Firebase emulator suite on MINGW64_NT needs verification (Phase 7)
+- Port 8080 residual Java process after test runs: consecutive `yarn test:rules` runs need ~15s delay or manual process kill. Known Windows behavior with Firebase emulators.
 
 **Resolved risks:**
 - ~~Phase 4 migration complexity: Firestore dual-write pattern needs validation during planning~~ - Feature flags created, security rules deployed (04-01), migration scripts ready (04-03)
 - ~~TypeScript strict mode impact: May reveal extensive type errors requiring incremental fixes~~ - Strict mode enabled with manageable errors (03-01)
+- ~~Windows emulator compatibility: Firebase emulator suite on MINGW64_NT needs verification (Phase 7)~~ - Resolved: local firebase-tools@13.35.1 + bash wrapper works correctly
 
 ## Session Continuity
 
-Last session: 2026-02-15 (plan execution)
-Stopped at: Completed 06-02-PLAN.md - Dashboard Lazy Loading & Performance Verification (2 tasks, 2 minutes)
-Resume file: .planning/phases/06-performance/06-02-SUMMARY.md
+Last session: 2026-02-18 (plan execution)
+Stopped at: Completed 07-01-PLAN.md - Emulator Setup + Teams/Users Rules Tests (3 tasks, 9 minutes)
+Resume file: .planning/phases/07-test-infrastructure/07-01-SUMMARY.md
