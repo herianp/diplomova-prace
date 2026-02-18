@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 8 of 9 (Test Implementation)
-Plan: 2 of 3 in current phase
+Plan: 3 of 3 in current phase
 Status: In Progress
-Last activity: 2026-02-18 — Completed 08-02-PLAN.md (useAuthUseCases unit tests - 24 new tests, 275 total, TST-03 covered)
+Last activity: 2026-02-18 — Completed 08-03-PLAN.md (Survey voting + Cashbox fine rule tests - 31 new tests, 306 total, TST-04 and TST-05 covered)
 
-Progress: [████████░░] 82% (7/9 phases complete, 2/3 plans in current phase complete)
+Progress: [█████████░] 88% (7/9 phases complete, 3/3 plans in current phase complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 23
-- Average duration: 8.1 minutes
-- Total execution time: ~3.1 hours
+- Total plans completed: 24
+- Average duration: 7.9 minutes
+- Total execution time: ~3.2 hours
 
 **By Phase:**
 
@@ -34,11 +34,11 @@ Progress: [████████░░] 82% (7/9 phases complete, 2/3 plans i
 | 05-security-audit | 3 | 11.0 min | 3.7 min |
 | 06-performance | 2 | 6.0 min | 3.0 min |
 | 07-test-infrastructure | 2 | 15 min | 7.5 min |
-| 08-test-implementation | 2 | 6.5 min | 3.25 min (2 of 3) |
+| 08-test-implementation | 3 | 10.5 min | 3.5 min (complete) |
 
 **Recent Trend:**
-- Last 5 plans: 07-01 (9min), 07-02 (6min), 08-01 (3.5min), 08-02 (3min)
-- Trend: Excellent velocity - 08-02 took 3 min for 24 auth tests (TST-03)
+- Last 5 plans: 07-02 (6min), 08-01 (3.5min), 08-02 (3min), 08-03 (4min)
+- Trend: Excellent velocity - 08-03 took 4 min for 31 voting+cashbox tests (TST-04, TST-05)
 
 *Updated after each plan completion*
 
@@ -128,6 +128,9 @@ Recent decisions affecting current work:
 - [Phase 08-02]: Use vi.hoisted() for mock functions referenced in vi.mock() factories - prevents ReferenceError on initialization before hoisting
 - [Phase 08-02]: Use toStrictEqual instead of toBe for Pinia store user assertions - reactive proxy wraps stored object so reference equality fails
 - [Phase 08-02]: Capture authStateListener callback via mockImplementation to simulate page reload session persistence
+- [Phase 08-03]: Test voteOnSurvey transient vs permanent errors via FirestoreError.code: unavailable/deadline-exceeded = retry, permission-denied = no retry
+- [Phase 08-03]: Use BASE_ARGS pattern for generateAutoFines calls to reduce parameter verbosity across many test cases
+- [Phase 08-03]: Test generateAutoFines with both surveyType=undefined (applies all types) and specific survey type filtering
 
 ### Pending Todos
 
@@ -138,7 +141,8 @@ None yet.
 **Known risks from research:**
 - Phase 5 Sentry integration: Quasar-specific setup may differ from standard Vue 3 (verify during planning)
 - Port 8080 residual Java process after test runs: consecutive `yarn test:rules` runs need ~15s delay or manual process kill. Known Windows behavior with Firebase emulators.
-- Coverage thresholds: Global 70% threshold may fail until 08-03 adds survey/cashbox use case tests
+- Coverage thresholds: Global 70% threshold — TST-04/TST-05 now complete, threshold should be met for targeted composables
+- useAuthUseCases.test.ts isolation issue: 4 tests fail in full-suite runs (Pinia proxy/test ordering), pass in isolation; scoped to 08-02 completion
 
 **Resolved risks:**
 - ~~Phase 4 migration complexity: Firestore dual-write pattern needs validation during planning~~ - Feature flags created, security rules deployed (04-01), migration scripts ready (04-03)
@@ -148,5 +152,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18 (plan execution)
-Stopped at: Completed 08-02-PLAN.md - useAuthUseCases Unit Tests (1 task, 3 minutes, 24 new tests, 275 total)
-Resume file: .planning/phases/08-test-implementation/08-02-SUMMARY.md
+Stopped at: Completed 08-03-PLAN.md - Survey Voting and Cashbox Fine Rule Tests (2 tasks, 4 minutes, 31 new tests, 306 total)
+Resume file: .planning/phases/08-test-implementation/08-03-SUMMARY.md
