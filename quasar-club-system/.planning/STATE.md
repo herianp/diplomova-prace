@@ -10,17 +10,17 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 8 of 9 (Test Implementation)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In Progress
-Last activity: 2026-02-18 — Completed 08-01-PLAN.md (Coverage Infrastructure + ListenerRegistry/useFormValidation tests - 149 new tests, 220 total)
+Last activity: 2026-02-18 — Completed 08-02-PLAN.md (useAuthUseCases unit tests - 24 new tests, 275 total, TST-03 covered)
 
-Progress: [████████░░] 82% (7/9 phases complete, 1/3 plans in current phase complete)
+Progress: [████████░░] 82% (7/9 phases complete, 2/3 plans in current phase complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 22
-- Average duration: 8.3 minutes
+- Total plans completed: 23
+- Average duration: 8.1 minutes
 - Total execution time: ~3.1 hours
 
 **By Phase:**
@@ -34,11 +34,11 @@ Progress: [████████░░] 82% (7/9 phases complete, 1/3 plans i
 | 05-security-audit | 3 | 11.0 min | 3.7 min |
 | 06-performance | 2 | 6.0 min | 3.0 min |
 | 07-test-infrastructure | 2 | 15 min | 7.5 min |
-| 08-test-implementation | 1 | 3.5 min | 3.5 min (1 of 3) |
+| 08-test-implementation | 2 | 6.5 min | 3.25 min (2 of 3) |
 
 **Recent Trend:**
-- Last 5 plans: 06-02 (2min), 07-01 (9min), 07-02 (6min), 08-01 (3.5min)
-- Trend: Excellent velocity - 08-01 took 3.5 min for 149 tests + coverage config
+- Last 5 plans: 07-01 (9min), 07-02 (6min), 08-01 (3.5min), 08-02 (3min)
+- Trend: Excellent velocity - 08-02 took 3 min for 24 auth tests (TST-03)
 
 *Updated after each plan completion*
 
@@ -125,6 +125,9 @@ Recent decisions affecting current work:
 - [Phase 08-01]: Mock src/utils/logger in ListenerRegistry tests to prevent console clutter and isolate behavior
 - [Phase 08-01]: Use fresh new ListenerRegistry() in beforeEach for test isolation (not the singleton)
 - [Phase 08-01]: Use vi.useFakeTimers() for futureDate/pastDate rules with setSystemTime(2026-01-15T12:00:00)
+- [Phase 08-02]: Use vi.hoisted() for mock functions referenced in vi.mock() factories - prevents ReferenceError on initialization before hoisting
+- [Phase 08-02]: Use toStrictEqual instead of toBe for Pinia store user assertions - reactive proxy wraps stored object so reference equality fails
+- [Phase 08-02]: Capture authStateListener callback via mockImplementation to simulate page reload session persistence
 
 ### Pending Todos
 
@@ -135,7 +138,7 @@ None yet.
 **Known risks from research:**
 - Phase 5 Sentry integration: Quasar-specific setup may differ from standard Vue 3 (verify during planning)
 - Port 8080 residual Java process after test runs: consecutive `yarn test:rules` runs need ~15s delay or manual process kill. Known Windows behavior with Firebase emulators.
-- Coverage thresholds: Global 70% threshold fails until 08-02 and 08-03 add use case tests (auth/survey/cashbox)
+- Coverage thresholds: Global 70% threshold may fail until 08-03 adds survey/cashbox use case tests
 
 **Resolved risks:**
 - ~~Phase 4 migration complexity: Firestore dual-write pattern needs validation during planning~~ - Feature flags created, security rules deployed (04-01), migration scripts ready (04-03)
@@ -145,5 +148,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18 (plan execution)
-Stopped at: Completed 08-01-PLAN.md - Coverage Infrastructure + Pure Logic Tests (2 tasks, 3.5 minutes, 149 new tests)
-Resume file: .planning/phases/08-test-implementation/08-01-SUMMARY.md
+Stopped at: Completed 08-02-PLAN.md - useAuthUseCases Unit Tests (1 task, 3 minutes, 24 new tests, 275 total)
+Resume file: .planning/phases/08-test-implementation/08-02-SUMMARY.md
