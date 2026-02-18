@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-14)
 ## Current Position
 
 Phase: 7 of 9 (Test Infrastructure)
-Plan: 1 of 3 in current phase
+Plan: 2 of 3 in current phase
 Status: In Progress
-Last activity: 2026-02-18 — Completed 07-01-PLAN.md (Emulator Setup + Teams/Users Rules Tests)
+Last activity: 2026-02-18 — Completed 07-02-PLAN.md (Full Firestore Security Rules Coverage - 125 tests)
 
-Progress: [███████░░░] 74% (6/9 phases complete, 1/3 plans in current phase complete)
+Progress: [███████░░░] 74% (6/9 phases complete, 2/3 plans in current phase complete)
 
 ## Performance Metrics
 
@@ -33,11 +33,11 @@ Progress: [███████░░░] 74% (6/9 phases complete, 1/3 plans i
 | 04-data-model-migration | 3 | 7.0 min | 2.3 min |
 | 05-security-audit | 3 | 11.0 min | 3.7 min |
 | 06-performance | 2 | 6.0 min | 3.0 min |
-| 07-test-infrastructure | 1 | 9 min | 9.0 min (plan 1 of 3) |
+| 07-test-infrastructure | 2 | 15 min | 7.5 min (plan 2 of 3) |
 
 **Recent Trend:**
-- Last 5 plans: 05-03 (4min), 06-01 (4min), 06-02 (2min), 07-01 (9min)
-- Trend: Good velocity - 07-01 took 9 min including infrastructure blockers resolved
+- Last 5 plans: 06-01 (4min), 06-02 (2min), 07-01 (9min), 07-02 (6min)
+- Trend: Excellent velocity - 07-02 took 6 min for 4 test files + 125 tests
 
 *Updated after each plan completion*
 
@@ -117,6 +117,9 @@ Recent decisions affecting current work:
 - [Phase 07-01]: bash test-rules.sh via firebase emulators:exec for Windows cmd.exe compatibility
 - [Phase 07-01]: setDoc for write permission tests instead of updateDoc (avoids NOT_FOUND in emulator)
 - [Phase 07-01]: Teams read+write rule grants delete to all members; outsider-deny is the correct assertion
+- [Phase 07-02]: fileParallelism: false in vitest.rules.config.ts - multiple test files sharing same emulator must run sequentially to prevent clearFirestore() race conditions
+- [Phase 07-02]: updateDoc for member update tests (setDoc on existing doc = create in Firestore rules, not update)
+- [Phase 07-02]: Parameterized loop for Pattern B subcollections (fineRules/fines/payments/cashboxHistory) - identical rule patterns, tested via for-loop
 
 ### Pending Todos
 
@@ -136,5 +139,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18 (plan execution)
-Stopped at: Completed 07-01-PLAN.md - Emulator Setup + Teams/Users Rules Tests (3 tasks, 9 minutes)
+Stopped at: Completed 07-02-PLAN.md - Full Firestore Security Rules Coverage (2 tasks, 6 minutes)
 Resume file: .planning/phases/07-test-infrastructure/07-01-SUMMARY.md
