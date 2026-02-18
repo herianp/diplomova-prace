@@ -131,6 +131,10 @@ Recent decisions affecting current work:
 - [Phase 08-03]: Test voteOnSurvey transient vs permanent errors via FirestoreError.code: unavailable/deadline-exceeded = retry, permission-denied = no retry
 - [Phase 08-03]: Use BASE_ARGS pattern for generateAutoFines calls to reduce parameter verbosity across many test cases
 - [Phase 08-03]: Test generateAutoFines with both surveyType=undefined (applies all types) and specific survey type filtering
+- [Phase 08-04]: vi.hoisted() required for firebase/firestore mockGetDoc/mockDoc in vi.mock() factories - vitest hoists vi.mock() above const declarations making them undefined without hoisting
+- [Phase 08-04]: onRetry lambda bodies covered by extracting callback from notifyError.mock.calls[0][1].onRetry and invoking it - only way to execute anonymous function body
+- [Phase 08-04]: deleteSurvey uses no-retry for all FirestoreErrors (destructive operation policy) - notifyError called with message only, no options object
+- [Phase 08-04]: Capture listener callback pattern: mockGetSurveysByTeamId.mockImplementation((_id, cb) => { capturedCallback = cb; return vi.fn() })
 - [Phase 08-05]: Combined CRUD+calculation tasks in single commit — no meaningful intermediate state
 - [Phase 08-05]: Use toMatchObject for audit context assertions to avoid over-specifying Date fields
 - [Phase 08-05]: Named mock extraction pattern: const mockX = vi.fn() before vi.mock() factory, referenced inside factory
@@ -155,5 +159,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-18 (plan execution)
-Stopped at: Completed 08-05-PLAN.md - useCashboxUseCases Coverage Gap Closure (2 tasks, 2 minutes, 62 tests total, 82.5% function coverage)
-Resume file: .planning/phases/08-test-implementation/08-05-SUMMARY.md
+Stopped at: Completed 08-04-PLAN.md - Coverage Gap Closure (Survey Use Cases + Auth Branch) - 2 tasks, 5 minutes, 49 new tests (306 → 355 total), useSurveyUseCases functions 15% → 70%, useSurveyFilters functions 53% → 93.33%, useAuthUseCases branch 53% → 66.66%
+Resume file: .planning/phases/08-test-implementation/08-04-SUMMARY.md
