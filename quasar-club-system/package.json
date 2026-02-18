@@ -11,6 +11,8 @@
     "format": "prettier --write \"**/*.{js,vue,scss,html,md,json}\" --ignore-path .gitignore",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:rules": "firebase emulators:exec --only firestore,auth ./test-rules.sh",
+    "emulators:start": "firebase emulators:start --only firestore,auth",
     "dev": "quasar dev",
     "build": "quasar build",
     "postinstall": "quasar prepare"
@@ -30,6 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
+    "@firebase/rules-unit-testing": "^5.0.0",
     "@intlify/unplugin-vue-i18n": "^2.0.0",
     "@quasar/app-vite": "^2.0.0",
     "@types/luxon": "^3.7.1",
