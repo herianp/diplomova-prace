@@ -148,6 +148,22 @@ describe('useAuthUseCases', () => {
       expect(mockNotifyError).toHaveBeenCalledWith('Network error', expect.objectContaining({ retry: true, onRetry: expect.any(Function) }))
     })
 
+    it('failure (AuthError network): onRetry callback re-invokes signIn', async () => {
+      const err = new AuthError('auth/network-request-failed', 'Network error')
+      mockLoginUser.mockRejectedValueOnce(err)
+
+      const { signIn } = useAuthUseCases()
+
+      await expect(signIn('test@test.cz', '123456')).rejects.toThrow()
+
+      // Extract the onRetry callback and invoke it to cover the lambda body
+      const notifyErrorCall = (mockNotifyError as ReturnType<typeof vi.fn>).mock.calls[0]
+      const { onRetry } = notifyErrorCall[1]
+      mockLoginUser.mockResolvedValueOnce(createMockUser())
+      await expect(onRetry()).resolves.not.toThrow()
+      expect(mockLoginUser).toHaveBeenCalledTimes(2)
+    })
+
     it('failure (generic Error): calls notifyError with errors.unexpected, re-throws', async () => {
       const err = new Error('Something went wrong')
       mockLoginUser.mockRejectedValue(err)
@@ -191,6 +207,21 @@ describe('useAuthUseCases', () => {
       expect(mockNotifyError).toHaveBeenCalledWith('Email already in use', expect.objectContaining({ retry: false }))
     })
 
+    it('failure (network AuthError): onRetry callback re-invokes signUp', async () => {
+      const err = new AuthError('auth/network-request-failed', 'Network error')
+      mockRegisterUser.mockRejectedValueOnce(err)
+
+      const { signUp } = useAuthUseCases()
+
+      await expect(signUp('test@test.cz', '123456', 'Test User')).rejects.toThrow()
+
+      const notifyErrorCall = (mockNotifyError as ReturnType<typeof vi.fn>).mock.calls[0]
+      const { onRetry } = notifyErrorCall[1]
+      mockRegisterUser.mockResolvedValueOnce(createMockUser())
+      await expect(onRetry()).resolves.not.toThrow()
+      expect(mockRegisterUser).toHaveBeenCalledTimes(2)
+    })
+
     it('failure (generic Error): notifyError called with errors.unexpected', async () => {
       const err = new Error('Unknown registration error')
       mockRegisterUser.mockRejectedValue(err)
@@ -229,6 +260,21 @@ describe('useAuthUseCases', () => {
       await expect(signOut()).rejects.toThrow(AuthError)
 
       expect(mockNotifyError).toHaveBeenCalledWith('Network error', expect.objectContaining({ retry: true, onRetry: expect.any(Function) }))
+    })
+
+    it('failure (network AuthError): onRetry callback re-invokes signOut', async () => {
+      const err = new AuthError('auth/network-request-failed', 'Network error')
+      mockLogoutUser.mockRejectedValueOnce(err)
+
+      const { signOut } = useAuthUseCases()
+
+      await expect(signOut()).rejects.toThrow()
+
+      const notifyErrorCall = (mockNotifyError as ReturnType<typeof vi.fn>).mock.calls[0]
+      const { onRetry } = notifyErrorCall[1]
+      mockLogoutUser.mockResolvedValueOnce(undefined)
+      await expect(onRetry()).resolves.not.toThrow()
+      expect(mockLogoutUser).toHaveBeenCalledTimes(2)
     })
 
     it('failure (generic Error): notifyError called with errors.unexpected', async () => {
@@ -430,6 +476,21 @@ describe('useAuthUseCases', () => {
       await expect(refreshCurrentUser()).rejects.toThrow()
 
       expect(mockNotifyError).toHaveBeenCalledWith('Network error', expect.objectContaining({ retry: true, onRetry: expect.any(Function) }))
+    })
+
+    it('failure (network AuthError): onRetry callback re-invokes refreshCurrentUser', async () => {
+      const err = new AuthError('auth/network-request-failed', 'Network error')
+      mockRefreshUser.mockRejectedValueOnce(err)
+
+      const { refreshCurrentUser } = useAuthUseCases()
+
+      await expect(refreshCurrentUser()).rejects.toThrow()
+
+      const notifyErrorCall = (mockNotifyError as ReturnType<typeof vi.fn>).mock.calls[0]
+      const { onRetry } = notifyErrorCall[1]
+      mockRefreshUser.mockResolvedValueOnce(createMockUser())
+      await expect(onRetry()).resolves.not.toThrow()
+      expect(mockRefreshUser).toHaveBeenCalledTimes(2)
     })
   })
 
