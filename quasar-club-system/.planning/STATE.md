@@ -5,16 +5,16 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** Phase 8 - Test Implementation (in progress)
+**Current focus:** Phase 9 - CI/CD Pipeline (in progress)
 
 ## Current Position
 
-Phase: 8 of 9 (Test Implementation)
-Plan: 5 of 5 in current phase
+Phase: 9 of 9 (CI/CD Pipeline)
+Plan: 1 of 2 in current phase
 Status: In Progress
-Last activity: 2026-02-18 — Completed 08-05-PLAN.md (useCashboxUseCases coverage gap closure - 62 tests total in file, 82.5% function coverage up from 12.5%)
+Last activity: 2026-02-19 — Completed 09-01-PLAN.md (CI workflow + vitest json reporters - 2 tasks, 2 minutes, .github/workflows/ci.yml created with 3 parallel jobs)
 
-Progress: [█████████░] 88% (7/9 phases complete, 3/3 plans in current phase complete)
+Progress: [█████████░] 94% (8/9 phases complete, 1/2 plans in current phase complete)
 
 ## Performance Metrics
 
@@ -34,11 +34,12 @@ Progress: [█████████░] 88% (7/9 phases complete, 3/3 plans i
 | 05-security-audit | 3 | 11.0 min | 3.7 min |
 | 06-performance | 2 | 6.0 min | 3.0 min |
 | 07-test-infrastructure | 2 | 15 min | 7.5 min |
-| 08-test-implementation | 5 | 14.5 min | 2.9 min (in progress) |
+| 08-test-implementation | 5 | 14.5 min | 2.9 min |
+| 09-ci-cd-pipeline | 1 | 2 min | 2 min (in progress) |
 
 **Recent Trend:**
-- Last 5 plans: 08-01 (3.5min), 08-02 (3min), 08-03 (4min), 08-04 (~2min), 08-05 (2min)
-- Trend: Excellent velocity - 08-05 took 2 min for 62 cashbox tests (CRUD + calculations + listeners)
+- Last 5 plans: 08-02 (3min), 08-03 (4min), 08-04 (~2min), 08-05 (2min), 09-01 (2min)
+- Trend: Excellent velocity - 09-01 took 2 min for CI workflow + vitest reporter changes
 
 *Updated after each plan completion*
 
@@ -138,6 +139,11 @@ Recent decisions affecting current work:
 - [Phase 08-05]: Combined CRUD+calculation tasks in single commit — no meaningful intermediate state
 - [Phase 08-05]: Use toMatchObject for audit context assertions to avoid over-specifying Date fields
 - [Phase 08-05]: Named mock extraction pattern: const mockX = vi.fn() before vi.mock() factory, referenced inside factory
+- [Phase 09-01]: Concurrency group added to ci.yml to cancel in-progress runs on same PR (saves compute on rapid commits)
+- [Phase 09-01]: VITE_FIREBASE_API_KEY passed via secrets to lint-and-build and unit-tests jobs (needed at Vite build/test time)
+- [Phase 09-01]: vitest json+json-summary reporters added alongside existing text/lcov/html for PR coverage comments
+- [Phase 09-01]: timeout-minutes: 15 on security-rules-tests to prevent emulator hang consuming CI minutes
+- [Phase 09-01]: firebase-tools not globally installed in CI - devDependencies entry available after yarn install
 
 ### Pending Todos
 
@@ -158,6 +164,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-18 (plan execution)
-Stopped at: Completed 08-04-PLAN.md - Coverage Gap Closure (Survey Use Cases + Auth Branch) - 2 tasks, 5 minutes, 49 new tests (306 → 355 total), useSurveyUseCases functions 15% → 70%, useSurveyFilters functions 53% → 93.33%, useAuthUseCases branch 53% → 66.66%
-Resume file: .planning/phases/08-test-implementation/08-04-SUMMARY.md
+Last session: 2026-02-19 (plan execution)
+Stopped at: Completed 09-01-PLAN.md - CI Workflow for PR Checks - 2 tasks, 2 minutes, .github/workflows/ci.yml created, vitest json/json-summary reporters added
+Resume file: .planning/phases/09-ci-cd-pipeline/09-01-SUMMARY.md
