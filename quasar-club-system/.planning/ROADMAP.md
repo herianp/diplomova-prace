@@ -168,10 +168,11 @@ Plans:
   2. Master branch push deploys to Firebase Hosting after tests pass
   3. CI build fails when test coverage drops below 70% threshold
   4. Developer sees test results and coverage report directly in GitHub PR checks
-**Plans**: TBD
+**Plans**: 2 plans in 2 waves
 
 Plans:
-- [ ] TBD during planning
+- [ ] 09-01-PLAN.md — CI workflow for PR checks + vitest coverage reporters (Wave 1)
+- [ ] 09-02-PLAN.md — Deploy workflow for master + GitHub secrets setup (Wave 2)
 
 ## Progress
 
