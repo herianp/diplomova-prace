@@ -14,7 +14,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'lcov', 'html'],
+      reporter: ['text', 'lcov', 'html', 'json', 'json-summary'],
       include: [
         'src/composable/useFormValidation.ts',
         'src/composable/useDateHelpers.ts',
