@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-14)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** Phase 9 - CI/CD Pipeline (in progress)
+**Current focus:** Phase 9 - CI/CD Pipeline (complete)
 
 ## Current Position
 
 Phase: 9 of 9 (CI/CD Pipeline)
-Plan: 1 of 2 in current phase
-Status: In Progress
-Last activity: 2026-02-19 — Completed 09-01-PLAN.md (CI workflow + vitest json reporters - 2 tasks, 2 minutes, .github/workflows/ci.yml created with 3 parallel jobs)
+Plan: 2 of 2 in current phase
+Status: Complete
+Last activity: 2026-02-19 — Completed 09-02-PLAN.md (deploy workflow for master - 1 task + 1 checkpoint skipped, .github/workflows/deploy.yml created)
 
-Progress: [█████████░] 94% (8/9 phases complete, 1/2 plans in current phase complete)
+Progress: [██████████] 100% (9/9 phases complete, 2/2 plans in current phase complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 24
-- Average duration: 7.9 minutes
-- Total execution time: ~3.2 hours
+- Total plans completed: 26
+- Average duration: 7.5 minutes
+- Total execution time: ~3.3 hours
 
 **By Phase:**
 
@@ -35,11 +35,11 @@ Progress: [█████████░] 94% (8/9 phases complete, 1/2 plans i
 | 06-performance | 2 | 6.0 min | 3.0 min |
 | 07-test-infrastructure | 2 | 15 min | 7.5 min |
 | 08-test-implementation | 5 | 14.5 min | 2.9 min |
-| 09-ci-cd-pipeline | 1 | 2 min | 2 min (in progress) |
+| 09-ci-cd-pipeline | 2 | 3.5 min | 1.75 min |
 
 **Recent Trend:**
-- Last 5 plans: 08-02 (3min), 08-03 (4min), 08-04 (~2min), 08-05 (2min), 09-01 (2min)
-- Trend: Excellent velocity - 09-01 took 2 min for CI workflow + vitest reporter changes
+- Last 5 plans: 08-03 (4min), 08-04 (~2min), 08-05 (2min), 09-01 (2min), 09-02 (1.5min)
+- Trend: Excellent velocity - 09-02 took 1.5 min for deploy workflow
 
 *Updated after each plan completion*
 
@@ -144,6 +144,9 @@ Recent decisions affecting current work:
 - [Phase 09-01]: vitest json+json-summary reporters added alongside existing text/lcov/html for PR coverage comments
 - [Phase 09-01]: timeout-minutes: 15 on security-rules-tests to prevent emulator hang consuming CI minutes
 - [Phase 09-01]: firebase-tools not globally installed in CI - devDependencies entry available after yarn install
+- [Phase 09-02]: No concurrency group on deploy workflow - production deploys should never be cancelled
+- [Phase 09-02]: Sequential steps in single job ensures deploy only after ALL checks pass
+- [Phase 09-02]: GitHub secrets checkpoint skipped - user handles FIREBASE_SERVICE_ACCOUNT and VITE_FIREBASE_API_KEY setup
 
 ### Pending Todos
 
@@ -164,6 +167,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-02-19 (plan execution)
-Stopped at: Completed 09-01-PLAN.md - CI Workflow for PR Checks - 2 tasks, 2 minutes, .github/workflows/ci.yml created, vitest json/json-summary reporters added
-Resume file: .planning/phases/09-ci-cd-pipeline/09-01-SUMMARY.md
+Last session: 2026-02-19 (phase execution)
+Stopped at: Phase 9 complete — all 9 phases executed. GitHub secrets setup deferred to user.
+Resume file: .planning/phases/09-ci-cd-pipeline/09-02-SUMMARY.md

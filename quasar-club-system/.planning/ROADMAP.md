@@ -20,7 +20,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Performance** - Lazy chart rendering and optimization
 - [x] **Phase 7: Test Infrastructure** - Firebase emulator setup and tooling
 - [x] **Phase 8: Test Implementation** - Comprehensive test coverage for critical paths
-- [ ] **Phase 9: CI/CD Pipeline** - Automated testing and deployment
+- [x] **Phase 9: CI/CD Pipeline** - Automated testing and deployment
 
 ## Phase Details
 
@@ -156,8 +156,8 @@ Plans:
 - [x] 08-01-PLAN.md — Coverage config + pure logic tests (ListenerRegistry, useFormValidation) (Wave 1)
 - [x] 08-02-PLAN.md — Auth flow use case tests (Wave 2)
 - [x] 08-03-PLAN.md — Survey voting + cashbox fine rule tests (Wave 2)
-- [ ] 08-04-PLAN.md — Gap closure: survey use cases, survey filters, auth branch coverage (Wave 3)
-- [ ] 08-05-PLAN.md — Gap closure: cashbox CRUD, listeners, and calculation tests (Wave 3)
+- [x] 08-04-PLAN.md — Gap closure: survey use cases, survey filters, auth branch coverage (Wave 3)
+- [x] 08-05-PLAN.md — Gap closure: cashbox CRUD, listeners, and calculation tests (Wave 3)
 
 ### Phase 9: CI/CD Pipeline
 **Goal**: Automate testing and deployment via GitHub Actions
@@ -171,8 +171,8 @@ Plans:
 **Plans**: 2 plans in 2 waves
 
 Plans:
-- [ ] 09-01-PLAN.md — CI workflow for PR checks + vitest coverage reporters (Wave 1)
-- [ ] 09-02-PLAN.md — Deploy workflow for master + GitHub secrets setup (Wave 2)
+- [x] 09-01-PLAN.md — CI workflow for PR checks + vitest coverage reporters (Wave 1)
+- [x] 09-02-PLAN.md — Deploy workflow for master + GitHub secrets setup (Wave 2)
 
 ## Progress
 
@@ -189,4 +189,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Performance | 2/2 | Complete | 2026-02-15 |
 | 7. Test Infrastructure | 2/2 | Complete | 2026-02-18 |
 | 8. Test Implementation | 5/5 | Complete | 2026-02-18 |
-| 9. CI/CD Pipeline | 0/TBD | Not started | - |
+| 9. CI/CD Pipeline | 2/2 | Complete | 2026-02-19 |
