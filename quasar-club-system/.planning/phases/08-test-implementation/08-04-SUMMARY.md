@@ -129,6 +129,17 @@ None beyond the vi.hoisted() fix documented above.
 - Ready for Phase 9 (CI/CD) — coverage thresholds should pass the global 70% target
 - Remaining uncovered branches in useAuthUseCases.ts (initializeAuth error handling) are acceptable given the complexity of testing async Firebase auth callbacks
 
+## Self-Check: PASSED
+
+- FOUND: `src/composable/__tests__/useSurveyUseCases.vote.test.ts`
+- FOUND: `src/composable/__tests__/useSurveyFilters.test.ts`
+- FOUND: `src/composable/__tests__/useAuthUseCases.test.ts`
+- FOUND: `.planning/phases/08-test-implementation/08-04-SUMMARY.md`
+- FOUND: commit `63a72f0` (Task 1 - survey use cases tests)
+- FOUND: commit `821a362` (Task 2 - survey filters computed tests)
+- FOUND: commit `808b757` (deviation - auth onRetry coverage)
+- FOUND: commit `ecb50c7` (docs - SUMMARY + STATE)
+
 ---
 *Phase: 08-test-implementation*
 *Completed: 2026-02-18*

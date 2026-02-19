@@ -1,42 +1,33 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx quasar build)",
+      "Bash(npx quasar build:*)",
       "Bash(yarn add:*)",
-      "Bash(npx yarn add -D vitest @vue/test-utils happy-dom)",
+      "Bash(yarn remove:*)",
+      "Bash(yarn install)",
       "Bash(npx vitest:*)",
-      "Bash(npx yarn info:*)",
-      "Bash(npx yarn remove:*)",
-      "Bash(npx yarn add vue-i18n@^9.14.5)",
-      "Bash(npx yarn add:*)",
-      "Bash(xxd:*)",
+      "Bash(npx vitest run)",
+      "Bash(yarn test:unit)",
       "Bash(npx firebase deploy --only firestore:rules)",
-      "Bash(npx:*)",
-      "mcp__firebase__firebase_get_environment",
-      "mcp__firebase__firestore_list_collections",
-      "mcp__firebase__firestore_query_collection",
-      "mcp__firebase__firebase_validate_security_rules",
-      "mcp__firebase__auth_get_users",
-      "mcp__firebase__auth_update_user",
+      "Bash(npx firebase emulators:start)",
       "Bash(grep:*)",
-      "Bash(git rm:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(mkdir:*)",
+      "Bash(touch:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(node:*)",
       "Skill(gsd:map-codebase)",
       "Skill(gsd:new-project)",
       "Skill(gsd:plan-phase)",
-      "WebSearch",
       "Skill(gsd:execute-phase)",
-      "Bash(node:*)",
-      "Bash(yarn build)",
-      "Bash(git add:*)",
-      "Bash(yarn quasar build:*)",
-      "Bash(git commit:*)",
-      "Bash([ -f \"src/services/notificationService.ts\" ])",
-      "Bash([ -f \"src/boot/errorHandler.ts\" ])",
-      "Bash(quasar build:*)"
+      "WebSearch",
+      "mcp__firebase__*"
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": [
-    "firebase"
-  ]
+  "enabledMcpjsonServers": ["firebase"]
 }
