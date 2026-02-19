@@ -1,192 +1,36 @@
-# Roadmap: Quasar Club System — Production Hardening
+# Roadmap: Quasar Club System
 
-## Overview
+## Milestones
 
-This roadmap transforms an existing Vue 3 + Quasar + Firebase club management system from a working prototype into a production-ready application. The journey addresses critical stability issues (listener lifecycle management, error handling, data scaling), establishes comprehensive testing infrastructure, and implements operational excellence features (audit trails, performance monitoring). Nine phases build incrementally from foundational error handling through data migration to full CI/CD automation, ensuring the system can reliably serve 40+ concurrent users with no silent failures, no lost votes, and no stale data.
+- ✅ **v1.0 Production Hardening** — Phases 1-9 (shipped 2026-02-19)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3): Planned milestone work
-- Decimal phases (2.1, 2.2): Urgent insertions (marked with INSERTED)
+<details>
+<summary>✅ v1.0 Production Hardening (Phases 1-9) — SHIPPED 2026-02-19</summary>
 
-Decimal phases appear between their surrounding integers in numeric order.
+- [x] Phase 1: Error System Foundation (5/5 plans) — completed 2026-02-14
+- [x] Phase 2: Listener Registry System (3/3 plans) — completed 2026-02-15
+- [x] Phase 3: Code Quality & TypeScript (4/4 plans) — completed 2026-02-15
+- [x] Phase 4: Data Model Migration (3/3 plans) — completed 2026-02-15
+- [x] Phase 5: Security & Audit (3/3 plans) — completed 2026-02-15
+- [x] Phase 6: Performance (2/2 plans) — completed 2026-02-15
+- [x] Phase 7: Test Infrastructure (2/2 plans) — completed 2026-02-18
+- [x] Phase 8: Test Implementation (5/5 plans) — completed 2026-02-18
+- [x] Phase 9: CI/CD Pipeline (2/2 plans) — completed 2026-02-19
 
-- [x] **Phase 1: Error System Foundation** - Typed error hierarchy and centralized handling
-- [x] **Phase 2: Listener Registry System** - Centralized lifecycle management for Firestore listeners
-- [x] **Phase 3: Code Quality & TypeScript** - Strict mode enablement and structured logging
-- [x] **Phase 4: Data Model Migration** - Move votes from arrays to subcollections
-- [x] **Phase 5: Security & Audit** - Audit trail and permission error boundaries
-- [x] **Phase 6: Performance** - Lazy chart rendering and optimization
-- [x] **Phase 7: Test Infrastructure** - Firebase emulator setup and tooling
-- [x] **Phase 8: Test Implementation** - Comprehensive test coverage for critical paths
-- [x] **Phase 9: CI/CD Pipeline** - Automated testing and deployment
-
-## Phase Details
-
-### Phase 1: Error System Foundation
-**Goal**: Replace any-typed error catches with a typed error hierarchy that enables programmatic error handling and user-friendly feedback
-**Depends on**: Nothing (first phase)
-**Requirements**: ERR-01, ERR-02, ERR-03, ERR-04, ERR-05
-**Success Criteria** (what must be TRUE):
-  1. Developer sees typed error classes (AuthError, FirestoreError, ValidationError, ListenerError) when catching errors in IDE autocomplete
-  2. User sees Czech/English error messages for common Firebase failures (permission denied, network error, wrong password) instead of technical codes
-  3. User can retry failed operations via retry button in error notification toast
-  4. Application continues running after auth/Firestore errors instead of white screen crash
-  5. Password change flow shows specific error message when reauthentication fails due to wrong password
-**Plans**: 5 plans in 4 waves
-
-Plans:
-- [x] 01-01-PLAN.md — Error class hierarchy and i18n messages (Wave 1)
-- [x] 01-02-PLAN.md — Notification service and global error handler (Wave 1)
-- [x] 01-03-PLAN.md — Firebase service migration to typed errors (Wave 2)
-- [x] 01-04-PLAN.md — Use case migration with error notifications (Wave 3)
-- [x] 01-05-PLAN.md — Password change flow hardening (Wave 4)
-
-### Phase 2: Listener Registry System
-**Goal**: Centrally manage all Firestore listener lifecycles to eliminate memory leaks and race conditions
-**Depends on**: Phase 1 (uses typed errors for listener failures)
-**Requirements**: LST-01, LST-02, LST-03, LST-04, LST-05
-**Success Criteria** (what must be TRUE):
-  1. User can switch between teams without seeing stale data from previous team (listeners properly unsubscribed)
-  2. Application memory usage stays stable during 60+ minute session (no accumulating listeners)
-  3. User sees permission error notification instead of empty dashboard when Firestore rules deny access
-  4. User does not see race condition errors on login (auth state resolved before data listeners start)
-  5. Developer can inspect active listeners via ListenerRegistry debug method showing count and metadata
-**Plans**: 3 plans in 3 waves
-
-Plans:
-- [x] 02-01-PLAN.md — ListenerRegistry singleton and Promise-based auth coordination (Wave 1)
-- [x] 02-02-PLAN.md — Migrate all listeners to registry and team switching cleanup (Wave 2)
-- [x] 02-03-PLAN.md — App.vue safety net and developer debug interface (Wave 3)
-
-### Phase 3: Code Quality & TypeScript
-**Goal**: Enable TypeScript strict mode and replace console logging with structured logging system
-**Depends on**: Phase 2 (stable foundation before adding type strictness)
-**Requirements**: QAL-01, QAL-02, QAL-03, QAL-04
-**Success Criteria** (what must be TRUE):
-  1. TypeScript compiler shows zero implicit any errors when running tsc with strict mode enabled
-  2. Developer sees structured log entries with context (userId, teamId, operation) instead of raw console.error output
-  3. i18n translation key typos caught at compile time (type error for missing keys)
-  4. Firebase config TODO comment resolved with documented environment variable or constant
-**Plans**: 4 plans in 3 waves
-
-Plans:
-- [x] 03-01-PLAN.md — TypeScript strict mode and Firebase config TODO (Wave 1)
-- [x] 03-02-PLAN.md — i18n TypeScript conversion with type-safe keys (Wave 1)
-- [x] 03-03-PLAN.md — Structured logging setup and service layer migration (Wave 2)
-- [x] 03-04-PLAN.md — Structured logging migration for composables, components, pages (Wave 3)
-
-### Phase 4: Data Model Migration
-**Goal**: Migrate survey votes from document arrays to subcollections to support unlimited team growth
-**Depends on**: Phase 3 (needs testing infrastructure and error handling before risky migration)
-**Requirements**: DAT-01, DAT-02, DAT-03, DAT-04
-**Success Criteria** (what must be TRUE):
-  1. User can vote on surveys with 200+ team members without hitting document size limit errors
-  2. Existing votes from production are preserved and accessible after migration (zero data loss)
-  3. Developer can toggle feature flag to switch between array-based and subcollection-based reads for rollback safety
-  4. Vote submission uses single addOrUpdateVote function regardless of backend storage (duplicates removed)
-  5. Teams with 30+ members see complete vote lists without IN query limit errors
-**Plans**: 3 plans in 3 waves
-
-Plans:
-- [x] 04-01-PLAN.md — Feature flags, security rules, vote function consolidation (Wave 1)
-- [x] 04-02-PLAN.md — Subcollection read/write logic with dual-write support (Wave 2)
-- [x] 04-03-PLAN.md — Migration script and data integrity verification (Wave 3)
-
-### Phase 5: Security & Audit
-**Goal**: Add audit trail for sensitive operations and surface permission errors to users
-**Depends on**: Phase 4 (audit system uses same data patterns as migration)
-**Requirements**: SEC-01, SEC-02, SEC-03, SEC-04
-**Success Criteria** (what must be TRUE):
-  1. Power user can view audit log showing who deleted surveys, modified fines, or removed team members with timestamps
-  2. User sees explicit permission denied notification instead of silent empty results when Firestore rules reject query
-  3. Team admin can delete team with 1000+ surveys/fines/members without transaction batch size errors
-  4. Application waits for auth state confirmation before initializing team listeners (no permission-denied flash)
-**Plans**: 3 plans in 2 waves
-
-Plans:
-- [x] 05-01-PLAN.md — Audit log foundation: interface, service, security rules (Wave 1)
-- [x] 05-02-PLAN.md — Permission error surfacing, cascade delete enhancement, SEC-04 verification (Wave 1)
-- [x] 05-03-PLAN.md — Audit log integration into existing sensitive operations (Wave 2)
-
-### Phase 6: Performance
-**Goal**: Optimize chart rendering and eliminate resource waste from accumulated listeners
-**Depends on**: Phase 5 (performance monitoring requires stable baseline)
-**Requirements**: PRF-01, PRF-02, PRF-03, PRF-04
-**Success Criteria** (what must be TRUE):
-  1. User scrolls dashboard without lag as charts render only when entering viewport (lazy loading)
-  2. Developer sees Firebase Performance Monitoring dashboard showing page load times and API latencies
-  3. User switches teams without memory accumulation (listeners from previous team unsubscribed)
-  4. Notification page stops fetching when scrolled to bottom (pagination boundary respected)
-**Plans**: 2 plans in 2 waves
-
-Plans:
-- [x] 06-01-PLAN.md — VueUse install, Firebase Performance Monitoring, lazy chart composable for ReportsCharts (Wave 1)
-- [x] 06-02-PLAN.md — Dashboard lazy loading, PRF-03 listener cleanup verification, PRF-04 pagination verification (Wave 2)
-
-### Phase 7: Test Infrastructure
-**Goal**: Configure Firebase emulators and Vitest for local testing without hitting production
-**Depends on**: Phase 6 (stable codebase before adding test tooling)
-**Requirements**: TST-01, TST-02
-**Success Criteria** (what must be TRUE):
-  1. Developer runs npm test and sees Firebase Auth/Firestore emulators start automatically on ports 9099/8080
-  2. Firestore security rules have passing unit tests covering allow/deny scenarios for all collections
-  3. Test suite runs against local emulators with seeded data instead of production Firebase project
-**Plans**: 2 plans in 2 waves
-
-Plans:
-- [x] 07-01-PLAN.md — Firebase emulator config, Vitest rules setup, teams/users rules tests (Wave 1)
-- [x] 07-02-PLAN.md — Security rules tests for all remaining collections (Wave 2)
-
-### Phase 8: Test Implementation
-**Goal**: Achieve 70%+ test coverage for critical user flows
-**Depends on**: Phase 7 (requires test infrastructure)
-**Requirements**: TST-03, TST-04, TST-05, TST-06, TST-07
-**Success Criteria** (what must be TRUE):
-  1. Auth flow tests verify login, register, logout, permission denied, and session persistence scenarios
-  2. Survey voting tests verify concurrent votes, vote updates, and missing votes array edge cases
-  3. Cashbox fine rule tests verify all FineRuleTrigger types (survey response, manual, payment)
-  4. Form validation composable tests verify async validation including debounce scenarios
-  5. Listener cleanup tests verify unsubscribe called on component unmount and navigation
-  6. Vitest coverage report shows 70%+ for lines, functions, branches, statements
-**Plans**: 5 plans in 3 waves
-
-Plans:
-- [x] 08-01-PLAN.md — Coverage config + pure logic tests (ListenerRegistry, useFormValidation) (Wave 1)
-- [x] 08-02-PLAN.md — Auth flow use case tests (Wave 2)
-- [x] 08-03-PLAN.md — Survey voting + cashbox fine rule tests (Wave 2)
-- [x] 08-04-PLAN.md — Gap closure: survey use cases, survey filters, auth branch coverage (Wave 3)
-- [x] 08-05-PLAN.md — Gap closure: cashbox CRUD, listeners, and calculation tests (Wave 3)
-
-### Phase 9: CI/CD Pipeline
-**Goal**: Automate testing and deployment via GitHub Actions
-**Depends on**: Phase 8 (requires passing test suite)
-**Requirements**: TST-08
-**Success Criteria** (what must be TRUE):
-  1. GitHub PR triggers automated workflow running lint, tests, and build checks
-  2. Master branch push deploys to Firebase Hosting after tests pass
-  3. CI build fails when test coverage drops below 70% threshold
-  4. Developer sees test results and coverage report directly in GitHub PR checks
-**Plans**: 2 plans in 2 waves
-
-Plans:
-- [x] 09-01-PLAN.md — CI workflow for PR checks + vitest coverage reporters (Wave 1)
-- [x] 09-02-PLAN.md — Deploy workflow for master + GitHub secrets setup (Wave 2)
+</details>
 
 ## Progress
 
-**Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Error System Foundation | 5/5 | Complete | 2026-02-14 |
-| 2. Listener Registry System | 3/3 | Complete | 2026-02-15 |
-| 3. Code Quality & TypeScript | 4/4 | Complete | 2026-02-15 |
-| 4. Data Model Migration | 3/3 | Complete | 2026-02-15 |
-| 5. Security & Audit | 3/3 | Complete | 2026-02-15 |
-| 6. Performance | 2/2 | Complete | 2026-02-15 |
-| 7. Test Infrastructure | 2/2 | Complete | 2026-02-18 |
-| 8. Test Implementation | 5/5 | Complete | 2026-02-18 |
-| 9. CI/CD Pipeline | 2/2 | Complete | 2026-02-19 |
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Error System Foundation | v1.0 | 5/5 | Complete | 2026-02-14 |
+| 2. Listener Registry System | v1.0 | 3/3 | Complete | 2026-02-15 |
+| 3. Code Quality & TypeScript | v1.0 | 4/4 | Complete | 2026-02-15 |
+| 4. Data Model Migration | v1.0 | 3/3 | Complete | 2026-02-15 |
+| 5. Security & Audit | v1.0 | 3/3 | Complete | 2026-02-15 |
+| 6. Performance | v1.0 | 2/2 | Complete | 2026-02-15 |
+| 7. Test Infrastructure | v1.0 | 2/2 | Complete | 2026-02-18 |
+| 8. Test Implementation | v1.0 | 5/5 | Complete | 2026-02-18 |
+| 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |

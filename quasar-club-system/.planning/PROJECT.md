@@ -1,8 +1,8 @@
-# Quasar Club System — Production Hardening
+# Quasar Club System
 
 ## What This Is
 
-A football club management system built with Vue 3, Quasar Framework, and Firebase. It enables team members to vote on surveys (attendance), manage teams, track fines/payments via a cashbox system, view reports/charts, and receive notifications. Used by real football teams with 40+ active members.
+A production-hardened football club management system built with Vue 3, Quasar Framework, and Firebase. It enables team members to vote on surveys (attendance), manage teams, track fines/payments via a cashbox system, view reports/charts, and receive notifications. Used by real football teams with 44+ active members. Features typed error handling, centralized listener management, audit trails, and automated CI/CD.
 
 ## Core Value
 
@@ -27,23 +27,43 @@ Reliable real-time survey voting and team management that works correctly under 
 - ✓ Route guards and auth state management — existing
 - ✓ Firestore security rules — existing
 - ✓ Build optimization with manual chunk splitting — existing
+- ✓ Typed error hierarchy (AuthError, FirestoreError, ValidationError, ListenerError) — v1.0
+- ✓ Global error handler with user-friendly Quasar notifications — v1.0
+- ✓ Error recovery UI with retry buttons for transient errors — v1.0
+- ✓ Firebase error codes mapped to Czech/English i18n messages — v1.0
+- ✓ Password change reauthentication with clear error messages — v1.0
+- ✓ Centralized ListenerRegistry with auto-cleanup — v1.0
+- ✓ Promise-based auth coordination (no timing buffers) — v1.0
+- ✓ Team switching with proper listener cleanup — v1.0
+- ✓ Permission error surfacing to users — v1.0
+- ✓ Listener cleanup verified on logout — v1.0
+- ✓ TypeScript strict mode with zero implicit-any — v1.0
+- ✓ Structured logging replacing all console calls — v1.0
+- ✓ Type-safe i18n keys — v1.0
+- ✓ Firebase config TODO resolved — v1.0
+- ✓ Votes migrated to subcollections with dual-write — v1.0
+- ✓ Migration script with rollback capability — v1.0
+- ✓ IN query batching for 30+ member teams — v1.0
+- ✓ Vote functions consolidated to addOrUpdateVote — v1.0
+- ✓ Audit trail for sensitive operations — v1.0
+- ✓ Permission-denied errors show user feedback — v1.0
+- ✓ Team deletion cascade for large datasets — v1.0
+- ✓ Auth state verified before team listeners — v1.0
+- ✓ Lazy chart rendering with intersection observer — v1.0
+- ✓ Firebase Performance Monitoring — v1.0
+- ✓ Notification pagination bounds checking — v1.0
+- ✓ Firebase Emulator Suite configured — v1.0
+- ✓ Firestore security rules unit tests — v1.0
+- ✓ Auth flow tests (login, register, logout, permissions) — v1.0
+- ✓ Survey voting tests (concurrent, updates, edge cases) — v1.0
+- ✓ Cashbox fine rule tests (all trigger types) — v1.0
+- ✓ Form validation composable tests — v1.0
+- ✓ Listener cleanup tests — v1.0
+- ✓ CI/CD pipeline with GitHub Actions — v1.0
 
 ### Active
 
-- [ ] Fix listener race conditions and lifecycle management
-- [ ] Move votes from document arrays to subcollections (scaling fix)
-- [ ] Add proper error typing (replace `any` catches with typed errors)
-- [ ] Remove duplicated vote functions (consolidate to single `addOrUpdateVote`)
-- [ ] Add error recovery with user-facing feedback for all async operations
-- [ ] Add audit trail for sensitive operations (deletions, fine modifications)
-- [ ] Add comprehensive test coverage for critical paths
-- [ ] Fix permission error boundaries with user-visible feedback
-- [ ] Optimize chart rendering (lazy loading)
-- [ ] Add data consistency validation for survey verification → cashbox flow
-- [ ] Harden password change reauthentication flow
-- [ ] Fix team deletion cascade for large datasets
-- [ ] Add notification pagination bounds checking
-- [ ] Type-safe i18n keys
+(None — define with next milestone)
 
 ### Out of Scope
 
@@ -52,32 +72,42 @@ Reliable real-time survey voting and team management that works correctly under 
 - Real-time chat — not core to club management
 - OAuth/social login — email/password sufficient for team members
 - Offline support — users always have connectivity at club events
+- Sentry/error monitoring — deferred to v2 (MON-01)
 
 ## Context
 
 - **User base**: Football teams, primarily Xaverov team with 44 members
 - **Firebase project**: `club-surveys`
-- **Existing codebase**: ~50 source files, clean architecture already established
-- **Current issues**: Race conditions in listeners, missing error recovery, no audit trail, test gaps, votes stored as arrays hitting Firestore document size limits
+- **Codebase**: 21,120 LOC across TypeScript/Vue files, clean architecture
+- **Tech stack**: Vue 3 + Quasar 2.16 + Firebase 11.4 + Vite + Vitest
+- **Test coverage**: 82%+ function coverage, security rules tests for all collections
+- **CI/CD**: GitHub Actions — PR checks (lint, tests, build) + master deploy to Firebase Hosting
+- **Deployment**: Firebase Hosting via GitHub Actions
 - **Codebase map**: Available at `.planning/codebase/` with 7 analysis documents
-- **Deployment**: Firebase Hosting, AWS deploy workflow exists
+- **Known issues**: 4 auth use case tests fail in full-suite runs (pass in isolation — test ordering issue)
 
 ## Constraints
 
 - **Tech stack**: Vue 3 + Quasar + Firebase — no framework changes
-- **Data migration**: Votes subcollection change requires migrating existing data
-- **Firebase limits**: Firestore IN query limited to 30 items, document size 1MB max
+- **Firebase limits**: Firestore IN query limited to 30 items (batched), document size 1MB max
 - **Backward compatibility**: Must not break existing user sessions or data
 
 ## Key Decisions
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Move votes to subcollections | Document array approach hits 1MB limit with large teams | — Pending |
-| Add typed error system | `any` catches lose type safety, can't distinguish error types | — Pending |
-| Consolidate vote functions | 3 duplicate functions increase maintenance burden | — Pending |
-| Add audit collection | No record of who deleted/modified sensitive data | — Pending |
-| Lazy chart rendering | All 4 charts render simultaneously, blocking UI | — Pending |
+| Move votes to subcollections | Document array approach hits 1MB limit with large teams | ✓ Good — dual-write with feature flags enables safe rollback |
+| Add typed error system | `any` catches lose type safety, can't distinguish error types | ✓ Good — 4 error classes with i18n messages and retry logic |
+| Consolidate vote functions | 3 duplicate functions increase maintenance burden | ✓ Good — single addOrUpdateVote function |
+| Add audit collection | No record of who deleted/modified sensitive data | ✓ Good — fire-and-forget writes, power-user-only reads |
+| Lazy chart rendering | All 4 charts render simultaneously, blocking UI | ✓ Good — intersection observer with VueUse |
+| Promise-based auth coordination | Timing buffers (100-300ms) caused race conditions | ✓ Good — eliminates all timing-based auth waits |
+| Custom lightweight logger over vuejs3-logger | Vue dependency incompatible with plain TS services | ✓ Good — scoped factory pattern, JSON context |
+| Feature flags default to false | Safe initial state for vote migration rollout | ✓ Good — const assertion for type safety |
+| Fire-and-forget audit writes | Audit failures shouldn't block user operations | ✓ Good — operations never fail due to audit |
+| Local firebase-tools@13.35.1 | Global v15.5.1 requires Java 21, local works with Java 17 | ✓ Good — bash wrapper for Windows compatibility |
+| fileParallelism: false for rules tests | Multiple test files sharing emulator cause clearFirestore() races | ✓ Good — sequential runs prevent data conflicts |
+| vi.hoisted() for mock functions | vitest hoists vi.mock() above const declarations | ✓ Good — prevents ReferenceError in test factories |
 
 ---
-*Last updated: 2026-02-14 after initialization*
+*Last updated: 2026-02-19 after v1.0 milestone*
