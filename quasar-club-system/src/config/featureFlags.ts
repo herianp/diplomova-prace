@@ -18,7 +18,7 @@ const FEATURE_FLAGS = {
    * - false: Write votes only to array (current implementation)
    * - true: Write votes to BOTH array and subcollection for safe migration
    */
-  DUAL_WRITE_VOTES: false,
+  DUAL_WRITE_VOTES: true,
 } as const
 
 export type FeatureFlagKey = keyof typeof FEATURE_FLAGS
