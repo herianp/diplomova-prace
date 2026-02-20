@@ -42,8 +42,8 @@ const auth = getAuth(app);
 
 /**
  * Initialize Performance Monitoring (automatic web vitals: FCP, LCP, CLS, FID)
- * Tracks page load times and web vitals in Firebase Console.
+ * Only in production — the SDK spams console with retry errors in dev/localhost.
  */
-const perf = getPerformance(app);
+const perf = import.meta.env.PROD ? getPerformance(app) : null;
 
 export { analytics, db, auth, perf };
