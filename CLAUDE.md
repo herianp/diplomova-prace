@@ -19,7 +19,11 @@
 - Working directory: /home/petah/projects/diplomova-prace/quasar-club-system
 - Git repository: Yes
 - Platform: Linux (WSL2)
-- Main branch: master
+
+## Git Branching Strategy
+- **master** — development branch (default), all feature work merges here
+- **production** — production branch, merging to this triggers Azure deploy automatically
+- CI (GitHub Actions) runs on PRs targeting both master and production
 
 ## Recent Activity
 - User requested project analysis to understand structure, technologies, and how to run it

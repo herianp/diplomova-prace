@@ -1,10 +1,10 @@
 # .github/workflows/ci.yml
-# Runs on every PR targeting master: lint + build + unit tests with coverage + security rules tests
+# Runs on every PR targeting master or production: lint + build + unit tests with coverage + security rules tests
 name: CI
 
 on:
   pull_request:
-    branches: [master]
+    branches: [master, production]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

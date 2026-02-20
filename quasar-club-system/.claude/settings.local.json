@@ -25,9 +25,12 @@
       "Skill(gsd:plan-phase)",
       "Skill(gsd:execute-phase)",
       "WebSearch",
-      "mcp__firebase__*"
+      "mcp__firebase__*",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ]
   },
   "enableAllProjectMcpServers": true,
-  "enabledMcpjsonServers": ["firebase"]
+  "enabledMcpjsonServers": [
+    "firebase"
+  ]
 }
