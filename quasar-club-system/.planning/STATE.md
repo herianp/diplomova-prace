@@ -11,7 +11,7 @@ See: .planning/PROJECT.md (updated 2026-02-19)
 
 Milestone: v1.0 Production Hardening — SHIPPED 2026-02-19
 Status: Complete
-Last activity: 2026-02-19 — Milestone v1.0 archived
+Last activity: 2026-02-21 - Completed quick task 1: Fix admin page styling and create PlayersPage with player cards and detail dialog
 
 Progress: [██████████] 100% (9/9 phases, 29/29 plans complete)
 
@@ -37,6 +37,12 @@ None.
 
 - Port 8080 residual Java process after test runs: consecutive `yarn test:rules` runs need ~15s delay or manual process kill
 - useAuthUseCases.test.ts: 4 tests fail in full-suite runs (pass in isolation — test ordering issue)
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Fix admin page styling and create PlayersPage with player cards and detail dialog | 2026-02-21 | 6f54409 | [1-fix-admin-page-styling-and-create-player](./quick/1-fix-admin-page-styling-and-create-player/) |
 
 ## Session Continuity
 
