@@ -63,29 +63,29 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ONB-01 | TBD | Pending |
-| ONB-02 | TBD | Pending |
-| ONB-03 | TBD | Pending |
-| ONB-04 | TBD | Pending |
-| TEAM-01 | TBD | Pending |
-| TEAM-02 | TBD | Pending |
-| DISC-01 | TBD | Pending |
-| DISC-02 | TBD | Pending |
-| DISC-03 | TBD | Pending |
-| DISC-04 | TBD | Pending |
-| DISC-05 | TBD | Pending |
-| EMPTY-01 | TBD | Pending |
-| EMPTY-02 | TBD | Pending |
-| EMPTY-03 | TBD | Pending |
-| EMPTY-04 | TBD | Pending |
-| ROUTE-01 | TBD | Pending |
-| ROUTE-02 | TBD | Pending |
+| ONB-01 | Phase 10 | Pending |
+| ONB-02 | Phase 10 | Pending |
+| ONB-03 | Phase 10 | Pending |
+| ONB-04 | Phase 10 | Pending |
+| ROUTE-01 | Phase 10 | Pending |
+| ROUTE-02 | Phase 10 | Pending |
+| TEAM-01 | Phase 11 | Pending |
+| TEAM-02 | Phase 11 | Pending |
+| DISC-01 | Phase 12 | Pending |
+| DISC-02 | Phase 12 | Pending |
+| DISC-03 | Phase 12 | Pending |
+| DISC-04 | Phase 12 | Pending |
+| DISC-05 | Phase 12 | Pending |
+| EMPTY-01 | Phase 13 | Pending |
+| EMPTY-02 | Phase 13 | Pending |
+| EMPTY-03 | Phase 13 | Pending |
+| EMPTY-04 | Phase 13 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 17 total
-- Mapped to phases: 0
-- Unmapped: 17
+- Mapped to phases: 17
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 after initial definition*
+*Last updated: 2026-02-21 — traceability filled after roadmap creation*

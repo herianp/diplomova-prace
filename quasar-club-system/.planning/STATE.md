@@ -5,16 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.1 New User Onboarding & No-Team UX
+**Current focus:** v1.1 — Phase 10: Onboarding Wizard & Route Guarding
 
 ## Current Position
 
 Milestone: v1.1 New User Onboarding & No-Team UX
-Phase: Not started (defining requirements)
-Status: Defining requirements
-Last activity: 2026-02-21 — Milestone v1.1 started
+Phase: 10 of 13 (Onboarding Wizard & Route Guarding)
+Plan: 0 of 3 in current phase
+Status: Ready to plan
+Last activity: 2026-02-21 — v1.1 roadmap created, phases 10-13 defined
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [░░░░░░░░░░] 0% (v1.1)
 
 ## Performance Metrics
 
@@ -24,11 +25,18 @@ Progress: [░░░░░░░░░░] 0%
 - Timeline: 6 days (2026-02-14 → 2026-02-19)
 - Files modified: 158 (+26,907/-742 lines)
 
+**v1.1 (in progress):**
+- Plans completed: 0 of 10
+
 ## Accumulated Context
 
 ### Decisions
 
 All v1.0 decisions archived in PROJECT.md Key Decisions table.
+
+v1.1 pending decisions (from PROJECT.md):
+- Allow any user to create teams — new users bootstrap without admin help
+- Join request system for team discovery — browsing enables self-service
 
 ### Pending Todos
 
@@ -47,5 +55,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21 (milestone v1.1 initialization)
-Stopped at: Requirements defined, roadmap creation next
+Last session: 2026-02-21 (v1.1 roadmap creation)
+Stopped at: Roadmap written, ready to plan Phase 10
+Resume file: None
