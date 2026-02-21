@@ -151,19 +151,6 @@
 
         <!-- Progress Bars -->
         <q-card-section>
-          <div class="q-mb-md">
-            <div class="row items-center q-mb-xs">
-              <div class="col text-caption text-weight-medium">{{ $t('players.detail.participationRate') }}</div>
-              <div class="col-auto text-caption text-primary text-weight-bold">{{ selectedStats?.participationRate ?? 0 }}%</div>
-            </div>
-            <q-linear-progress
-              :value="(selectedStats?.participationRate ?? 0) / 100"
-              color="primary"
-              track-color="grey-3"
-              rounded
-              size="8px"
-            />
-          </div>
           <div>
             <div class="row items-center q-mb-xs">
               <div class="col text-caption text-weight-medium">{{ $t('players.detail.attendanceRate') }}</div>
