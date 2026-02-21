@@ -90,7 +90,6 @@
 
           <!-- Inline Create Team form (placeholder for Phase 11) -->
           <div v-else-if="teamChoicePath === 'create'">
-            <q-btn flat icon="arrow_back" :label="$t('onboarding.back')" @click="backToCardSelection" class="q-mb-md" />
             <q-banner class="bg-info text-white rounded-borders">
               <template v-slot:avatar><q-icon name="info" /></template>
               {{ $t('onboarding.teamChoice.createPlaceholder') }}
@@ -99,15 +98,14 @@
 
           <!-- Inline Browse Teams list (placeholder for Phase 12) -->
           <div v-else-if="teamChoicePath === 'browse'">
-            <q-btn flat icon="arrow_back" :label="$t('onboarding.back')" @click="backToCardSelection" class="q-mb-md" />
             <q-banner class="bg-info text-white rounded-borders">
               <template v-slot:avatar><q-icon name="info" /></template>
               {{ $t('onboarding.teamChoice.browsePlaceholder') }}
             </q-banner>
           </div>
         </div>
-        <q-stepper-navigation v-if="!teamChoicePath">
-          <q-btn flat :label="$t('onboarding.back')" @click="prevStep" />
+        <q-stepper-navigation>
+          <q-btn flat :label="$t('onboarding.back')" @click="teamChoicePath ? backToCardSelection() : prevStep()" />
         </q-stepper-navigation>
       </q-step>
 
@@ -152,6 +150,6 @@ watch(
 
 <style scoped>
 .step-content {
-  min-height: 280px;
+  min-height: 500px;
 }
 </style>

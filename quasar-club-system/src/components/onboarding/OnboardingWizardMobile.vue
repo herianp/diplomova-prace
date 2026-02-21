@@ -95,7 +95,6 @@
 
           <!-- Inline Create Team placeholder -->
           <div v-else-if="teamChoicePath === 'create'">
-            <q-btn flat icon="arrow_back" :label="$t('onboarding.back')" @click="backToCardSelection" class="q-mb-md" dense />
             <q-banner class="bg-info text-white rounded-borders">
               <template v-slot:avatar><q-icon name="info" /></template>
               {{ $t('onboarding.teamChoice.createPlaceholder') }}
@@ -104,7 +103,6 @@
 
           <!-- Inline Browse Teams placeholder -->
           <div v-else-if="teamChoicePath === 'browse'">
-            <q-btn flat icon="arrow_back" :label="$t('onboarding.back')" @click="backToCardSelection" class="q-mb-md" dense />
             <q-banner class="bg-info text-white rounded-borders">
               <template v-slot:avatar><q-icon name="info" /></template>
               {{ $t('onboarding.teamChoice.browsePlaceholder') }}
@@ -124,8 +122,8 @@
           <q-btn flat :label="$t('onboarding.back')" @click="prevStep" class="full-width" />
         </template>
 
-        <!-- Step 3 (only when no inline path selected) -->
-        <q-btn v-if="currentStep === 3 && !teamChoicePath" flat :label="$t('onboarding.back')" @click="prevStep" class="full-width" />
+        <!-- Step 3 -->
+        <q-btn v-if="currentStep === 3" flat :label="$t('onboarding.back')" @click="teamChoicePath ? backToCardSelection() : prevStep()" class="full-width" />
       </div>
     </template>
   </q-page>
