@@ -1,0 +1,91 @@
+# Requirements: Quasar Club System
+
+**Defined:** 2026-02-21
+**Core Value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
+
+## v1.1 Requirements
+
+Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
+
+### Onboarding
+
+- [ ] **ONB-01**: User without a team sees an onboarding wizard instead of the main app
+- [ ] **ONB-02**: User can set their display name during onboarding
+- [ ] **ONB-03**: User can choose between creating a team or browsing existing teams
+- [ ] **ONB-04**: User who completes onboarding (has a team) is redirected to the dashboard
+
+### Team Creation
+
+- [ ] **TEAM-01**: Any authenticated user can create a team (not restricted to power users)
+- [ ] **TEAM-02**: Team creator automatically becomes power user of that team only
+
+### Team Discovery & Joining
+
+- [ ] **DISC-01**: User can browse a list of all existing teams
+- [ ] **DISC-02**: User can send a join request to a team
+- [ ] **DISC-03**: Team power user sees pending join requests
+- [ ] **DISC-04**: Team power user can approve or decline a join request
+- [ ] **DISC-05**: Approved user is added to the team's members array
+
+### Empty States
+
+- [ ] **EMPTY-01**: Dashboard shows guidance to create/join a team when user has no team
+- [ ] **EMPTY-02**: Surveys page shows guidance when user has no team
+- [ ] **EMPTY-03**: Reports page shows guidance when user has no team
+- [ ] **EMPTY-04**: Players page shows guidance when user has no team
+
+### Route Guarding
+
+- [ ] **ROUTE-01**: Teamless users are redirected to onboarding from protected pages
+- [ ] **ROUTE-02**: Users with a team skip onboarding and go directly to dashboard
+
+## Future Requirements
+
+Deferred to later milestones. Tracked but not in current roadmap.
+
+### Team Discovery Enhancements
+
+- **DISC-06**: Teams can set a description visible in the browse list
+- **DISC-07**: User can search/filter teams by name
+
+## Out of Scope
+
+| Feature | Reason |
+|---------|--------|
+| Team visibility toggle (public/private) | All teams visible for now, simplicity |
+| App-wide admin approval for team creation | Any user can create, no gatekeeping |
+| Auto-join without approval | Power user approval required for join requests |
+| Onboarding feature tour | Keep wizard focused on profile + team setup only |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ONB-01 | TBD | Pending |
+| ONB-02 | TBD | Pending |
+| ONB-03 | TBD | Pending |
+| ONB-04 | TBD | Pending |
+| TEAM-01 | TBD | Pending |
+| TEAM-02 | TBD | Pending |
+| DISC-01 | TBD | Pending |
+| DISC-02 | TBD | Pending |
+| DISC-03 | TBD | Pending |
+| DISC-04 | TBD | Pending |
+| DISC-05 | TBD | Pending |
+| EMPTY-01 | TBD | Pending |
+| EMPTY-02 | TBD | Pending |
+| EMPTY-03 | TBD | Pending |
+| EMPTY-04 | TBD | Pending |
+| ROUTE-01 | TBD | Pending |
+| ROUTE-02 | TBD | Pending |
+
+**Coverage:**
+- v1.1 requirements: 17 total
+- Mapped to phases: 0
+- Unmapped: 17
+
+---
+*Requirements defined: 2026-02-21*
+*Last updated: 2026-02-21 after initial definition*

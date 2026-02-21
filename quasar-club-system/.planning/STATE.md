@@ -2,18 +2,19 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-19)
+See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.0 Production Hardening complete — planning next milestone
+**Current focus:** v1.1 New User Onboarding & No-Team UX
 
 ## Current Position
 
-Milestone: v1.0 Production Hardening — SHIPPED 2026-02-19
-Status: Complete
-Last activity: 2026-02-21 - Completed quick task 1: Fix admin page styling and create PlayersPage with player cards and detail dialog
+Milestone: v1.1 New User Onboarding & No-Team UX
+Phase: Not started (defining requirements)
+Status: Defining requirements
+Last activity: 2026-02-21 — Milestone v1.1 started
 
-Progress: [██████████] 100% (9/9 phases, 29/29 plans complete)
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -46,5 +47,5 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21 (quick task execution)
-Stopped at: Completed quick/1-fix-admin-page-styling-and-create-player/1-PLAN.md
+Last session: 2026-02-21 (milestone v1.1 initialization)
+Stopped at: Requirements defined, roadmap creation next
