@@ -151,14 +151,24 @@ watch(
 <style scoped>
 :deep(.q-stepper__content.q-panel-parent) {
   min-height: 450px;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.q-stepper__step) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 :deep(.q-stepper__step-content) {
-  height: 100%;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 :deep(.q-stepper__step-inner) {
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
