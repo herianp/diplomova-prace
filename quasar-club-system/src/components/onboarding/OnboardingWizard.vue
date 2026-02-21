@@ -13,7 +13,7 @@
 
       <!-- Step 1: Welcome -->
       <q-step :name="1" :title="$t('onboarding.welcome.title')" icon="waving_hand" :done="currentStep > 1">
-        <div class="text-center q-py-md">
+        <div class="step-content text-center q-py-md">
           <q-icon name="sports_soccer" size="64px" color="primary" class="q-mb-md" />
           <div class="text-h5 q-mb-md">{{ $t('onboarding.welcome.heading') }}</div>
           <div class="text-body1 text-grey-7 q-mb-lg">{{ $t('onboarding.welcome.description') }}</div>
@@ -41,7 +41,7 @@
 
       <!-- Step 2: Display Name -->
       <q-step :name="2" :title="$t('onboarding.displayName.title')" icon="person" :done="currentStep > 2">
-        <div class="q-py-md">
+        <div class="step-content q-py-md">
           <div class="text-body1 q-mb-md">{{ $t('onboarding.displayName.description') }}</div>
           <q-input
             v-model="displayName"
@@ -59,7 +59,7 @@
 
       <!-- Step 3: Team Choice -->
       <q-step :name="3" :title="$t('onboarding.teamChoice.title')" icon="group_add">
-        <div class="q-py-md">
+        <div class="step-content q-py-md">
           <!-- Card selection (shown when no path selected) -->
           <div v-if="!teamChoicePath" class="row q-gutter-md justify-center">
             <q-card
@@ -149,3 +149,9 @@ watch(
   }
 )
 </script>
+
+<style scoped>
+.step-content {
+  min-height: 280px;
+}
+</style>
