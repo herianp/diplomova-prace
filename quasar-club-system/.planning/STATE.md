@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 10 of 13 (Onboarding Wizard & Route Guarding)
-Plan: 0 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-02-21 — v1.1 roadmap created, phases 10-13 defined
+Plan: 1 of 3 in current phase
+Status: In progress
+Last activity: 2026-02-21 — Plan 10-01 complete: route guard and onboarding route
 
-Progress: [░░░░░░░░░░] 0% (v1.1)
+Progress: [█░░░░░░░░░] 10% (v1.1)
 
 ## Performance Metrics
 
@@ -34,9 +34,11 @@ Progress: [░░░░░░░░░░] 0% (v1.1)
 
 All v1.0 decisions archived in PROJECT.md Key Decisions table.
 
-v1.1 pending decisions (from PROJECT.md):
+v1.1 decisions:
 - Allow any user to create teams — new users bootstrap without admin help
 - Join request system for team discovery — browsing enables self-service
+- Route guard uses isTeamReady flag from authStore to gate team-state check before redirecting to /onboarding
+- OnboardingLayout: clean full-page with minimal header (app title + logout), no drawer/sidebar
 
 ### Pending Todos
 
@@ -55,6 +57,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21 (v1.1 roadmap creation)
-Stopped at: Roadmap written, ready to plan Phase 10
+Last session: 2026-02-21 (Phase 10, Plan 01 execution)
+Stopped at: Completed 10-01-PLAN.md — route guard + onboarding route
 Resume file: None

@@ -9,7 +9,7 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 
 ### Onboarding
 
-- [ ] **ONB-01**: User without a team sees an onboarding wizard instead of the main app
+- [x] **ONB-01**: User without a team sees an onboarding wizard instead of the main app
 - [ ] **ONB-02**: User can set their display name during onboarding
 - [ ] **ONB-03**: User can choose between creating a team or browsing existing teams
 - [ ] **ONB-04**: User who completes onboarding (has a team) is redirected to the dashboard
@@ -36,8 +36,8 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 
 ### Route Guarding
 
-- [ ] **ROUTE-01**: Teamless users are redirected to onboarding from protected pages
-- [ ] **ROUTE-02**: Users with a team skip onboarding and go directly to dashboard
+- [x] **ROUTE-01**: Teamless users are redirected to onboarding from protected pages
+- [x] **ROUTE-02**: Users with a team skip onboarding and go directly to dashboard
 
 ## Future Requirements
 
@@ -63,12 +63,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ONB-01 | Phase 10 | Pending |
+| ONB-01 | Phase 10 | Complete |
 | ONB-02 | Phase 10 | Pending |
 | ONB-03 | Phase 10 | Pending |
 | ONB-04 | Phase 10 | Pending |
-| ROUTE-01 | Phase 10 | Pending |
-| ROUTE-02 | Phase 10 | Pending |
+| ROUTE-01 | Phase 10 | Complete |
+| ROUTE-02 | Phase 10 | Complete |
 | TEAM-01 | Phase 11 | Pending |
 | TEAM-02 | Phase 11 | Pending |
 | DISC-01 | Phase 12 | Pending |
