@@ -149,7 +149,19 @@ watch(
 </script>
 
 <style scoped>
-.step-content {
-  min-height: 500px;
+:deep(.q-stepper__step-content) {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.q-stepper__step-inner) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+:deep(.q-stepper__step-inner > .step-content) {
+  flex: 1;
 }
 </style>
