@@ -352,7 +352,30 @@ export default {
     teamsCount: "Týmy",
     noTeams: "Žádné týmy nenalezeny",
     noUsers: "Žádní uživatelé nenalezeni",
-    loadError: "Nepodařilo se načíst data administrace"
+    loadError: "Nepodařilo se načíst data administrace",
+    auditTab: "Audit logy",
+    audit: {
+      selectTeam: "Vyberte tým",
+      operation: "Operace",
+      allOperations: "Všechny operace",
+      load: "Načíst",
+      dateTime: "Datum a čas",
+      actor: "Provedl",
+      entity: "Entita",
+      details: "Detaily",
+      noLogs: "Žádné audit logy",
+      loadError: "Nepodařilo se načíst audit logy",
+      op: {
+        survey_create: "Vytvoření ankety",
+        survey_update: "Úprava ankety",
+        survey_delete: "Smazání ankety",
+        fine_create: "Vytvoření pokuty",
+        fine_update: "Úprava pokuty",
+        fine_delete: "Smazání pokuty",
+        member_remove: "Odebrání člena",
+        vote_verify: "Ověření hlasování"
+      }
+    }
   },
   reports: {
     title: "Reporty a analytika",
@@ -411,6 +434,28 @@ export default {
     monthlyTrend: "Měsíční trend docházky",
     playerRanking: "Žebříček docházky hráčů",
     attendanceRate: "Míra docházky"
+  },
+  players: {
+    title: "Hráči",
+    description: "Přehled členů týmu",
+    search: "Hledat hráče...",
+    noPlayers: "Žádní členové týmu nenalezeni",
+    noResults: "Žádní hráči neodpovídají hledání",
+    detail: {
+      stats: "Statistiky",
+      totalSurveys: "Celkem anket",
+      yesVotes: "Ano hlasy",
+      noVotes: "Ne hlasy",
+      unvoted: "Nehlasováno",
+      participationRate: "Míra účasti",
+      attendanceRate: "Míra docházky",
+      voteBreakdown: "Rozložení hlasů",
+      finances: "Finance",
+      totalFined: "Celkem pokutováno",
+      totalPaid: "Celkem zaplaceno",
+      balance: "Zůstatek",
+      close: "Zavřít"
+    }
   },
   cashbox: {
     title: "Pokladna",
