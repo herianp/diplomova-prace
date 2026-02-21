@@ -155,6 +155,12 @@ watch(
   flex-direction: column;
 }
 
+:deep(.q-panel) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 :deep(.q-stepper__step) {
   flex: 1;
   display: flex;
