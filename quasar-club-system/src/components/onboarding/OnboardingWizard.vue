@@ -165,5 +165,12 @@ watch(
 
 .step-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+:deep(.q-stepper__nav) {
+  margin-top: auto;
 }
 </style>
