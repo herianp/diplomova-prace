@@ -58,6 +58,7 @@ const topLinks = [
   { title: "Teams", icon: "groups", route: RouteEnum.TEAM.path },
   { title: "Surveys", icon: "poll", route: RouteEnum.SURVEY.path },
   { title: "Reports", icon: "bar_chart", route: RouteEnum.REPORTS.path },
+  { title: "Players", icon: "person", route: RouteEnum.PLAYERS.path },
   { title: "Cashbox", icon: "account_balance_wallet", route: RouteEnum.CASHBOX.path },
   { title: "Messages", icon: "chat", route: RouteEnum.MESSAGES.path },
 ];
