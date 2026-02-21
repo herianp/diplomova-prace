@@ -149,19 +149,21 @@ watch(
 </script>
 
 <style scoped>
+:deep(.q-stepper__content.q-panel-parent) {
+  min-height: 450px;
+}
+
 :deep(.q-stepper__step-content) {
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
+  height: 100%;
 }
 
 :deep(.q-stepper__step-inner) {
-  flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-:deep(.q-stepper__step-inner > .step-content) {
+.step-content {
   flex: 1;
 }
 </style>
