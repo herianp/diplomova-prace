@@ -11,14 +11,14 @@ const FEATURE_FLAGS = {
    * - false: Read votes from surveys.votes array (current implementation)
    * - true: Read votes from surveys/{surveyId}/votes subcollection
    */
-  USE_VOTE_SUBCOLLECTIONS: false,
+  USE_VOTE_SUBCOLLECTIONS: true,
 
   /**
    * Enables dual-write during migration:
    * - false: Write votes only to array (current implementation)
    * - true: Write votes to BOTH array and subcollection for safe migration
    */
-  DUAL_WRITE_VOTES: true,
+  DUAL_WRITE_VOTES: false,
 } as const
 
 export type FeatureFlagKey = keyof typeof FEATURE_FLAGS
