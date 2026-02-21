@@ -218,7 +218,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import Chart from 'chart.js/auto'
 import { useTeamStore } from '@/stores/teamStore'
@@ -226,8 +226,6 @@ import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 import { useCashboxUseCases } from '@/composable/useCashboxUseCases'
 import { useReadiness } from '@/composable/useReadiness'
-import type { ITeamMember, IMemberStats } from '@/interfaces/interfaces'
-import type { IFine, IPayment } from '@/interfaces/interfaces'
 
 const teamStore = useTeamStore()
 const { waitForTeam } = useReadiness()
@@ -236,37 +234,37 @@ const { setSurveysListener } = useSurveyUseCases()
 const cashboxUseCases = useCashboxUseCases()
 
 // Refs
-const members = ref<ITeamMember[]>([])
+const members = ref([])
 const loading = ref(false)
 const searchTerm = ref('')
 const showDetail = ref(false)
-const selectedMember = ref<ITeamMember | null>(null)
-const selectedStats = ref<IMemberStats | null>(null)
-const selectedBalance = ref<{ totalFined: number; totalPaid: number; balance: number } | null>(null)
-const chartRef = ref<HTMLCanvasElement | null>(null)
-const chartInstance = ref<Chart | null>(null)
-const fines = ref<IFine[]>([])
-const payments = ref<IPayment[]>([])
+const selectedMember = ref(null)
+const selectedStats = ref(null)
+const selectedBalance = ref(null)
+const chartRef = ref(null)
+const chartInstance = ref(null)
+const fines = ref([])
+const payments = ref([])
 
-let unsubscribeFines: (() => void) | null = null
-let unsubscribePayments: (() => void) | null = null
+let unsubscribeFines = null
+let unsubscribePayments = null
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
 const surveys = computed(() => teamStore.surveys)
 
 const filteredMembers = computed(() => {
-  const filtered = filterMembers(members.value, searchTerm.value)
+  const filtered = filterMembers(members.value, searchTerm.value || '')
   return sortMembersByName(filtered)
 })
 
 // Get quick stats for card chips (without opening dialog)
-const getQuickStats = (memberId: string): IMemberStats => {
+const getQuickStats = (memberId) => {
   return getMemberStats(memberId, surveys.value)
 }
 
 // Compute player balance from fines/payments
-const getPlayerBalance = (playerId: string): { totalFined: number; totalPaid: number; balance: number } => {
+const getPlayerBalance = (playerId) => {
   const playerFines = fines.value.filter((f) => f.playerId === playerId)
   const playerPayments = payments.value.filter((p) => p.playerId === playerId)
   const totalFined = playerFines.reduce((sum, f) => sum + (f.amount || 0), 0)
@@ -308,7 +306,7 @@ const renderChart = () => {
   })
 }
 
-const openDetail = async (member: ITeamMember) => {
+const openDetail = async (member) => {
   selectedMember.value = member
   selectedStats.value = getMemberStats(member.uid, surveys.value)
   selectedBalance.value = getPlayerBalance(member.uid)
