@@ -434,7 +434,7 @@ describe('useSurveyUseCases - addSurvey', () => {
     const { addSurvey } = useSurveyUseCases()
     await addSurvey(newSurvey)
 
-    expect(mockAddSurvey).toHaveBeenCalledWith(newSurvey, ['u1', 'u2'])
+    expect(mockAddSurvey).toHaveBeenCalledWith(newSurvey, ['u1', 'u2'], undefined)
     expect(mockCreateSurveyNotification).toHaveBeenCalledWith(surveyData, ['u1', 'u2'])
   })
 
@@ -449,7 +449,7 @@ describe('useSurveyUseCases - addSurvey', () => {
     const { addSurvey } = useSurveyUseCases()
     await addSurvey(newSurvey)
 
-    expect(mockAddSurvey).toHaveBeenCalledWith(newSurvey, [])
+    expect(mockAddSurvey).toHaveBeenCalledWith(newSurvey, [], undefined)
     expect(mockCreateSurveyNotification).not.toHaveBeenCalled()
   })
 
@@ -464,7 +464,7 @@ describe('useSurveyUseCases - addSurvey', () => {
     const { addSurvey } = useSurveyUseCases()
     await addSurvey(newSurvey)
 
-    expect(mockAddSurvey).toHaveBeenCalledWith(newSurvey, [])
+    expect(mockAddSurvey).toHaveBeenCalledWith(newSurvey, [], undefined)
     expect(mockCreateSurveyNotification).not.toHaveBeenCalled()
   })
 
@@ -500,7 +500,7 @@ describe('useSurveyUseCases - updateSurvey', () => {
     const { updateSurvey } = useSurveyUseCases()
     await updateSurvey('survey-1', partial)
 
-    expect(mockUpdateSurvey).toHaveBeenCalledWith('survey-1', partial)
+    expect(mockUpdateSurvey).toHaveBeenCalledWith('survey-1', partial, undefined)
   })
 
   it('FirestoreError (transient): notifyError with retry:true, re-throws', async () => {
