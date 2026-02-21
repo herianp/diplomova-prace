@@ -5,11 +5,11 @@
         <q-toolbar-title>{{ t('app.title') }}</q-toolbar-title>
         <q-btn
           flat
-          dense
-          round
           icon="logout"
+          :label="$q.screen.gt.xs ? t('settings.account.signOut') : undefined"
           :title="t('settings.account.signOut')"
           @click="handleSignOut"
+          class="q-px-sm"
         />
       </q-toolbar>
     </q-header>
@@ -22,12 +22,22 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import { useAuthUseCases } from '@/composable/useAuthUseCases'
+import { RouteEnum } from '@/enums/routesEnum'
 
 const { t } = useI18n()
+const $q = useQuasar()
+const router = useRouter()
 const { signOut } = useAuthUseCases()
 
 const handleSignOut = async () => {
-  await signOut()
+  try {
+    await signOut()
+  } catch {
+    // signOut failed — force navigate to login anyway
+  }
+  await router.push(RouteEnum.LOGIN.path)
 }
 </script>
