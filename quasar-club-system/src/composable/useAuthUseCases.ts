@@ -74,6 +74,7 @@ export function useAuthUseCases() {
       } else {
         authStore.setUser(null)
         authStore.setAdmin(false)
+        authStore.setTeamReady(false)
         router.push(RouteEnum.HOME.path)
         teamStore.clearData()
 

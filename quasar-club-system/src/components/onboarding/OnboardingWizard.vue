@@ -1,54 +1,47 @@
 <template>
-  <q-page class="flex flex-center q-pa-sm" style="min-height: inherit">
+  <q-page class="flex flex-center" style="min-height: inherit">
     <!-- Success screen (shown after team gained) -->
-    <div v-if="showSuccess" class="text-center q-pa-md">
-      <q-icon name="check_circle" color="positive" size="64px" />
+    <div v-if="showSuccess" class="text-center">
+      <q-icon name="check_circle" color="positive" size="80px" />
       <div class="text-h5 q-mt-md">{{ $t('onboarding.success.title') }}</div>
       <div class="text-body1 q-mt-sm text-grey-7">{{ $t('onboarding.success.subtitle') }}</div>
       <q-btn color="primary" :label="$t('onboarding.success.goToDashboard')" @click="goToDashboard" class="q-mt-lg" size="lg" />
     </div>
 
     <!-- Wizard stepper -->
-    <q-stepper
-      v-else
-      v-model="currentStep"
-      animated
-      flat
-      bordered
-      class="onboarding-stepper"
-    >
+    <q-stepper v-else v-model="currentStep" animated flat bordered style="max-width: 600px; width: 100%">
 
       <!-- Step 1: Welcome -->
       <q-step :name="1" :title="$t('onboarding.welcome.title')" icon="waving_hand" :done="currentStep > 1">
-        <div class="text-center q-py-sm">
-          <q-icon name="sports_soccer" size="56px" color="primary" class="q-mb-sm" />
-          <div class="text-h5 q-mb-sm">{{ $t('onboarding.welcome.heading') }}</div>
-          <div class="text-body1 text-grey-7 q-mb-md">{{ $t('onboarding.welcome.description') }}</div>
+        <div class="text-center q-py-md">
+          <q-icon name="sports_soccer" size="64px" color="primary" class="q-mb-md" />
+          <div class="text-h5 q-mb-md">{{ $t('onboarding.welcome.heading') }}</div>
+          <div class="text-body1 text-grey-7 q-mb-lg">{{ $t('onboarding.welcome.description') }}</div>
 
           <!-- Feature highlights: 3 icons with labels -->
-          <div class="row justify-center q-gutter-sm q-mb-sm">
-            <div class="col-auto text-center" style="min-width: 90px; max-width: 120px">
-              <q-icon name="how_to_vote" size="32px" color="primary" />
+          <div class="row justify-center q-gutter-md q-mb-md">
+            <div class="col-auto text-center" style="width: 120px">
+              <q-icon name="how_to_vote" size="36px" color="primary" />
               <div class="text-caption q-mt-xs">{{ $t('onboarding.welcome.feature1') }}</div>
             </div>
-            <div class="col-auto text-center" style="min-width: 90px; max-width: 120px">
-              <q-icon name="bar_chart" size="32px" color="primary" />
+            <div class="col-auto text-center" style="width: 120px">
+              <q-icon name="bar_chart" size="36px" color="primary" />
               <div class="text-caption q-mt-xs">{{ $t('onboarding.welcome.feature2') }}</div>
             </div>
-            <div class="col-auto text-center" style="min-width: 90px; max-width: 120px">
-              <q-icon name="groups" size="32px" color="primary" />
+            <div class="col-auto text-center" style="width: 120px">
+              <q-icon name="groups" size="36px" color="primary" />
               <div class="text-caption q-mt-xs">{{ $t('onboarding.welcome.feature3') }}</div>
             </div>
           </div>
         </div>
         <q-stepper-navigation>
-          <q-btn color="primary" :label="$t('onboarding.next')" @click="nextStep" class="full-width" />
+          <q-btn color="primary" :label="$t('onboarding.next')" @click="nextStep" />
         </q-stepper-navigation>
       </q-step>
 
       <!-- Step 2: Display Name -->
       <q-step :name="2" :title="$t('onboarding.displayName.title')" icon="person" :done="currentStep > 2">
-        <div class="q-py-sm">
+        <div class="q-py-md">
           <div class="text-body1 q-mb-md">{{ $t('onboarding.displayName.description') }}</div>
           <q-input
             v-model="displayName"
@@ -58,25 +51,25 @@
             class="q-mb-md"
           />
         </div>
-        <q-stepper-navigation class="row q-gutter-sm">
-          <q-btn color="primary" :label="$t('onboarding.next')" @click="nextStep" :loading="isLoading" class="col" />
-          <q-btn flat :label="$t('onboarding.back')" @click="prevStep" class="col-auto" />
+        <q-stepper-navigation>
+          <q-btn color="primary" :label="$t('onboarding.next')" @click="nextStep" :loading="isLoading" />
+          <q-btn flat :label="$t('onboarding.back')" @click="prevStep" class="q-ml-sm" />
         </q-stepper-navigation>
       </q-step>
 
       <!-- Step 3: Team Choice -->
       <q-step :name="3" :title="$t('onboarding.teamChoice.title')" icon="group_add">
-        <div class="q-py-sm">
+        <div class="q-py-md">
           <!-- Card selection (shown when no path selected) -->
-          <div v-if="!teamChoicePath" class="column q-gutter-sm items-center">
+          <div v-if="!teamChoicePath" class="row q-gutter-md justify-center">
             <q-card
               clickable
               @click="selectTeamPath('create')"
-              class="cursor-pointer team-choice-card"
+              class="col-12 col-sm-5 cursor-pointer"
               bordered
             >
               <q-card-section class="text-center q-pa-lg">
-                <q-icon name="add_circle" size="44px" color="primary" />
+                <q-icon name="add_circle" size="48px" color="primary" />
                 <div class="text-h6 q-mt-sm">{{ $t('onboarding.teamChoice.createTitle') }}</div>
                 <div class="text-body2 text-grey-7 q-mt-xs">{{ $t('onboarding.teamChoice.createDescription') }}</div>
               </q-card-section>
@@ -84,11 +77,11 @@
             <q-card
               clickable
               @click="selectTeamPath('browse')"
-              class="cursor-pointer team-choice-card"
+              class="col-12 col-sm-5 cursor-pointer"
               bordered
             >
               <q-card-section class="text-center q-pa-lg">
-                <q-icon name="search" size="44px" color="primary" />
+                <q-icon name="search" size="48px" color="primary" />
                 <div class="text-h6 q-mt-sm">{{ $t('onboarding.teamChoice.browseTitle') }}</div>
                 <div class="text-body2 text-grey-7 q-mt-xs">{{ $t('onboarding.teamChoice.browseDescription') }}</div>
               </q-card-section>
@@ -156,21 +149,3 @@ watch(
   }
 )
 </script>
-
-<style scoped>
-.onboarding-stepper {
-  max-width: 600px;
-  width: 100%;
-}
-
-.team-choice-card {
-  width: 100%;
-  max-width: 280px;
-}
-
-@media (min-width: 600px) {
-  .team-choice-card {
-    max-width: 240px;
-  }
-}
-</style>
