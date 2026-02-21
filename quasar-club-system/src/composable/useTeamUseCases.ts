@@ -2,19 +2,19 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { ITeam } from '@/interfaces/interfaces'
+import { notifyError } from '@/services/notificationService'
+import { FirestoreError } from '@/errors'
+import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
 export function useTeamUseCases() {
+  const log = createLogger('useTeamUseCases')
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
 
   const setTeamListener = (userId: string): Promise<void> => {
     return new Promise((resolve) => {
-      // Clear existing listener
-      if (teamStore.unsubscribeTeams) {
-        teamStore.unsubscribeTeams()
-      }
-
       let isFirstCallback = true
 
       // Set up new listener
@@ -31,23 +31,58 @@ export function useTeamUseCases() {
           authStore.setTeamReady(true)
           resolve()
         }
+      }, (error) => {
+        // Permission-denied: show user-visible notification (SEC-02)
+        log.error('Team listener permission denied', { userId, error: error.message })
+        notifyError('errors.firestore.permissionDenied', {
+          retry: false
+        })
+        // Still resolve the promise so app doesn't hang
+        if (isFirstCallback) {
+          isFirstCallback = false
+          authStore.setTeamReady(true)
+          resolve()
+        }
       })
 
-      // Store unsubscribe function
-      teamStore.setTeamsUnsubscribe(unsubscribe)
+      // Register with listener registry
+      listenerRegistry.register('teams', unsubscribe, { userId })
     })
   }
 
   const createTeam = async (teamName: string, userId: string): Promise<void> => {
-    return teamFirebase.createTeam(teamName, userId)
+    try {
+      return await teamFirebase.createTeam(teamName, userId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => createTeam(teamName, userId) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const deleteTeam = async (teamId: string): Promise<void> => {
-    await teamFirebase.deleteTeam(teamId)
-    // Clear currentTeam if the deleted team was selected
-    if (teamStore.currentTeam?.id === teamId) {
-      const remaining = teamStore.teams.filter(t => t.id !== teamId)
-      teamStore.setCurrentTeam(remaining.length > 0 ? remaining[0] : null)
+    try {
+      await teamFirebase.deleteTeam(teamId)
+      // Clear currentTeam if the deleted team was selected
+      if (teamStore.currentTeam?.id === teamId) {
+        const remaining = teamStore.teams.filter(t => t.id !== teamId)
+        teamStore.setCurrentTeam(remaining.length > 0 ? remaining[0] : null)
+      }
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        // NO retry for destructive operations
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
     }
   }
 
@@ -56,8 +91,21 @@ export function useTeamUseCases() {
   }
 
   const getTeamByIdAndSetCurrentTeam = async (teamId: string): Promise<void> => {
-    const team = await teamFirebase.getTeamById(teamId)
-    teamStore.setCurrentTeam(team)
+    try {
+      const team = await teamFirebase.getTeamById(teamId)
+      teamStore.setCurrentTeam(team)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => getTeamByIdAndSetCurrentTeam(teamId) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const clearTeamData = () => {

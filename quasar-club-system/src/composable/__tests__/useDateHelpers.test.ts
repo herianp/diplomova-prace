@@ -1,10 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
 import { useDateHelpers } from '../useDateHelpers'
 
 describe('useDateHelpers', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2025-10-15T12:00:00'))
+    setActivePinia(createPinia())
   })
 
   afterEach(() => {
@@ -79,11 +81,11 @@ describe('useDateHelpers', () => {
       expect(presets[0].key).toBe('season')
     })
 
-    it('season preset uses SEASON_CONFIG dates', () => {
+    it('season preset uses active season dates from store', () => {
       const { getDatePresets } = useDateHelpers()
       const presets = getDatePresets()
       const season = presets.find(p => p.key === 'season')
-      expect(season?.from).toBe('2025-07-13')
+      expect(season?.from).toBe('2025-07-01')
       expect(season?.to).toBe('2026-06-30')
     })
 
@@ -104,10 +106,10 @@ describe('useDateHelpers', () => {
   })
 
   describe('getSeasonDateRange', () => {
-    it('returns season date range from config', () => {
+    it('returns season date range from store', () => {
       const { getSeasonDateRange } = useDateHelpers()
       const range = getSeasonDateRange()
-      expect(range.from).toBe('2025-07-13')
+      expect(range.from).toBe('2025-07-01')
       expect(range.to).toBe('2026-06-30')
     })
   })

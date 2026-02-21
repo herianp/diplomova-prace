@@ -99,7 +99,9 @@ import { useReadiness } from '@/composable/useReadiness'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
 import { useSurveyMetrics } from '@/composable/useSurveyMetrics'
 import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('ReportsComponent')
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const { t } = useI18n()
@@ -150,7 +152,11 @@ const loadTeamMembersData = async () => {
   try {
     teamMembers.value = await loadTeamMembers(currentTeam.value.members)
   } catch (error) {
-    console.error('Error loading team members:', error)
+    log.error('Failed to load team members', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id,
+      memberCount: currentTeam.value?.members?.length
+    })
     teamMembers.value = []
   }
 }
@@ -177,7 +183,10 @@ const loadData = async () => {
 
     loading.value = false
   } catch (error) {
-    console.error('Error loading reports data:', error)
+    log.error('Failed to load reports data', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id
+    })
     loading.value = false
   }
 }

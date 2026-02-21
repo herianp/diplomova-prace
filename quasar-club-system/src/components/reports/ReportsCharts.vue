@@ -9,7 +9,7 @@
   <div v-else class="charts-grid">
     <div class="row q-gutter-lg">
       <!-- Survey Participation Chart (full width) -->
-      <div class="col-12">
+      <div class="col-12" ref="participationContainer">
         <q-card flat bordered class="chart-card q-mb-lg">
           <q-card-section>
             <div class="row items-center q-mb-md">
@@ -17,14 +17,15 @@
               <div class="text-subtitle1 text-weight-medium">{{ $t('reports.surveyParticipation') }}</div>
             </div>
             <div class="chart-container" style="height: 400px;">
-              <canvas ref="participationChart"></canvas>
+              <canvas v-if="participationVisible" ref="participationChart"></canvas>
+              <q-skeleton v-else type="rect" height="400px" />
             </div>
           </q-card-section>
         </q-card>
       </div>
 
       <!-- Survey Types Distribution (half) -->
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-md-6" ref="typesContainer">
         <q-card flat bordered class="chart-card">
           <q-card-section>
             <div class="row items-center q-mb-md">
@@ -32,14 +33,15 @@
               <div class="text-subtitle1 text-weight-medium">{{ $t('reports.surveyTypes') }}</div>
             </div>
             <div class="chart-container" style="height: 300px;">
-              <canvas ref="surveyTypesChart"></canvas>
+              <canvas v-if="typesVisible" ref="surveyTypesChart"></canvas>
+              <q-skeleton v-else type="rect" height="300px" />
             </div>
           </q-card-section>
         </q-card>
       </div>
 
       <!-- Monthly Attendance Trend (half) -->
-      <div class="col-12 col-md-6">
+      <div class="col-12 col-md-6" ref="trendContainer">
         <q-card flat bordered class="chart-card">
           <q-card-section>
             <div class="row items-center q-mb-md">
@@ -47,14 +49,15 @@
               <div class="text-subtitle1 text-weight-medium">{{ $t('reports.monthlyTrend') }}</div>
             </div>
             <div class="chart-container" style="height: 300px;">
-              <canvas ref="monthlyTrendChart"></canvas>
+              <canvas v-if="trendVisible" ref="monthlyTrendChart"></canvas>
+              <q-skeleton v-else type="rect" height="300px" />
             </div>
           </q-card-section>
         </q-card>
       </div>
 
       <!-- Player Attendance Ranking (full width) -->
-      <div class="col-12">
+      <div class="col-12" ref="rankingContainer">
         <q-card flat bordered class="chart-card">
           <q-card-section>
             <div class="row items-center q-mb-md">
@@ -62,7 +65,8 @@
               <div class="text-subtitle1 text-weight-medium">{{ $t('reports.playerRanking') }}</div>
             </div>
             <div class="chart-container" :style="{ height: rankingChartHeight }">
-              <canvas ref="playerRankingChart"></canvas>
+              <canvas v-if="rankingVisible" ref="playerRankingChart"></canvas>
+              <q-skeleton v-else type="rect" :height="rankingChartHeight" />
             </div>
           </q-card-section>
         </q-card>
@@ -75,6 +79,7 @@
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
+import { useChartLazyLoad } from '@/composables/useChartLazyLoad'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -133,6 +138,12 @@ const props = defineProps({
 })
 
 const { t } = useI18n()
+
+// Lazy load instances for each chart
+const { chartContainer: participationContainer, isVisible: participationVisible } = useChartLazyLoad()
+const { chartContainer: typesContainer, isVisible: typesVisible } = useChartLazyLoad()
+const { chartContainer: trendContainer, isVisible: trendVisible } = useChartLazyLoad()
+const { chartContainer: rankingContainer, isVisible: rankingVisible } = useChartLazyLoad()
 
 // Chart refs
 const participationChart = ref(null)
@@ -501,10 +512,11 @@ const createPlayerRankingChart = () => {
 const createAllCharts = async () => {
   await nextTick()
   await nextTick()
-  createParticipationChart()
-  createSurveyTypesChart()
-  createMonthlyTrendChart()
-  createPlayerRankingChart()
+  // Only create charts that are currently visible
+  if (participationVisible.value) createParticipationChart()
+  if (typesVisible.value) createSurveyTypesChart()
+  if (trendVisible.value) createMonthlyTrendChart()
+  if (rankingVisible.value) createPlayerRankingChart()
 }
 
 const destroyAllCharts = () => {
@@ -513,6 +525,35 @@ const destroyAllCharts = () => {
   })
   charts = {}
 }
+
+// Watch each chart's visibility - create chart when it enters viewport
+watch(participationVisible, async (visible) => {
+  if (visible && !props.loading && props.filteredSurveys.length > 0 && props.teamMembers.length > 0) {
+    await nextTick()
+    createParticipationChart()
+  }
+})
+
+watch(typesVisible, async (visible) => {
+  if (visible && !props.loading && props.filteredSurveys.length > 0 && props.teamMembers.length > 0) {
+    await nextTick()
+    createSurveyTypesChart()
+  }
+})
+
+watch(trendVisible, async (visible) => {
+  if (visible && !props.loading && props.filteredSurveys.length > 0 && props.teamMembers.length > 0) {
+    await nextTick()
+    createMonthlyTrendChart()
+  }
+})
+
+watch(rankingVisible, async (visible) => {
+  if (visible && !props.loading && props.filteredSurveys.length > 0 && props.teamMembers.length > 0) {
+    await nextTick()
+    createPlayerRankingChart()
+  }
+})
 
 // Watch loading state - create charts when loading finishes
 watch(() => props.loading, (newLoading, oldLoading) => {

@@ -1,7 +1,8 @@
-import { computed, ref, Ref } from 'vue'
+import { computed, Ref } from 'vue'
 import { DateTime } from 'luxon'
 import { ISurvey } from '@/interfaces/interfaces'
-import { SEASON_CONFIG } from '@/config/seasonConfig'
+import { useSeasonStore } from '@/stores/seasonStore'
+import { useFilterStore } from '@/stores/filterStore'
 
 export interface SurveyFilters {
   searchName: string
@@ -10,14 +11,33 @@ export interface SurveyFilters {
 }
 
 export function useSurveyFilters() {
-  // Default filter state with season dates
-  const defaultFilters: SurveyFilters = {
-    searchName: '',
-    dateFrom: SEASON_CONFIG.startDate,
-    dateTo: SEASON_CONFIG.endDate
-  }
+  const seasonStore = useSeasonStore()
+  const filterStore = useFilterStore()
 
-  const filters = ref<SurveyFilters>({ ...defaultFilters })
+  // Default filter state with season dates from store
+  const defaultFilters = computed<SurveyFilters>(() => ({
+    searchName: '',
+    dateFrom: seasonStore.activeSeason.startDate,
+    dateTo: seasonStore.activeSeason.endDate
+  }))
+
+  // Writable computed backed by filterStore — shared singleton
+  const filters = computed({
+    get: () => filterStore.filters,
+    set: (val: SurveyFilters) => {
+      filterStore.filters = val
+    }
+  })
+
+  /**
+   * Clamp a date within the active season boundaries
+   */
+  const clampToSeason = (date: string): string => {
+    const season = seasonStore.activeSeason
+    if (date < season.startDate) return season.startDate
+    if (date > season.endDate) return season.endDate
+    return date
+  }
 
   /**
    * Filter surveys based on search name and date range
@@ -66,7 +86,7 @@ export function useSurveyFilters() {
    */
   const createFilteredSurveys = (surveys: Ref<ISurvey[]>, customFilters?: Ref<SurveyFilters>) => {
     return computed(() => {
-      const surveysValue = Array.isArray(surveys.value) ? surveys.value : surveys
+      const surveysValue = surveys.value
       const filtersValue = customFilters?.value || filters.value
 
       const filtered = filterSurveys(surveysValue, filtersValue)
@@ -81,7 +101,7 @@ export function useSurveyFilters() {
    */
   const createRecentFilteredSurveys = (surveys: Ref<ISurvey[]>, limit = 5, customFilters?: Ref<SurveyFilters>) => {
     return computed(() => {
-      const surveysValue = Array.isArray(surveys.value) ? surveys.value : surveys
+      const surveysValue = surveys.value
       const filtersValue = customFilters?.value || filters.value
 
       const filtered = filterSurveys(surveysValue, filtersValue)
@@ -89,7 +109,7 @@ export function useSurveyFilters() {
       // Sort by creation date: newest first (descending order) and limit
       return filtered
         .slice()
-        .sort((a, b) => parseInt(b.createdDate) - parseInt(a.createdDate))
+        .sort((a, b) => parseInt(b.createdDate || '0') - parseInt(a.createdDate || '0'))
         .slice(0, limit)
     })
   }
@@ -98,36 +118,35 @@ export function useSurveyFilters() {
    * Apply date preset to filters
    */
   const applyDatePreset = (preset: { from: string; to: string }) => {
-    filters.value.dateFrom = preset.from
-    filters.value.dateTo = preset.to
+    filterStore.updateFilters({ dateFrom: preset.from, dateTo: preset.to })
   }
 
   /**
-   * Clear all filters
+   * Clear all filters - resets to season defaults
    */
   const clearFilters = () => {
-    filters.value = { ...defaultFilters }
+    filterStore.resetToSeason()
   }
 
   /**
    * Reset filters to default season dates
    */
   const resetToSeason = () => {
-    filters.value = { ...defaultFilters }
+    filterStore.resetToSeason()
   }
 
   /**
    * Set current date as dateTo (useful for "up to now" filters)
    */
   const setDateToNow = () => {
-    filters.value.dateTo = DateTime.now().toISODate()
+    filterStore.updateFilters({ dateTo: DateTime.now().toISODate() })
   }
 
   /**
    * Update filters (reactive)
    */
   const updateFilters = (newFilters: Partial<SurveyFilters>) => {
-    Object.assign(filters.value, newFilters)
+    filterStore.updateFilters(newFilters)
   }
 
   return {
@@ -140,9 +159,7 @@ export function useSurveyFilters() {
     clearFilters,
     resetToSeason,
     setDateToNow,
-    updateFilters
+    updateFilters,
+    clampToSeason
   }
 }
-
-// Re-export types for convenience
-export type { SurveyFilters }

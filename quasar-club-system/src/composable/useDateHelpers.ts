@@ -1,5 +1,5 @@
 ﻿import { DateTime } from "luxon";
-import { SEASON_CONFIG } from '@/config/seasonConfig';
+import { useSeasonStore } from '@/stores/seasonStore';
 
 interface DatePreset {
   key: string
@@ -62,13 +62,15 @@ export function useDateHelpers(locale = 'en') {
    */
   const getDatePresets = (t?: (key: string) => string): DatePreset[] => {
     const translateKey = t || ((key: string) => key)
+    const seasonStore = useSeasonStore()
+    const season = seasonStore.activeSeason
 
     return [
       {
         key: 'season',
         label: translateKey('reports.thisSeason'),
-        from: SEASON_CONFIG.startDate,
-        to: SEASON_CONFIG.endDate
+        from: season.startDate,
+        to: season.endDate
       },
       {
         key: 'thisMonth',
@@ -125,9 +127,11 @@ export function useDateHelpers(locale = 'en') {
    * Get seasonal date range (default for football season)
    */
   const getSeasonDateRange = () => {
+    const seasonStore = useSeasonStore()
+    const season = seasonStore.activeSeason
     return {
-      from: SEASON_CONFIG.startDate,
-      to: SEASON_CONFIG.endDate
+      from: season.startDate,
+      to: season.endDate
     }
   }
 

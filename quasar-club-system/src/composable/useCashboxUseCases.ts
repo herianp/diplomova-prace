@@ -2,9 +2,13 @@ import { useCashboxFirebase } from '@/services/cashboxFirebase'
 import { IFine, IFineRule, IPayment, IPlayerBalance, IVote, ICashboxHistoryEntry, FineRuleTrigger } from '@/interfaces/interfaces'
 import { SurveyTypes } from '@/enums/SurveyTypes'
 import { Unsubscribe } from 'firebase/firestore'
+import { notifyError } from '@/services/notificationService'
+import { FirestoreError } from '@/errors'
+import { useAuthStore } from '@/stores/authStore'
 
 export function useCashboxUseCases() {
   const cashboxFirebase = useCashboxFirebase()
+  const authStore = useAuthStore()
 
   // ============================================================
   // Listeners
@@ -27,15 +31,51 @@ export function useCashboxUseCases() {
   // ============================================================
 
   const addFineRule = async (teamId: string, rule: Omit<IFineRule, 'id'>): Promise<void> => {
-    return cashboxFirebase.addFineRule(teamId, rule)
+    try {
+      return await cashboxFirebase.addFineRule(teamId, rule)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => addFineRule(teamId, rule) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const updateFineRule = async (teamId: string, ruleId: string, data: Partial<IFineRule>): Promise<void> => {
-    return cashboxFirebase.updateFineRule(teamId, ruleId, data)
+    try {
+      return await cashboxFirebase.updateFineRule(teamId, ruleId, data)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => updateFineRule(teamId, ruleId, data) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   const deleteFineRule = async (teamId: string, ruleId: string): Promise<void> => {
-    return cashboxFirebase.deleteFineRule(teamId, ruleId)
+    try {
+      return await cashboxFirebase.deleteFineRule(teamId, ruleId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        // NO retry for destructive operations
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   // ============================================================
@@ -57,11 +97,46 @@ export function useCashboxUseCases() {
       createdBy,
       createdAt: new Date(),
     }
-    return cashboxFirebase.addFine(teamId, fine)
+    try {
+      const auditContext = authStore.user ? {
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown'
+      } : undefined
+
+      return await cashboxFirebase.addFine(teamId, fine, auditContext)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => addManualFine(teamId, playerId, amount, reason, createdBy) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
-  const deleteFine = async (teamId: string, fineId: string): Promise<void> => {
-    return cashboxFirebase.deleteFine(teamId, fineId)
+  const deleteFine = async (teamId: string, fineId: string, fine?: IFine): Promise<void> => {
+    try {
+      const auditContext = authStore.user && fine ? {
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown',
+        fineAmount: fine.amount,
+        fineReason: fine.reason
+      } : undefined
+
+      return await cashboxFirebase.deleteFine(teamId, fineId, auditContext)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        // NO retry for destructive operations
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   // ============================================================
@@ -82,7 +157,20 @@ export function useCashboxUseCases() {
       createdAt: new Date(),
       ...(note && { note }),
     }
-    return cashboxFirebase.addPayment(teamId, payment)
+    try {
+      return await cashboxFirebase.addPayment(teamId, payment)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
+        notifyError(error.message, {
+          retry: shouldRetry,
+          onRetry: shouldRetry ? () => recordPayment(teamId, playerId, amount, createdBy, note) : undefined
+        })
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   // ============================================================
@@ -170,7 +258,17 @@ export function useCashboxUseCases() {
   }
 
   const deletePayment = async (teamId: string, paymentId: string): Promise<void> => {
-    return cashboxFirebase.deletePayment(teamId, paymentId)
+    try {
+      return await cashboxFirebase.deletePayment(teamId, paymentId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        // NO retry for destructive operations
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
   }
 
   // ============================================================
@@ -281,7 +379,7 @@ export function useCashboxUseCases() {
       payments: payments.map((p) => ({
         playerId: p.playerId,
         amount: p.amount,
-        note: p.note,
+        note: p.note ?? '',
         createdAt: p.createdAt,
       })),
     }

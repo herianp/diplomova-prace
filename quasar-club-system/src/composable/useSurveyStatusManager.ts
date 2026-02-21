@@ -2,18 +2,20 @@ import { ref, computed, watch } from 'vue'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
-import { 
-  isSurveyExpired, 
-  getSurveyStatus, 
+import {
+  isSurveyExpired,
+  getSurveyStatus,
   getSurveysNeedingVerification,
-  needsVerification 
+  needsVerification
 } from '@/utils/surveyStatusUtils'
 import { ISurvey, SurveyStatus } from '@/interfaces/interfaces'
+import { createLogger } from 'src/utils/logger'
 
 /**
  * Composable for managing survey status and automated expiration checks
  */
 export function useSurveyStatusManager() {
+  const log = createLogger('useSurveyStatusManager')
   const teamStore = useTeamStore()
   const authStore = useAuthStore()
   const { updateSurveyStatus } = useSurveyUseCases()
@@ -26,9 +28,10 @@ export function useSurveyStatusManager() {
   const currentUser = computed(() => authStore.user)
   const currentTeam = computed(() => teamStore.currentTeam)
   const surveys = computed(() => teamStore.surveys || [])
-  const isPowerUser = computed(() => 
-    currentTeam.value?.powerusers?.includes(currentUser.value?.uid)
-  )
+  const isPowerUser = computed(() => {
+    const uid = currentUser.value?.uid
+    return uid ? (currentTeam.value?.powerusers?.includes(uid) ?? false) : false
+  })
   
   // Get surveys that need verification (for Power Users)
   const surveysNeedingVerification = computed(() => {
@@ -37,23 +40,26 @@ export function useSurveyStatusManager() {
   })
   
   // Get surveys by status
-  const activeSurveys = computed(() => 
-    surveys.value.filter(survey => 
-      getSurveyStatus(survey, isPowerUser.value) === SurveyStatus.ACTIVE
+  const activeSurveys = computed(() => {
+    const powerUser = isPowerUser.value
+    return surveys.value.filter(survey =>
+      getSurveyStatus(survey, powerUser) === SurveyStatus.ACTIVE
     )
-  )
-  
-  const awaitingVerificationSurveys = computed(() => 
-    surveys.value.filter(survey => 
-      getSurveyStatus(survey, isPowerUser.value) === SurveyStatus.AWAITING_VERIFICATION
+  })
+
+  const awaitingVerificationSurveys = computed(() => {
+    const powerUser = isPowerUser.value
+    return surveys.value.filter(survey =>
+      getSurveyStatus(survey, powerUser) === SurveyStatus.AWAITING_VERIFICATION
     )
-  )
-  
-  const closedSurveys = computed(() => 
-    surveys.value.filter(survey => 
-      getSurveyStatus(survey, isPowerUser.value) === SurveyStatus.CLOSED
+  })
+
+  const closedSurveys = computed(() => {
+    const powerUser = isPowerUser.value
+    return surveys.value.filter(survey =>
+      getSurveyStatus(survey, powerUser) === SurveyStatus.CLOSED
     )
-  )
+  })
   
   // Notification counts for Power Users
   const verificationNotificationCount = computed(() => 
@@ -86,14 +92,17 @@ export function useSurveyStatusManager() {
             await updateSurveyStatus(survey.id!, SurveyStatus.CLOSED)
           }
         } catch (error) {
-          console.error(`Failed to update status for survey ${survey.id}:`, error)
+          log.error('Failed to update survey status', {
+            error: error instanceof Error ? error.message : String(error),
+            surveyId: survey.id
+          })
         }
       }
-      
+
       lastExpirationCheck.value = new Date()
 
     } catch (error) {
-      console.error('Error processing expired surveys:', error)
+      log.error('Failed to process expired surveys', { error: error instanceof Error ? error.message : String(error) })
     } finally {
       isProcessingExpiration.value = false
     }
@@ -126,14 +135,16 @@ export function useSurveyStatusManager() {
    * Get survey status for a specific survey
    */
   const getStatusForSurvey = (survey: ISurvey): SurveyStatus => {
-    return getSurveyStatus(survey, isPowerUser.value)
+    const powerUser = isPowerUser.value
+    return getSurveyStatus(survey, powerUser)
   }
-  
+
   /**
    * Check if a specific survey needs verification
    */
   const surveyNeedsVerification = (survey: ISurvey): boolean => {
-    return isPowerUser.value && needsVerification(survey)
+    const powerUser = isPowerUser.value
+    return powerUser && needsVerification(survey)
   }
   
   /**
@@ -195,6 +206,7 @@ export function useSurveyStatusManager() {
 }
 
 // Helper to make refs readonly
-function readonly<T>(ref: any) {
-  return computed(() => ref.value)
+import type { Ref, DeepReadonly } from 'vue'
+function readonly<T>(ref: Ref<T>): DeepReadonly<Ref<T>> {
+  return computed(() => ref.value) as DeepReadonly<Ref<T>>
 }

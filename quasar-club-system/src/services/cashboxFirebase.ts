@@ -11,21 +11,35 @@ import {
   getDocs,
 } from 'firebase/firestore'
 import { IFineRule, IFine, IPayment, ICashboxHistoryEntry } from '@/interfaces/interfaces'
+import { mapFirestoreError } from '@/errors/errorMapper'
+import { FirestoreError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+import { useAuditLogFirebase } from '@/services/auditLogFirebase'
+
+const log = createLogger('cashboxFirebase')
 
 export function useCashboxFirebase() {
   // ============================================================
   // Fine Rules
   // ============================================================
 
-  const listenToFineRules = (teamId: string, callback: (rules: IFineRule[]) => void): Unsubscribe => {
+  const listenToFineRules = (
+    teamId: string,
+    callback: (rules: IFineRule[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const rulesRef = collection(doc(db, 'teams', teamId), 'fineRules')
     return onSnapshot(rulesRef, (snapshot) => {
       const rules = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFineRule[]
       callback(rules)
     }, (error) => {
-      console.error('Error in fineRules listener:', error)
-      if (error.code === 'permission-denied') {
-        callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('FineRules listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
       }
     })
   }
@@ -35,8 +49,9 @@ export function useCashboxFirebase() {
       const rulesRef = collection(doc(db, 'teams', teamId), 'fineRules')
       const snapshot = await getDocs(rulesRef)
       return snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFineRule[]
-    } catch (error) {
-      console.error('Error loading fine rules:', error)
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Failed to load fine rules', { teamId, error: firestoreError.message })
       return []
     }
   }
@@ -44,27 +59,30 @@ export function useCashboxFirebase() {
   const addFineRule = async (teamId: string, rule: Omit<IFineRule, 'id'>): Promise<void> => {
     try {
       await addDoc(collection(doc(db, 'teams', teamId), 'fineRules'), rule)
-    } catch (error) {
-      console.error('Error adding fine rule:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to add fine rule', { teamId, ruleName: rule.name, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
   const updateFineRule = async (teamId: string, ruleId: string, data: Partial<IFineRule>): Promise<void> => {
     try {
       await updateDoc(doc(db, 'teams', teamId, 'fineRules', ruleId), data)
-    } catch (error) {
-      console.error('Error updating fine rule:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to update fine rule', { teamId, ruleId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
   const deleteFineRule = async (teamId: string, ruleId: string): Promise<void> => {
     try {
       await deleteDoc(doc(db, 'teams', teamId, 'fineRules', ruleId))
-    } catch (error) {
-      console.error('Error deleting fine rule:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      log.error('Failed to delete fine rule', { teamId, ruleId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
@@ -72,34 +90,82 @@ export function useCashboxFirebase() {
   // Fines
   // ============================================================
 
-  const listenToFines = (teamId: string, callback: (fines: IFine[]) => void): Unsubscribe => {
+  const listenToFines = (
+    teamId: string,
+    callback: (fines: IFine[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const finesRef = collection(doc(db, 'teams', teamId), 'fines')
     return onSnapshot(finesRef, (snapshot) => {
       const fines = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFine[]
       callback(fines)
     }, (error) => {
-      console.error('Error in fines listener:', error)
-      if (error.code === 'permission-denied') {
-        callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Fines listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
       }
     })
   }
 
-  const addFine = async (teamId: string, fine: Omit<IFine, 'id'>): Promise<void> => {
+  const addFine = async (
+    teamId: string,
+    fine: Omit<IFine, 'id'>,
+    auditContext?: { actorUid: string; actorDisplayName: string }
+  ): Promise<void> => {
     try {
       await addDoc(collection(doc(db, 'teams', teamId), 'fines'), fine)
-    } catch (error) {
-      console.error('Error adding fine:', error)
-      throw error
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId,
+          operation: 'fine.create',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: fine.playerId,
+          entityType: 'fine',
+          after: { amount: fine.amount, reason: fine.reason, source: fine.source }
+        })
+      }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to add fine', { teamId, playerId: fine.playerId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
-  const deleteFine = async (teamId: string, fineId: string): Promise<void> => {
+  const deleteFine = async (
+    teamId: string,
+    fineId: string,
+    auditContext?: { actorUid: string; actorDisplayName: string; fineAmount?: number; fineReason?: string }
+  ): Promise<void> => {
     try {
       await deleteDoc(doc(db, 'teams', teamId, 'fines', fineId))
-    } catch (error) {
-      console.error('Error deleting fine:', error)
-      throw error
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId,
+          operation: 'fine.delete',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: fineId,
+          entityType: 'fine',
+          before: auditContext.fineAmount ? { amount: auditContext.fineAmount, reason: auditContext.fineReason } : undefined
+        })
+      }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      log.error('Failed to delete fine', { teamId, fineId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
@@ -115,9 +181,10 @@ export function useCashboxFirebase() {
         })
         await batch.commit()
       }
-    } catch (error) {
-      console.error('Error bulk adding fines:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to bulk add fines', { teamId, count: fines.length, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
@@ -125,15 +192,23 @@ export function useCashboxFirebase() {
   // Payments
   // ============================================================
 
-  const listenToPayments = (teamId: string, callback: (payments: IPayment[]) => void): Unsubscribe => {
+  const listenToPayments = (
+    teamId: string,
+    callback: (payments: IPayment[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const paymentsRef = collection(doc(db, 'teams', teamId), 'payments')
     return onSnapshot(paymentsRef, (snapshot) => {
       const payments = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IPayment[]
       callback(payments)
     }, (error) => {
-      console.error('Error in payments listener:', error)
-      if (error.code === 'permission-denied') {
-        callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Payments listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
       }
     })
   }
@@ -141,18 +216,20 @@ export function useCashboxFirebase() {
   const deletePayment = async (teamId: string, paymentId: string): Promise<void> => {
     try {
       await deleteDoc(doc(db, 'teams', teamId, 'payments', paymentId))
-    } catch (error) {
-      console.error('Error deleting payment:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      log.error('Failed to delete payment', { teamId, paymentId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
   const addPayment = async (teamId: string, payment: Omit<IPayment, 'id'>): Promise<void> => {
     try {
       await addDoc(collection(doc(db, 'teams', teamId), 'payments'), payment)
-    } catch (error) {
-      console.error('Error adding payment:', error)
-      throw error
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to add payment', { teamId, playerId: payment.playerId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
@@ -161,33 +238,51 @@ export function useCashboxFirebase() {
   // ============================================================
 
   const deleteAllFines = async (teamId: string): Promise<void> => {
-    const finesRef = collection(doc(db, 'teams', teamId), 'fines')
-    const snapshot = await getDocs(finesRef)
-    for (let i = 0; i < snapshot.docs.length; i += 499) {
-      const batch = writeBatch(db)
-      snapshot.docs.slice(i, i + 499).forEach((d) => batch.delete(d.ref))
-      await batch.commit()
+    try {
+      const finesRef = collection(doc(db, 'teams', teamId), 'fines')
+      const snapshot = await getDocs(finesRef)
+      for (let i = 0; i < snapshot.docs.length; i += 499) {
+        const batch = writeBatch(db)
+        snapshot.docs.slice(i, i + 499).forEach((d) => batch.delete(d.ref))
+        await batch.commit()
+      }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      log.error('Failed to delete all fines', { teamId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
   const deleteAllPayments = async (teamId: string): Promise<void> => {
-    const paymentsRef = collection(doc(db, 'teams', teamId), 'payments')
-    const snapshot = await getDocs(paymentsRef)
-    for (let i = 0; i < snapshot.docs.length; i += 499) {
-      const batch = writeBatch(db)
-      snapshot.docs.slice(i, i + 499).forEach((d) => batch.delete(d.ref))
-      await batch.commit()
+    try {
+      const paymentsRef = collection(doc(db, 'teams', teamId), 'payments')
+      const snapshot = await getDocs(paymentsRef)
+      for (let i = 0; i < snapshot.docs.length; i += 499) {
+        const batch = writeBatch(db)
+        snapshot.docs.slice(i, i + 499).forEach((d) => batch.delete(d.ref))
+        await batch.commit()
+      }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      log.error('Failed to delete all payments', { teamId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
   const bulkAddPayments = async (teamId: string, payments: Omit<IPayment, 'id'>[]): Promise<void> => {
-    const paymentsRef = collection(doc(db, 'teams', teamId), 'payments')
-    for (let i = 0; i < payments.length; i += 499) {
-      const batch = writeBatch(db)
-      payments.slice(i, i + 499).forEach((payment) => {
-        batch.set(doc(paymentsRef), payment)
-      })
-      await batch.commit()
+    try {
+      const paymentsRef = collection(doc(db, 'teams', teamId), 'payments')
+      for (let i = 0; i < payments.length; i += 499) {
+        const batch = writeBatch(db)
+        payments.slice(i, i + 499).forEach((payment) => {
+          batch.set(doc(paymentsRef), payment)
+        })
+        await batch.commit()
+      }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to bulk add payments', { teamId, count: payments.length, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
@@ -196,10 +291,20 @@ export function useCashboxFirebase() {
   // ============================================================
 
   const addCashboxHistoryEntry = async (teamId: string, entry: Omit<ICashboxHistoryEntry, 'id'>): Promise<void> => {
-    await addDoc(collection(doc(db, 'teams', teamId), 'cashboxHistory'), entry)
+    try {
+      await addDoc(collection(doc(db, 'teams', teamId), 'cashboxHistory'), entry)
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to add cashbox history entry', { teamId, error: firestoreError.message })
+      throw firestoreError
+    }
   }
 
-  const listenToCashboxHistory = (teamId: string, callback: (entries: ICashboxHistoryEntry[]) => void): Unsubscribe => {
+  const listenToCashboxHistory = (
+    teamId: string,
+    callback: (entries: ICashboxHistoryEntry[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
     const historyRef = collection(doc(db, 'teams', teamId), 'cashboxHistory')
     return onSnapshot(historyRef, (snapshot) => {
       const entries = snapshot.docs
@@ -211,9 +316,13 @@ export function useCashboxFirebase() {
       })
       callback(entries)
     }, (error) => {
-      console.error('Error in cashboxHistory listener:', error)
-      if (error.code === 'permission-denied') {
-        callback([])
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('CashboxHistory listener failed', { teamId, code: error.code, error: firestoreError.message })
+
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([]) // Graceful degradation for transient errors
       }
     })
   }

@@ -138,7 +138,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
 import { useNotificationFirebase } from '@/services/notificationFirebase'
+import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('NotificationsDropdown')
 const authStore = useAuthStore()
 const $q = useQuasar()
 const { t } = useI18n()
@@ -149,7 +152,6 @@ const notificationFirebase = useNotificationFirebase()
 const notifications = ref([])
 const loading = ref(true)
 const showDropdown = ref(false)
-let unsubscribe = null
 
 // Computed
 const currentUser = computed(() => authStore.user)
@@ -166,13 +168,10 @@ const loadNotifications = async () => {
     return
   }
 
-  // Clean up previous subscription
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 
   try {
-    unsubscribe = notificationFirebase.listenToNotifications(
+    const unsubscribe = notificationFirebase.listenToNotifications(
       currentUser.value.uid,
       10,
       (notifs) => {
@@ -183,13 +182,22 @@ const loadNotifications = async () => {
         })
         loading.value = false
       },
-      () => {
+      (error) => {
+        log.error('Notification listener failed', {
+          error: error instanceof Error ? error.message : String(error),
+          userId: currentUser.value.uid
+        })
         notifications.value = []
         loading.value = false
       }
     )
+
+    listenerRegistry.register('notifications', unsubscribe, { userId: currentUser.value.uid })
   } catch (error) {
-    console.error('Error setting up notifications listener:', error)
+    log.error('Failed to setup notifications listener', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: currentUser.value?.uid
+    })
     notifications.value = []
     loading.value = false
   }
@@ -231,7 +239,11 @@ const handleInvitationResponse = async (notification, response) => {
     })
 
   } catch (error) {
-    console.error('Error responding to invitation:', error)
+    log.error('Failed to respond to invitation', {
+      error: error instanceof Error ? error.message : String(error),
+      notificationId: notification.id,
+      response
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.invitation.error'),
@@ -244,13 +256,17 @@ const markAsRead = async (notificationId) => {
   try {
     await notificationFirebase.markNotificationAsRead(notificationId)
   } catch (error) {
-    console.error('Error marking notification as read:', error)
+    log.error('Failed to mark notification as read', {
+      error: error instanceof Error ? error.message : String(error),
+      notificationId
+    })
   }
 }
 
 const markAllAsRead = async () => {
+  const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
+
   try {
-    const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
     await notificationFirebase.markAllNotificationsAsRead(unreadIds)
 
     $q.notify({
@@ -260,7 +276,10 @@ const markAllAsRead = async () => {
     })
 
   } catch (error) {
-    console.error('Error marking all as read:', error)
+    log.error('Failed to mark all as read', {
+      error: error instanceof Error ? error.message : String(error),
+      count: unreadIds.length
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.markReadError'),
@@ -312,10 +331,7 @@ watch(currentUser, (newUser, oldUser) => {
   } else if (!newUser?.uid) {
     notifications.value = []
     loading.value = false
-    if (unsubscribe) {
-      unsubscribe()
-      unsubscribe = null
-    }
+    listenerRegistry.unregister('notifications')
   }
 })
 
@@ -324,9 +340,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 })
 </script>
 

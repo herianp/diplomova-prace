@@ -16,6 +16,11 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { INotification } from '@/interfaces/interfaces'
+import { mapFirestoreError } from '@/errors/errorMapper'
+import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('notificationFirebase')
 
 export function useNotificationFirebase() {
   /**
@@ -41,8 +46,9 @@ export function useNotificationFirebase() {
       const last = snapshot.docs[snapshot.docs.length - 1] || null
       onData(notifications, last)
     }, (error) => {
-      console.error('Error loading notifications:', error)
-      if (onError) onError(error as Error)
+      const listenerError = new ListenerError('notifications', 'errors.listener.failed', { code: error.code })
+      log.error('Notifications listener failed', { userId, code: error.code, error: listenerError.message })
+      if (onError) onError(listenerError)
     })
   }
 
@@ -54,23 +60,29 @@ export function useNotificationFirebase() {
     lastDoc: DocumentSnapshot,
     pageSize: number
   ): Promise<{ notifications: INotification[], lastDoc: DocumentSnapshot | null, hasMore: boolean }> => {
-    const moreQuery = query(
-      collection(db, 'notifications'),
-      where('userId', '==', userId),
-      startAfter(lastDoc),
-      limit(pageSize)
-    )
+    try {
+      const moreQuery = query(
+        collection(db, 'notifications'),
+        where('userId', '==', userId),
+        startAfter(lastDoc),
+        limit(pageSize)
+      )
 
-    const snapshot = await getDocs(moreQuery)
-    const notifications = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as INotification[]
+      const snapshot = await getDocs(moreQuery)
+      const notifications = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as INotification[]
 
-    return {
-      notifications,
-      lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
-      hasMore: snapshot.docs.length === pageSize
+      return {
+        notifications,
+        lastDoc: snapshot.docs[snapshot.docs.length - 1] || null,
+        hasMore: snapshot.docs.length === pageSize
+      }
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Failed to load more notifications', { userId, error: firestoreError.message })
+      throw firestoreError
     }
   }
 
@@ -78,27 +90,39 @@ export function useNotificationFirebase() {
    * Mark a single notification as read
    */
   const markNotificationAsRead = async (notificationId: string): Promise<void> => {
-    await updateDoc(doc(db, 'notifications', notificationId), {
-      read: true,
-      readAt: new Date()
-    })
+    try {
+      await updateDoc(doc(db, 'notifications', notificationId), {
+        read: true,
+        readAt: new Date()
+      })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to mark notification as read', { notificationId, error: firestoreError.message })
+      throw firestoreError
+    }
   }
 
   /**
    * Mark multiple notifications as read (batch)
    */
   const markAllNotificationsAsRead = async (notificationIds: string[]): Promise<void> => {
-    const batch = writeBatch(db)
+    try {
+      const batch = writeBatch(db)
 
-    notificationIds.forEach(id => {
-      const notificationRef = doc(db, 'notifications', id)
-      batch.update(notificationRef, {
-        read: true,
-        readAt: new Date()
+      notificationIds.forEach(id => {
+        const notificationRef = doc(db, 'notifications', id)
+        batch.update(notificationRef, {
+          read: true,
+          readAt: new Date()
+        })
       })
-    })
 
-    await batch.commit()
+      await batch.commit()
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to mark all notifications as read', { count: notificationIds.length, error: firestoreError.message })
+      throw firestoreError
+    }
   }
 
   /**
@@ -109,42 +133,59 @@ export function useNotificationFirebase() {
     response: 'accepted' | 'declined',
     currentUserId: string
   ): Promise<void> => {
-    const batch = writeBatch(db)
+    try {
+      const batch = writeBatch(db)
 
-    // Update the team invitation
-    const invitationRef = doc(db, 'teamInvitations', notification.invitationId!)
-    batch.update(invitationRef, {
-      status: response,
-      respondedAt: new Date()
-    })
-
-    if (response === 'accepted') {
-      // Add user to team
-      const teamRef = doc(db, 'teams', notification.teamId!)
-      batch.update(teamRef, {
-        members: arrayUnion(currentUserId)
+      // Update the team invitation
+      const invitationRef = doc(db, 'teamInvitations', notification.invitationId!)
+      batch.update(invitationRef, {
+        status: response,
+        respondedAt: new Date()
       })
+
+      if (response === 'accepted') {
+        // Add user to team
+        const teamRef = doc(db, 'teams', notification.teamId!)
+        batch.update(teamRef, {
+          members: arrayUnion(currentUserId)
+        })
+      }
+
+      // Update notification
+      const notificationRef = doc(db, 'notifications', notification.id!)
+      batch.update(notificationRef, {
+        status: response,
+        read: true
+      })
+
+      await batch.commit()
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to respond to invitation', {
+        invitationId: notification.invitationId,
+        teamId: notification.teamId,
+        response,
+        error: firestoreError.message
+      })
+      throw firestoreError
     }
-
-    // Update notification
-    const notificationRef = doc(db, 'notifications', notification.id!)
-    batch.update(notificationRef, {
-      status: response,
-      read: true
-    })
-
-    await batch.commit()
   }
 
   /**
    * Create a new notification
    */
   const createNotification = async (notification: Partial<INotification>): Promise<void> => {
-    await addDoc(collection(db, 'notifications'), {
-      ...notification,
-      read: false,
-      createdAt: new Date()
-    })
+    try {
+      await addDoc(collection(db, 'notifications'), {
+        ...notification,
+        read: false,
+        createdAt: new Date()
+      })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to create notification', { type: notification.type, userId: notification.userId, error: firestoreError.message })
+      throw firestoreError
+    }
   }
 
   return {

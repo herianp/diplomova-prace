@@ -21,6 +21,24 @@ service cloud.firestore {
       allow update: if canTeamExistsAndIsUserAuthenticated(resource.data.teamId) &&
       	isTeamMember(resource.data.teamId) &&
         request.resource.data.votes != null; //todo
+
+      // Subcollection: votes - team members can read all votes and write their own
+      match /votes/{voteId} {
+        // Team members can read all votes for surveys they can access
+        allow read: if request.auth != null &&
+          isTeamMember(get(/databases/$(database)/documents/surveys/$(surveyId)).data.teamId);
+
+        // Team members can create/update their own vote (voteId must equal auth UID)
+        allow create, update: if request.auth != null &&
+          voteId == request.auth.uid &&
+          isTeamMember(get(/databases/$(database)/documents/surveys/$(surveyId)).data.teamId);
+
+        // Power users have full access to votes
+        allow read, write, delete: if isPowerUserForTeam(get(/databases/$(database)/documents/surveys/$(surveyId)).data.teamId);
+
+        // App admin full access
+        allow read, delete: if isAppAdmin();
+      }
     }
 
     // Helper function to check if the user is a global app admin
@@ -120,6 +138,22 @@ service cloud.firestore {
           get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
         allow read, delete: if isAppAdmin();
       }
+
+      // Subcollection: audit logs - power users read, authenticated create
+      match /auditLogs/{logId} {
+        // Power users can read audit logs for their team
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+
+        // Authenticated team members can create audit logs (system creates during operations)
+        // Validates: teamId matches parent, actorUid matches authenticated user
+        allow create: if request.auth != null &&
+          request.resource.data.teamId == teamId &&
+          request.resource.data.actorUid == request.auth.uid;
+
+        // App admin full access
+        allow read, delete: if isAppAdmin();
+      }
     }
     
     // Secure access to the 'users' collection - users can only access their own data
@@ -196,6 +230,9 @@ service cloud.firestore {
         resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
         (get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid || isAppAdmin());
+
+      // Allow app admin to read any message
+      allow read: if isAppAdmin();
     }
     
     

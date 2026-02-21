@@ -62,26 +62,32 @@
 
       <!-- Charts Section -->
       <div class="row q-col-gutter-md">
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6" ref="votingContainer">
           <q-card flat bordered>
             <q-card-section>
               <div class="row items-center q-mb-md">
                 <q-icon name="bar_chart" size="sm" color="primary" class="q-mr-sm" />
                 <div class="text-subtitle1 text-weight-medium">{{ $t('dashboard.votingTrends') }}</div>
               </div>
-              <VotingChart :surveys="filteredRecentSurveys" :user-uid="currentUser?.uid" />
+              <template v-if="votingVisible">
+                <VotingChart :surveys="filteredRecentSurveys" :user-uid="currentUser?.uid" />
+              </template>
+              <q-skeleton v-else type="rect" height="200px" />
             </q-card-section>
           </q-card>
         </div>
 
-        <div class="col-12 col-md-6">
+        <div class="col-12 col-md-6" ref="typesContainer">
           <q-card flat bordered>
             <q-card-section>
               <div class="row items-center q-mb-md">
                 <q-icon name="donut_large" size="sm" color="primary" class="q-mr-sm" />
                 <div class="text-subtitle1 text-weight-medium">{{ $t('dashboard.surveyTypes') }}</div>
               </div>
-              <SurveyTypesChart :surveys="filteredSurveys" />
+              <template v-if="typesVisible">
+                <SurveyTypesChart :surveys="filteredSurveys" />
+              </template>
+              <q-skeleton v-else type="rect" height="200px" />
             </q-card-section>
           </q-card>
         </div>
@@ -103,13 +109,20 @@ import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
+import { createLogger } from 'src/utils/logger'
+import { useChartLazyLoad } from '@/composables/useChartLazyLoad'
 
+const log = createLogger('DashboardComponent')
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const { waitForTeam } = useReadiness()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
 const { filters, createFilteredSurveys, createRecentFilteredSurveys, updateFilters } = useSurveyFilters()
+
+// Lazy load chart sections
+const { chartContainer: votingContainer, isVisible: votingVisible } = useChartLazyLoad()
+const { chartContainer: typesContainer, isVisible: typesVisible } = useChartLazyLoad()
 
 const isLoading = ref(false)
 
@@ -133,7 +146,10 @@ const refreshData = async () => {
       setSurveysListener(currentTeam.value.id)
     }
   } catch (error) {
-    console.error('Error refreshing dashboard data:', error)
+    log.error('Failed to refresh dashboard data', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id
+    })
   } finally {
     isLoading.value = false
   }

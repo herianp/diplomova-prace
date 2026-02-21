@@ -1,8 +1,10 @@
 import { ref, computed } from 'vue'
 import { useAdminUseCases, IAdminOverviewStats } from '@/composable/useAdminUseCases'
 import { ITeam, IUser, ISurvey } from '@/interfaces/interfaces'
+import { createLogger } from 'src/utils/logger'
 
 export function useAdminComposable() {
+  const log = createLogger('useAdminComposable')
   const adminUseCases = useAdminUseCases()
 
   const allTeams = ref<ITeam[]>([])
@@ -77,7 +79,7 @@ export function useAdminComposable() {
       allUsers.value = users
       allSurveys.value = surveys
     } catch (error) {
-      console.error('Error loading admin data:', error)
+      log.error('Failed to load admin data', { error: error instanceof Error ? error.message : String(error) })
       loadError.value = (error as Error).message
     } finally {
       isLoading.value = false

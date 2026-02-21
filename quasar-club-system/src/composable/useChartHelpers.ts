@@ -117,7 +117,7 @@ export function useChartHelpers() {
         const config: ChartConfiguration = {
           type,
           data,
-          options: { ...defaultOptions, ...options }
+          options: { ...defaultOptions, ...options } as any
         }
 
         chartInstance.value = new ChartJS(canvasRef.value, config)
@@ -128,7 +128,7 @@ export function useChartHelpers() {
       if (chartInstance.value) {
         chartInstance.value.data = newData
         if (newOptions) {
-          chartInstance.value.options = { ...chartInstance.value.options, ...newOptions }
+          chartInstance.value.options = { ...chartInstance.value.options, ...newOptions } as any
         }
         chartInstance.value.update()
       }

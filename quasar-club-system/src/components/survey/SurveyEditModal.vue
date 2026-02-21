@@ -128,6 +128,9 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('SurveyEditModal')
 
 const props = defineProps({
   survey: {
@@ -189,6 +192,15 @@ const handleUpdate = async () => {
       date: formData.value.date,
       time: formData.value.time,
       type: formData.value.type
+    }, {
+      teamId: props.survey.teamId,
+      before: {
+        title: props.survey.title,
+        description: props.survey.description,
+        date: props.survey.date,
+        time: props.survey.time,
+        type: props.survey.type
+      }
     })
     
     $q.notify({
@@ -199,9 +211,13 @@ const handleUpdate = async () => {
     
     emits('updated')
     emits('close')
-    
+
   } catch (err) {
-    console.error('Error updating survey:', err)
+    log.error('Failed to update survey', {
+      error: err instanceof Error ? err.message : String(err),
+      surveyId: props.survey.id,
+      title: formData.value.title
+    })
     error.value = t('survey.updateError')
     
     $q.notify({
@@ -232,9 +248,12 @@ const handleDelete = async () => {
     
     emits('deleted')
     emits('close')
-    
+
   } catch (err) {
-    console.error('Error deleting survey:', err)
+    log.error('Failed to delete survey', {
+      error: err instanceof Error ? err.message : String(err),
+      surveyId: props.survey.id
+    })
     error.value = t('survey.deleteError')
     
     $q.notify({

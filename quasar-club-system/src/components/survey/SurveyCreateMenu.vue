@@ -29,6 +29,9 @@
 <script setup>
 import { ref } from 'vue'
 import SurveyForm from '@/components/modal/SurveyForm.vue'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('SurveyCreateMenu')
 
 // Props
 defineProps({
@@ -53,7 +56,10 @@ const handleSurveySubmit = async (payload) => {
     // Close expansion after successful creation
     expanded.value = false
   } catch (error) {
-    console.error('Error creating survey:', error)
+    log.error('Failed to create survey', {
+      error: error instanceof Error ? error.message : String(error),
+      title: payload.title
+    })
   } finally {
     isSubmitting.value = false
   }

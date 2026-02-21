@@ -7,7 +7,8 @@ import { fileURLToPath, URL } from 'node:url'
 export default defineConfig((ctx) => {
   return {
     boot: [
-      'i18n'
+      'i18n',
+      'errorHandler'
     ],
     css: [
       'app.scss'
