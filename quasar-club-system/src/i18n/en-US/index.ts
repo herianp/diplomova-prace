@@ -5,6 +5,11 @@ export default {
   app: {
     title: "Club Manager"
   },
+  season: {
+    selector: "Select Season",
+    label: "Season",
+    current: "Current season"
+  },
   survey: {
     title: "Surveys",
     create: "Create Survey",

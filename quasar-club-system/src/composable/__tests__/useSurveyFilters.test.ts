@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ref } from 'vue'
+import { setActivePinia, createPinia } from 'pinia'
 import { useSurveyFilters } from '../useSurveyFilters'
 import { ISurvey } from '@/interfaces/interfaces'
 import { SurveyTypes } from '@/enums/SurveyTypes'
@@ -23,6 +24,8 @@ describe('useSurveyFilters', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2025-10-15T12:00:00'))
+    localStorage.removeItem('sharedFilters')
+    setActivePinia(createPinia())
   })
 
   afterEach(() => {
@@ -32,7 +35,7 @@ describe('useSurveyFilters', () => {
   describe('default filters', () => {
     it('has season date range as defaults', () => {
       const { filters } = useSurveyFilters()
-      expect(filters.value.dateFrom).toBe('2025-07-13')
+      expect(filters.value.dateFrom).toBe('2025-07-01')
       expect(filters.value.dateTo).toBe('2026-06-30')
       expect(filters.value.searchName).toBe('')
     })
@@ -73,7 +76,7 @@ describe('useSurveyFilters', () => {
       const { filterSurveys } = useSurveyFilters()
       const result = filterSurveys(surveys, {
         searchName: 'training',
-        dateFrom: '2025-07-13',
+        dateFrom: '2025-07-01',
         dateTo: '2025-12-31'
       })
       expect(result).toHaveLength(2)
@@ -128,7 +131,7 @@ describe('useSurveyFilters', () => {
       filters.value.dateFrom = '2025-01-01'
       clearFilters()
       expect(filters.value.searchName).toBe('')
-      expect(filters.value.dateFrom).toBe('2025-07-13')
+      expect(filters.value.dateFrom).toBe('2025-07-01')
       expect(filters.value.dateTo).toBe('2026-06-30')
     })
   })
@@ -147,7 +150,7 @@ describe('useSurveyFilters', () => {
       updateFilters({ searchName: 'new search' })
       expect(filters.value.searchName).toBe('new search')
       // Other filters unchanged
-      expect(filters.value.dateFrom).toBe('2025-07-13')
+      expect(filters.value.dateFrom).toBe('2025-07-01')
     })
   })
 

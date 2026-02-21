@@ -379,7 +379,7 @@ export function useCashboxUseCases() {
       payments: payments.map((p) => ({
         playerId: p.playerId,
         amount: p.amount,
-        note: p.note,
+        note: p.note ?? '',
         createdAt: p.createdAt,
       })),
     }

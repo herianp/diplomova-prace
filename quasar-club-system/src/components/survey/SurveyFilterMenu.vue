@@ -116,6 +116,9 @@
       <q-date
         v-model="tempDateFrom"
         mask="YYYY-MM-DD"
+        :navigation-min-year-month="seasonNavMin"
+        :navigation-max-year-month="seasonNavMax"
+        :options="dateFromOptions"
         @update:model-value="onDateFromSelect"
       >
         <div class="row items-center justify-end q-gutter-sm">
@@ -130,6 +133,9 @@
       <q-date
         v-model="tempDateTo"
         mask="YYYY-MM-DD"
+        :navigation-min-year-month="seasonNavMin"
+        :navigation-max-year-month="seasonNavMax"
+        :options="dateToOptions"
         @update:model-value="onDateToSelect"
       >
         <div class="row items-center justify-end q-gutter-sm">
@@ -145,9 +151,11 @@
 import { ref, reactive, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useDateHelpers } from '@/composable/useDateHelpers'
+import { useSeasonStore } from '@/stores/seasonStore'
 
 const { t } = useI18n()
 const { getDatePresets } = useDateHelpers()
+const seasonStore = useSeasonStore()
 
 // Props
 const props = defineProps({
@@ -179,7 +187,31 @@ const localFilters = reactive({
 })
 
 // Date presets using the new helper
-const datePresets = computed(() => getDatePresets(t))
+const datePresets = computed(() => {
+  const season = seasonStore.activeSeason
+  return getDatePresets(t).filter(p => {
+    // Hide presets that fall entirely outside the active season
+    return p.to >= season.startDate && p.from <= season.endDate
+  })
+})
+
+// Season boundary constraints for date pickers
+const seasonNavMin = computed(() => {
+  const s = seasonStore.activeSeason.startDate
+  return s.substring(0, 7).replace('-', '/')
+})
+const seasonNavMax = computed(() => {
+  const s = seasonStore.activeSeason.endDate
+  return s.substring(0, 7).replace('-', '/')
+})
+const dateFromOptions = (date) => {
+  const season = seasonStore.activeSeason
+  return date >= season.startDate && date <= season.endDate
+}
+const dateToOptions = (date) => {
+  const season = seasonStore.activeSeason
+  return date >= season.startDate && date <= season.endDate
+}
 
 // Detect which preset matches the current date range
 const detectActivePreset = () => {
@@ -232,12 +264,13 @@ const applyDatePreset = (preset) => {
 }
 
 const clearFilters = () => {
+  const season = seasonStore.activeSeason
   localFilters.searchName = ''
-  localFilters.dateFrom = ''
-  localFilters.dateTo = ''
+  localFilters.dateFrom = season.startDate
+  localFilters.dateTo = season.endDate
   tempDateFrom.value = ''
   tempDateTo.value = ''
-  activePresetKey.value = ''
+  activePresetKey.value = 'season'
   onFilterChange()
 }
 

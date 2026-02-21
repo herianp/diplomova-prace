@@ -14,7 +14,7 @@
     </div>
 
     <!-- Search -->
-    <div class="q-mb-lg">
+    <div class="q-mb-md">
       <q-input
         v-model="searchTerm"
         :placeholder="$t('players.search')"
@@ -27,6 +27,14 @@
           <q-icon name="search" />
         </template>
       </q-input>
+    </div>
+
+    <!-- Filter Menu -->
+    <div class="q-mb-lg">
+      <SurveyFilterMenu
+        v-model="filters"
+        @filters-changed="onFiltersChanged"
+      />
     </div>
 
     <!-- Loading -->
@@ -211,13 +219,16 @@ import Chart from 'chart.js/auto'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { useSurveyFilters } from '@/composable/useSurveyFilters'
 import { useCashboxUseCases } from '@/composable/useCashboxUseCases'
 import { useReadiness } from '@/composable/useReadiness'
+import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 
 const teamStore = useTeamStore()
 const { waitForTeam } = useReadiness()
 const { loadTeamMembers, getMemberDisplayName, filterMembers, sortMembersByName, getMemberStats } = useTeamMemberUtils()
 const { setSurveysListener } = useSurveyUseCases()
+const { filters, createFilteredSurveys, updateFilters } = useSurveyFilters()
 const cashboxUseCases = useCashboxUseCases()
 
 // Refs
@@ -239,15 +250,20 @@ let unsubscribePayments = null
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
 const surveys = computed(() => teamStore.surveys)
+const filteredSurveys = createFilteredSurveys(surveys)
 
 const filteredMembers = computed(() => {
   const filtered = filterMembers(members.value, searchTerm.value || '')
   return sortMembersByName(filtered)
 })
 
+const onFiltersChanged = (newFilters) => {
+  updateFilters(newFilters)
+}
+
 // Get quick stats for card chips (without opening dialog)
 const getQuickStats = (memberId) => {
-  return getMemberStats(memberId, surveys.value)
+  return getMemberStats(memberId, filteredSurveys.value)
 }
 
 // Compute player balance from fines/payments
@@ -295,7 +311,7 @@ const renderChart = () => {
 
 const openDetail = async (member) => {
   selectedMember.value = member
-  selectedStats.value = getMemberStats(member.uid, surveys.value)
+  selectedStats.value = getMemberStats(member.uid, filteredSurveys.value)
   selectedBalance.value = getPlayerBalance(member.uid)
   showDetail.value = true
   await nextTick()

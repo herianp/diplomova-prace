@@ -160,7 +160,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { DateTime } from 'luxon'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useReadiness } from '@/composable/useReadiness'
@@ -186,10 +185,6 @@ const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
 
 const showMetrics = ref(false)
 const showCreateDialog = ref(false)
-
-// Default to "this week" for survey page
-filters.value.dateFrom = DateTime.now().startOf('week').toISODate()
-filters.value.dateTo = DateTime.now().endOf('week').toISODate()
 
 // Computed properties
 const currentTeam = computed(() => teamStore.currentTeam)

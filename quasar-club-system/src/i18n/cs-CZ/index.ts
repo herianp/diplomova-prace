@@ -5,6 +5,11 @@ export default {
   app: {
     title: "Klubový manažer"
   },
+  season: {
+    selector: "Vybrat sezónu",
+    label: "Sezóna",
+    current: "Aktuální sezóna"
+  },
   survey: {
     title: "Ankety",
     create: "Vytvořit anketu",
