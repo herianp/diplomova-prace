@@ -10,9 +10,9 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 ### Onboarding
 
 - [x] **ONB-01**: User without a team sees an onboarding wizard instead of the main app
-- [ ] **ONB-02**: User can set their display name during onboarding
-- [ ] **ONB-03**: User can choose between creating a team or browsing existing teams
-- [ ] **ONB-04**: User who completes onboarding (has a team) is redirected to the dashboard
+- [x] **ONB-02**: User can set their display name during onboarding
+- [x] **ONB-03**: User can choose between creating a team or browsing existing teams
+- [x] **ONB-04**: User who completes onboarding (has a team) is redirected to the dashboard
 
 ### Team Creation
 
@@ -64,9 +64,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | ONB-01 | Phase 10 | Complete |
-| ONB-02 | Phase 10 | Pending |
-| ONB-03 | Phase 10 | Pending |
-| ONB-04 | Phase 10 | Pending |
+| ONB-02 | Phase 10 | Complete |
+| ONB-03 | Phase 10 | Complete |
+| ONB-04 | Phase 10 | Complete |
 | ROUTE-01 | Phase 10 | Complete |
 | ROUTE-02 | Phase 10 | Complete |
 | TEAM-01 | Phase 11 | Pending |

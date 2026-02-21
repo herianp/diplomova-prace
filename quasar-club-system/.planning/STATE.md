@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 10 of 13 (Onboarding Wizard & Route Guarding)
-Plan: 1 of 3 in current phase
-Status: In progress
-Last activity: 2026-02-21 — Plan 10-01 complete: route guard and onboarding route
+Plan: 2 of 3 in current phase
+Status: In progress — awaiting human-verify checkpoint
+Last activity: 2026-02-21 — Plan 10-02 complete: onboarding wizard (Task 2 awaiting human verification)
 
 Progress: [█░░░░░░░░░] 10% (v1.1)
 
@@ -39,6 +39,8 @@ v1.1 decisions:
 - Join request system for team discovery — browsing enables self-service
 - Route guard uses isTeamReady flag from authStore to gate team-state check before redirecting to /onboarding
 - OnboardingLayout: clean full-page with minimal header (app title + logout), no drawer/sidebar
+- [Phase 10]: Display name save is silent if empty — user can proceed without setting a name
+- [Phase 10]: showSuccess ref set from component-level watcher on teamStore.teams.length for reactive team detection
 
 ### Pending Todos
 
@@ -54,9 +56,10 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Fix admin page styling and create PlayersPage with player cards and detail dialog | 2026-02-21 | 6f54409 | [1-fix-admin-page-styling-and-create-player](./quick/1-fix-admin-page-styling-and-create-player/) |
+| Phase 10 P02 | 2 | 1 tasks | 5 files |
 
 ## Session Continuity
 
-Last session: 2026-02-21 (Phase 10, Plan 01 execution)
-Stopped at: Completed 10-01-PLAN.md — route guard + onboarding route
+Last session: 2026-02-21 (Phase 10, Plan 02 execution)
+Stopped at: Completed 10-02-PLAN.md Task 1 — checkpoint:human-verify Task 2 reached
 Resume file: None

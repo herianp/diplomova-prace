@@ -26,7 +26,7 @@
 
 **Milestone Goal:** New users see a guided onboarding wizard and all pages handle the "no team" state gracefully.
 
-- [ ] **Phase 10: Onboarding Wizard & Route Guarding** — Intercept teamless users, collect display name, and branch to create or join a team
+- [x] **Phase 10: Onboarding Wizard & Route Guarding** — Intercept teamless users, collect display name, and branch to create or join a team (completed 2026-02-21)
 - [ ] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user
 - [ ] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them
 - [ ] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team
@@ -43,7 +43,7 @@
   3. The wizard presents a field where the user can set or confirm their display name before proceeding
   4. The wizard presents two clear paths: create a new team or browse existing teams
   5. After the user gains team membership through the wizard, they land on the dashboard
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 10-01-PLAN.md — Route guard for teamless users, onboarding route, and clean layout
@@ -108,7 +108,7 @@ Plans:
 | 7. Test Infrastructure | v1.0 | 2/2 | Complete | 2026-02-18 |
 | 8. Test Implementation | v1.0 | 5/5 | Complete | 2026-02-18 |
 | 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |
-| 10. Onboarding Wizard & Route Guarding | 1/2 | In Progress|  | - |
+| 10. Onboarding Wizard & Route Guarding | 2/2 | Complete   | 2026-02-21 | - |
 | 11. Team Creation | v1.1 | 0/1 | Not started | - |
 | 12. Team Discovery & Join Requests | v1.1 | 0/4 | Not started | - |
 | 13. Empty States | v1.1 | 0/2 | Not started | - |
