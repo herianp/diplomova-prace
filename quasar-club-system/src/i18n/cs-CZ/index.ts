@@ -462,6 +462,38 @@ export default {
       close: "Zavřít"
     }
   },
+  onboarding: {
+    next: 'Pokračovat',
+    back: 'Zpět',
+    welcome: {
+      title: 'Vítejte',
+      heading: 'Vítejte v Club System',
+      description: 'Vaše platforma pro správu týmu, ankety, reporty a spolupráci.',
+      feature1: 'Ankety a docházka',
+      feature2: 'Reporty a statistiky',
+      feature3: 'Správa týmu'
+    },
+    displayName: {
+      title: 'Vaše jméno',
+      description: 'Nastavte si zobrazované jméno, aby vás spoluhráči poznali.',
+      label: 'Zobrazované jméno',
+      hint: 'Toto jméno uvidí vaši spoluhráči'
+    },
+    teamChoice: {
+      title: 'Připojte se k týmu',
+      createTitle: 'Vytvořit tým',
+      createDescription: 'Založte nový tým a pozvěte ostatní.',
+      browseTitle: 'Procházet týmy',
+      browseDescription: 'Najděte a připojte se k existujícímu týmu.',
+      createPlaceholder: 'Vytváření týmů bude brzy dostupné.',
+      browsePlaceholder: 'Procházení týmů bude brzy dostupné.'
+    },
+    success: {
+      title: 'Vše je připraveno!',
+      subtitle: 'Váš tým je připraven. Pojďme na to.',
+      goToDashboard: 'Přejít na nástěnku'
+    }
+  },
   cashbox: {
     title: "Pokladna",
     subtitle: "Správa pokut a plateb vašeho týmu",

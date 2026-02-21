@@ -462,6 +462,38 @@ export default {
       close: "Close"
     }
   },
+  onboarding: {
+    next: 'Continue',
+    back: 'Back',
+    welcome: {
+      title: 'Welcome',
+      heading: 'Welcome to Club System',
+      description: 'Your team management platform for surveys, reports, and collaboration.',
+      feature1: 'Surveys & Attendance',
+      feature2: 'Reports & Statistics',
+      feature3: 'Team Management'
+    },
+    displayName: {
+      title: 'Your Name',
+      description: 'Set a display name so your teammates can recognize you.',
+      label: 'Display name',
+      hint: 'Your teammates will see this name'
+    },
+    teamChoice: {
+      title: 'Join a Team',
+      createTitle: 'Create a Team',
+      createDescription: 'Start a new team and invite others to join.',
+      browseTitle: 'Browse Teams',
+      browseDescription: 'Find and join an existing team.',
+      createPlaceholder: 'Team creation will be available soon.',
+      browsePlaceholder: 'Team browsing will be available soon.'
+    },
+    success: {
+      title: "You're all set!",
+      subtitle: "Your team is ready. Let's get started.",
+      goToDashboard: 'Go to Dashboard'
+    }
+  },
   cashbox: {
     title: "Cashbox",
     subtitle: "Manage fines and payments for your team",
