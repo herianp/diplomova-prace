@@ -121,7 +121,7 @@
           </q-banner>
         </div>
 
-        <q-btn flat :label="$t('onboarding.back')" @click="prevStep" class="full-width q-mt-md" />
+        <q-btn v-if="!teamChoicePath" flat :label="$t('onboarding.back')" @click="prevStep" class="full-width q-mt-md" />
       </div>
     </div>
   </q-page>

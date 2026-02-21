@@ -106,7 +106,7 @@
             </q-banner>
           </div>
         </div>
-        <q-stepper-navigation>
+        <q-stepper-navigation v-if="!teamChoicePath">
           <q-btn flat :label="$t('onboarding.back')" @click="prevStep" />
         </q-stepper-navigation>
       </q-step>
