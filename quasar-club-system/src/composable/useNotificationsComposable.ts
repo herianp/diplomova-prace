@@ -30,7 +30,7 @@ export const useNotifications = () => {
   const createSurveyNotification = async (survey: { id: string; title: string; teamId: string }, userIds: string[]): Promise<void> => {
     const notifications = userIds.map(userId => ({
       userId,
-      type: 'survey_created',
+      type: 'survey_created' as const,
       title: 'New Survey',
       message: `New survey "${survey.title}" has been created`,
       surveyId: survey.id,

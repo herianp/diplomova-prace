@@ -146,7 +146,10 @@ import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
 import MessageBubble from '@/components/messages/MessageBubble.vue'
 import MessageDateSeparator from '@/components/messages/MessageDateSeparator.vue'
+import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('MessagesComponent')
 const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { waitForTeam } = useReadiness()
@@ -161,7 +164,6 @@ const loading = ref(true)
 const sending = ref(false)
 const scrollArea = ref(null)
 const showScrollButton = ref(false)
-let unsubscribe = null
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
@@ -221,11 +223,9 @@ const loadMessages = () => {
     return
   }
 
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('messages')
 
-  unsubscribe = messageFirebase.listenToMessages(
+  const unsubscribe = messageFirebase.listenToMessages(
     currentTeam.value.id,
     100,
     (msgs) => {
@@ -256,6 +256,8 @@ const loadMessages = () => {
       })
     }
   )
+
+  listenerRegistry.register('messages', unsubscribe, { teamId: currentTeam.value.id })
 }
 
 // Send message
@@ -283,7 +285,11 @@ const sendNewMessage = async () => {
       timeout: 1000
     })
   } catch (error) {
-    console.error('Error sending message:', error)
+    log.error('Failed to send message', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: currentTeam.value?.id,
+      authorId: currentUser.value?.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('messages.sendError'),
@@ -314,9 +320,7 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('messages')
 })
 </script>
 

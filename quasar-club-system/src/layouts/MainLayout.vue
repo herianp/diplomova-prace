@@ -5,8 +5,11 @@
         <q-btn flat dense round icon="menu" aria-label="Menu" @click="drawerOpen = !drawerOpen" />
         <q-toolbar-title>{{ $t('app.title') }}</q-toolbar-title>
 
-        <!-- 🔽 Team Dropdown Button -->
-        <TeamDropdown />
+        <!-- Season Selector (hidden on mobile, shown in drawer instead) -->
+        <SeasonSelector class="gt-sm" />
+
+        <!-- Team Dropdown (hidden on mobile, shown in drawer instead) -->
+        <TeamDropdown class="gt-sm" />
 
         <!-- 🔔 Notifications Dropdown -->
         <NotificationsDropdown />
@@ -27,6 +30,7 @@
 <script setup>
 import { ref } from "vue";
 import CustomDrawer from "@/components/new/CustomDrawer.vue";
+import SeasonSelector from '@/components/SeasonSelector.vue'
 import TeamDropdown from '@/components/new/TeamDropdown.vue'
 import NotificationsDropdown from '@/components/notifications/NotificationsDropdown.vue'
 import UserAvatarMenu from '@/components/UserAvatarMenu.vue'

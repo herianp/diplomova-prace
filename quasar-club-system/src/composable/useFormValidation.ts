@@ -1,10 +1,10 @@
 import { ref, computed } from 'vue'
 
-export type ValidationRule = (val: any) => boolean | string
+export type ValidationRule = (val: unknown) => boolean | string
 export type ValidationRules = ValidationRule[]
 
 export interface FormField {
-  value: any
+  value: unknown
   rules: ValidationRules
   error?: string
   touched?: boolean
@@ -17,41 +17,47 @@ export function useFormValidation() {
    */
   const rules = {
     required: (message = 'This field is required'): ValidationRule =>
-      (val: any) => !!val || message,
+      (val: unknown) => !!val || message,
 
     requiredSelect: (message = 'Please select an option'): ValidationRule =>
-      (val: any) => (val !== null && val !== undefined && val !== '') || message,
+      (val: unknown) => (val !== null && val !== undefined && val !== '') || message,
 
     email: (message = 'Please enter a valid email'): ValidationRule =>
-      (val: string) => {
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-        return !val || emailPattern.test(val) || message
+        return emailPattern.test(val) || message
       },
 
     minLength: (min: number, message?: string): ValidationRule =>
-      (val: string) => {
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const msg = message || `Must be at least ${min} characters`
-        return !val || val.length >= min || msg
+        return val.length >= min || msg
       },
 
     maxLength: (max: number, message?: string): ValidationRule =>
-      (val: string) => {
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const msg = message || `Must be no more than ${max} characters`
-        return !val || val.length <= max || msg
+        return val.length <= max || msg
       },
 
     pattern: (regex: RegExp, message = 'Invalid format'): ValidationRule =>
-      (val: string) => !val || regex.test(val) || message,
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
+        return regex.test(val) || message
+      },
 
     numeric: (message = 'Must be a number'): ValidationRule =>
-      (val: any) => !val || !isNaN(Number(val)) || message,
+      (val: unknown) => !val || !isNaN(Number(val)) || message,
 
     positiveNumber: (message = 'Must be a positive number'): ValidationRule =>
-      (val: any) => !val || (Number(val) > 0) || message,
+      (val: unknown) => !val || (Number(val) > 0) || message,
 
     url: (message = 'Please enter a valid URL'): ValidationRule =>
-      (val: string) => {
-        if (!val) return true
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         try {
           new URL(val)
           return true
@@ -61,22 +67,22 @@ export function useFormValidation() {
       },
 
     dateFormat: (message = 'Please enter a valid date (YYYY-MM-DD)'): ValidationRule =>
-      (val: string) => {
-        if (!val) return true
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const datePattern = /^\d{4}-\d{2}-\d{2}$/
         return datePattern.test(val) || message
       },
 
     timeFormat: (message = 'Please enter a valid time (HH:MM)'): ValidationRule =>
-      (val: string) => {
-        if (!val) return true
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const timePattern = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/
         return timePattern.test(val) || message
       },
 
     futureDate: (message = 'Date must be in the future'): ValidationRule =>
-      (val: string) => {
-        if (!val) return true
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const selectedDate = new Date(val)
         const today = new Date()
         today.setHours(0, 0, 0, 0)
@@ -84,18 +90,18 @@ export function useFormValidation() {
       },
 
     pastDate: (message = 'Date must be in the past'): ValidationRule =>
-      (val: string) => {
-        if (!val) return true
+      (val: unknown) => {
+        if (!val || typeof val !== 'string') return true
         const selectedDate = new Date(val)
         const today = new Date()
         return selectedDate <= today || message
       },
 
-    confirm: (originalValue: any, message = 'Values do not match'): ValidationRule =>
-      (val: any) => val === originalValue || message,
+    confirm: (originalValue: unknown, message = 'Values do not match'): ValidationRule =>
+      (val: unknown) => val === originalValue || message,
 
-    custom: (validator: (val: any) => boolean, message: string): ValidationRule =>
-      (val: any) => validator(val) || message
+    custom: (validator: (val: unknown) => boolean, message: string): ValidationRule =>
+      (val: unknown) => validator(val) || message
   }
 
   /**
@@ -170,7 +176,7 @@ export function useFormValidation() {
   /**
    * Validate a single field
    */
-  const validateField = (value: any, rules: ValidationRules): string | null => {
+  const validateField = (value: unknown, rules: ValidationRules): string | null => {
     for (const rule of rules) {
       const result = rule(value)
       if (result !== true) {
@@ -183,7 +189,7 @@ export function useFormValidation() {
   /**
    * Validate multiple fields
    */
-  const validateFields = (fields: Record<string, { value: any; rules: ValidationRules }>) => {
+  const validateFields = (fields: Record<string, { value: unknown; rules: ValidationRules }>) => {
     const errors: Record<string, string> = {}
     let isValid = true
 
@@ -201,7 +207,7 @@ export function useFormValidation() {
   /**
    * Create a reactive form validator
    */
-  const createFormValidator = (initialFields: Record<string, { value: any; rules: ValidationRules }>) => {
+  const createFormValidator = (initialFields: Record<string, { value: unknown; rules: ValidationRules }>) => {
     const fields = ref({ ...initialFields })
     const errors = ref<Record<string, string>>({})
     const touched = ref<Record<string, boolean>>({})

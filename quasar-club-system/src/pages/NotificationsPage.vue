@@ -207,7 +207,10 @@ import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { DateTime } from 'luxon'
 import { useNotificationFirebase } from '@/services/notificationFirebase'
+import { listenerRegistry } from '@/services/listenerRegistry'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('NotificationsPage')
 const authStore = useAuthStore()
 const { isMobile } = useScreenComposable()
 const $q = useQuasar()
@@ -225,7 +228,6 @@ const respondingTo = ref(null)
 const filter = ref('all')
 const hasMore = ref(true)
 const pageSize = 20
-let unsubscribe = null
 let lastDoc = null
 
 // Computed
@@ -268,12 +270,9 @@ const filteredNotifications = computed(() => {
 const loadNotifications = () => {
   if (!currentUser.value?.uid) return
 
-  // Clean up previous subscription
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 
-  unsubscribe = notificationFirebase.listenToNotifications(
+  const unsubscribe = notificationFirebase.listenToNotifications(
     currentUser.value.uid,
     pageSize,
     (notifs, last) => {
@@ -282,13 +281,21 @@ const loadNotifications = () => {
       hasMore.value = notifs.length === pageSize
       loading.value = false
     },
-    () => {
+    (error) => {
+      log.error('Notification listener failed', {
+        error: error instanceof Error ? error.message : String(error),
+        userId: currentUser.value.uid
+      })
       loading.value = false
     }
   )
+
+  listenerRegistry.register('notifications', unsubscribe, { userId: currentUser.value.uid })
 }
 
 const loadMoreNotifications = async () => {
+  // PRF-04: Verified - pagination stops when hasMore is false
+  // Button hidden via v-if="hasMore", guard prevents redundant Firestore queries (Phase 06)
   if (!lastDoc || !hasMore.value) return
 
   loadingMore.value = true
@@ -305,7 +312,10 @@ const loadMoreNotifications = async () => {
     hasMore.value = result.hasMore
 
   } catch (error) {
-    console.error('Error loading more notifications:', error)
+    log.error('Failed to load more notifications', {
+      error: error instanceof Error ? error.message : String(error),
+      userId: currentUser.value.uid
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.loadMoreError'),
@@ -331,15 +341,19 @@ const markAsRead = async (notification) => {
   try {
     await notificationFirebase.markNotificationAsRead(notification.id)
   } catch (error) {
-    console.error('Error marking notification as read:', error)
+    log.error('Failed to mark notification as read', {
+      error: error instanceof Error ? error.message : String(error),
+      notificationId: notification.id
+    })
   }
 }
 
 const markAllAsRead = async () => {
   markingAllRead.value = true
 
+  const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
+
   try {
-    const unreadIds = notifications.value.filter(n => !n.read).map(n => n.id)
     await notificationFirebase.markAllNotificationsAsRead(unreadIds)
 
     $q.notify({
@@ -349,7 +363,10 @@ const markAllAsRead = async () => {
     })
 
   } catch (error) {
-    console.error('Error marking all as read:', error)
+    log.error('Failed to mark all as read', {
+      error: error instanceof Error ? error.message : String(error),
+      count: unreadIds.length
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.markReadError'),
@@ -375,7 +392,11 @@ const handleInvitationResponse = async (notification, response) => {
     })
 
   } catch (error) {
-    console.error('Error responding to invitation:', error)
+    log.error('Failed to respond to invitation', {
+      error: error instanceof Error ? error.message : String(error),
+      notificationId: notification.id,
+      response
+    })
     $q.notify({
       type: 'negative',
       message: t('notifications.invitation.error'),
@@ -449,9 +470,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  if (unsubscribe) {
-    unsubscribe()
-  }
+  listenerRegistry.unregister('notifications')
 })
 </script>
 

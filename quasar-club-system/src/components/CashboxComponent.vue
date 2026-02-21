@@ -250,6 +250,7 @@ import CashboxAddFine from '@/components/cashbox/CashboxAddFine.vue'
 import CashboxAddPayment from '@/components/cashbox/CashboxAddPayment.vue'
 import CashboxFineRules from '@/components/cashbox/CashboxFineRules.vue'
 import { DateTime } from 'luxon'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -272,12 +273,6 @@ const showHistoryDialog = ref(false)
 const clearing = ref(false)
 const cashboxHistory = ref([])
 const preselectedPlayer = ref(null)
-
-// Listener unsubscribes
-let unsubFines = null
-let unsubPayments = null
-let unsubRules = null
-let unsubHistory = null
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
@@ -302,17 +297,25 @@ const teamSummary = computed(() => {
 // Setup listeners for a team
 const setupListeners = (teamId) => {
   cleanupListeners()
-  unsubFines = cashbox.listenToFines(teamId, (data) => { fines.value = data })
-  unsubPayments = cashbox.listenToPayments(teamId, (data) => { payments.value = data })
-  unsubRules = cashbox.listenToFineRules(teamId, (data) => { fineRules.value = data })
-  unsubHistory = cashbox.listenToCashboxHistory(teamId, (data) => { cashboxHistory.value = data })
+
+  const unsubFines = cashbox.listenToFines(teamId, (data) => { fines.value = data })
+  listenerRegistry.register('cashbox-fines', unsubFines, { teamId })
+
+  const unsubPayments = cashbox.listenToPayments(teamId, (data) => { payments.value = data })
+  listenerRegistry.register('cashbox-payments', unsubPayments, { teamId })
+
+  const unsubRules = cashbox.listenToFineRules(teamId, (data) => { fineRules.value = data })
+  listenerRegistry.register('cashbox-rules', unsubRules, { teamId })
+
+  const unsubHistory = cashbox.listenToCashboxHistory(teamId, (data) => { cashboxHistory.value = data })
+  listenerRegistry.register('cashbox-history', unsubHistory, { teamId })
 }
 
 const cleanupListeners = () => {
-  if (unsubFines) { unsubFines(); unsubFines = null }
-  if (unsubPayments) { unsubPayments(); unsubPayments = null }
-  if (unsubRules) { unsubRules(); unsubRules = null }
-  if (unsubHistory) { unsubHistory(); unsubHistory = null }
+  listenerRegistry.unregister('cashbox-fines')
+  listenerRegistry.unregister('cashbox-payments')
+  listenerRegistry.unregister('cashbox-rules')
+  listenerRegistry.unregister('cashbox-history')
 }
 
 // Load team members
@@ -357,7 +360,8 @@ const onSubmitPayment = async ({ playerId, amount, note }) => {
 
 const onDeleteFine = async (fineId) => {
   try {
-    await cashbox.deleteFine(currentTeam.value.id, fineId)
+    const fine = fines.value.find(f => f.id === fineId)
+    await cashbox.deleteFine(currentTeam.value.id, fineId, fine)
     $q.notify({ type: 'positive', message: t('cashbox.fines.deleteSuccess') })
   } catch {
     $q.notify({ type: 'negative', message: t('cashbox.fines.deleteError') })

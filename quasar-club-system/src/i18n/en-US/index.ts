@@ -1,6 +1,14 @@
+import errors from './errors'
+
 export default {
+  errors,
   app: {
     title: "Club Manager"
+  },
+  season: {
+    selector: "Select Season",
+    label: "Season",
+    current: "Current season"
   },
   survey: {
     title: "Surveys",
@@ -171,7 +179,7 @@ export default {
     wednesday: "Wednesday",
     thursday: "Thursday",
     friday: "Friday",
-    saturday: "Saturday",
+    saturday: "Saturday"
   },
   months: {
     january: "january",
@@ -265,10 +273,10 @@ export default {
     delete: "Delete",
     update: "Update",
     back: "Back",
-    fillAllFields: "Please fill in all fields"
-  },
-  validation: {
-    required: "This field is required"
+    fillAllFields: "Please fill in all fields",
+    retry: "Retry",
+    retrySuccess: "Operation completed successfully",
+    dismiss: "Dismiss"
   },
   notifications: {
     title: "Notifications",
@@ -349,7 +357,30 @@ export default {
     teamsCount: "Teams",
     noTeams: "No teams found",
     noUsers: "No users found",
-    loadError: "Failed to load admin data"
+    loadError: "Failed to load admin data",
+    auditTab: "Audit Logs",
+    audit: {
+      selectTeam: "Select team",
+      operation: "Operation",
+      allOperations: "All operations",
+      load: "Load",
+      dateTime: "Date & Time",
+      actor: "Actor",
+      entity: "Entity",
+      details: "Details",
+      noLogs: "No audit logs",
+      loadError: "Failed to load audit logs",
+      op: {
+        survey_create: "Survey created",
+        survey_update: "Survey updated",
+        survey_delete: "Survey deleted",
+        fine_create: "Fine created",
+        fine_update: "Fine updated",
+        fine_delete: "Fine deleted",
+        member_remove: "Member removed",
+        vote_verify: "Vote verified"
+      }
+    }
   },
   reports: {
     title: "Reports & Analytics",
@@ -408,6 +439,28 @@ export default {
     monthlyTrend: "Monthly Attendance Trend",
     playerRanking: "Player Attendance Ranking",
     attendanceRate: "Attendance Rate"
+  },
+  players: {
+    title: "Players",
+    description: "Team members overview",
+    search: "Search players...",
+    noPlayers: "No team members found",
+    noResults: "No players match your search",
+    detail: {
+      stats: "Statistics",
+      totalSurveys: "Total Surveys",
+      yesVotes: "Yes Votes",
+      noVotes: "No Votes",
+      unvoted: "Unvoted",
+      participationRate: "Participation Rate",
+      attendanceRate: "Attendance Rate",
+      voteBreakdown: "Vote Breakdown",
+      finances: "Finances",
+      totalFined: "Total Fined",
+      totalPaid: "Total Paid",
+      balance: "Balance",
+      close: "Close"
+    }
   },
   cashbox: {
     title: "Cashbox",
@@ -522,4 +575,4 @@ export default {
       viewDetails: "View Details"
     }
   }
-}
+} as const

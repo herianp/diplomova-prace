@@ -53,6 +53,7 @@ import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
+import { listenerRegistry } from '@/services/listenerRegistry'
 
 const teamStore = useTeamStore()
 const router = useRouter()
@@ -63,8 +64,13 @@ const { isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
 
 const selectTeam = (team) => {
+  // Clean up all team-scoped listeners before switching
+  // PRF-03: Verified - team-scoped listeners cleaned up before switching teams
+  // Prevents memory accumulation from accumulated listeners (Phase 06)
+  listenerRegistry.unregisterByScope('team')
+
   teamStore.currentTeam = team
-  setSurveysListener(team.id) // ✅ Call new listener for surveys for selected team
+  setSurveysListener(team.id)
 }
 
 const manageCurrentTeam = () => {

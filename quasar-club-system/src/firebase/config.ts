@@ -3,9 +3,20 @@ import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getPerformance } from "firebase/performance";
 
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+/**
+ * Firebase Configuration
+ *
+ * Uses Vite environment variables for API key (VITE_FIREBASE_API_KEY).
+ * Other config values are non-secret project identifiers.
+ *
+ * Environment setup:
+ * - Development: Set VITE_FIREBASE_API_KEY in .env.local (gitignored)
+ * - Production: Set VITE_FIREBASE_API_KEY in deployment environment
+ *
+ * SDKs in use: firebase/app, firebase/auth, firebase/firestore, firebase/analytics
+ */
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -29,4 +40,10 @@ const db = getFirestore(app);
 // Initialize Authentication and get a reference to the service
 const auth = getAuth(app);
 
-export { analytics, db, auth};
+/**
+ * Initialize Performance Monitoring (automatic web vitals: FCP, LCP, CLS, FID)
+ * Only in production — the SDK spams console with retry errors in dev/localhost.
+ */
+const perf = import.meta.env.PROD ? getPerformance(app) : null;
+
+export { analytics, db, auth, perf };

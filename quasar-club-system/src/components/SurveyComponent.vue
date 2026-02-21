@@ -160,7 +160,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { DateTime } from 'luxon'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useReadiness } from '@/composable/useReadiness'
@@ -173,7 +172,9 @@ import MetricCard from '@/components/dashboard/MetricCard.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
 import SurveyForm from '@/components/modal/SurveyForm.vue'
 import SurveyCard from '@/components/new/SurveyCard.vue'
+import { createLogger } from 'src/utils/logger'
 
+const log = createLogger('SurveyComponent')
 const teamStore = useTeamStore()
 const { waitForTeam } = useReadiness()
 const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
@@ -184,10 +185,6 @@ const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
 
 const showMetrics = ref(false)
 const showCreateDialog = ref(false)
-
-// Default to "this week" for survey page
-filters.value.dateFrom = DateTime.now().startOf('week').toISODate()
-filters.value.dateTo = DateTime.now().endOf('week').toISODate()
 
 // Computed properties
 const currentTeam = computed(() => teamStore.currentTeam)
@@ -227,7 +224,11 @@ async function handleSurveySubmit(payload) {
       type: payload.surveyType,
     })
   } catch (err) {
-    console.error('Error creating survey:', err)
+    log.error('Failed to create survey', {
+      error: err instanceof Error ? err.message : String(err),
+      teamId: currentTeam.value?.id,
+      title: payload.title
+    })
     throw err
   }
 }

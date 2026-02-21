@@ -9,10 +9,6 @@ export const useTeamStore = defineStore("team", () => {
   const editedSurvey = ref<ISurvey | null>(null);
   const currentTeam = ref<ITeam | null>(null);
 
-  // Firestore listeners - managed by use cases
-  const unsubscribeTeams = ref<(() => void) | null>(null);
-  const unsubscribeSurveys = ref<(() => void) | null>(null);
-
   // Pure state mutations (no business logic)
   const setTeams = (teamsList: ITeam[]) => {
     teams.value = teamsList;
@@ -30,25 +26,7 @@ export const useTeamStore = defineStore("team", () => {
     editedSurvey.value = survey;
   };
 
-  const setTeamsUnsubscribe = (unsubscribeFn: (() => void) | null) => {
-    unsubscribeTeams.value = unsubscribeFn;
-  };
-
-  const setSurveysUnsubscribe = (unsubscribeFn: (() => void) | null) => {
-    unsubscribeSurveys.value = unsubscribeFn;
-  };
-
   const clearData = () => {
-    if (unsubscribeTeams.value) {
-      unsubscribeTeams.value();
-      unsubscribeTeams.value = null;
-    }
-
-    if (unsubscribeSurveys.value) {
-      unsubscribeSurveys.value();
-      unsubscribeSurveys.value = null;
-    }
-
     teams.value = [];
     surveys.value = [];
     currentTeam.value = null;
@@ -61,15 +39,11 @@ export const useTeamStore = defineStore("team", () => {
     surveys,
     editedSurvey,
     currentTeam,
-    unsubscribeTeams,
-    unsubscribeSurveys,
     // Pure state mutations
     setTeams,
     setSurveys,
     setCurrentTeam,
     setEditedSurvey,
-    setTeamsUnsubscribe,
-    setSurveysUnsubscribe,
     clearData
   };
 });

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="admin-container">
     <!-- Header -->
     <div class="row items-center q-mb-lg">
       <div class="col">
@@ -66,6 +66,7 @@
         <q-tabs v-model="activeTab" class="text-primary" align="left" dense>
           <q-tab name="teams" :label="$t('admin.teamsTab')" icon="groups" />
           <q-tab name="users" :label="$t('admin.usersTab')" icon="person" />
+          <q-tab name="audit" :label="$t('admin.auditTab')" icon="history" />
         </q-tabs>
 
         <q-separator />
@@ -90,6 +91,10 @@
               @update:user-search-query="userSearchQuery = $event"
             />
           </q-tab-panel>
+
+          <q-tab-panel name="audit">
+            <AdminAuditTab :filtered-teams="filteredTeams" />
+          </q-tab-panel>
         </q-tab-panels>
       </q-card>
     </template>
@@ -104,6 +109,7 @@ import { useAdminComposable } from '@/composable/useAdminComposable'
 import MetricCard from '@/components/dashboard/MetricCard.vue'
 import AdminTeamsTab from '@/components/admin/AdminTeamsTab.vue'
 import AdminUsersTab from '@/components/admin/AdminUsersTab.vue'
+import AdminAuditTab from '@/components/admin/AdminAuditTab.vue'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -138,3 +144,15 @@ onMounted(() => {
   loadAdminData()
 })
 </script>
+
+<style scoped>
+.admin-container {
+  width: 100%;
+  padding: 1rem;
+}
+@media (min-width: 600px) {
+  .admin-container {
+    padding: 1.5rem;
+  }
+}
+</style>

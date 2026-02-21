@@ -4,8 +4,10 @@ import { RouteEnum } from '@/enums/routesEnum'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthUseCases } from '@/composable/useAuthUseCases'
+import { createLogger } from 'src/utils/logger'
 
 export function useAuthComposable() {
+  const log = createLogger('useAuthComposable')
   const router = useRouter()
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
@@ -16,7 +18,8 @@ export function useAuthComposable() {
   const isAdmin = computed(() => authStore.isAdmin)
 
   const isCurrentUserPowerUser = computed(() => {
-    return teamStore.currentTeam?.powerusers?.includes(currentUser.value?.uid) || false
+    const uid = currentUser.value?.uid
+    return uid ? (teamStore.currentTeam?.powerusers?.includes(uid) || false) : false
   })
 
   // Delegate to use cases with navigation logic
@@ -24,8 +27,13 @@ export function useAuthComposable() {
     try {
       await authUseCases.signIn(email, password)
       router.push(RouteEnum.DASHBOARD.path)
-    } catch (error: any) {
-      console.error(`Login Error: ${error.code} - ${error.message}`)
+    } catch (error: unknown) {
+      log.error('Login operation failed', {
+        error: error instanceof Error ? error.message : String(error),
+        email
+      })
+      // Error notification already shown by use case
+      // Composable just logs and re-throws for component
       throw error
     }
   }
@@ -34,8 +42,9 @@ export function useAuthComposable() {
     try {
       await authUseCases.signOut()
       router.push(RouteEnum.LOGIN.path)
-    } catch (error: any) {
-      console.error(`Logout Error: ${error.message}`)
+    } catch (error: unknown) {
+      log.error('Logout operation failed', { error: error instanceof Error ? error.message : String(error) })
+      // Error notification already shown by use case
       throw error
     }
   }
@@ -44,14 +53,19 @@ export function useAuthComposable() {
     try {
       await authUseCases.signUp(email, password, name)
       router.push(RouteEnum.DASHBOARD.path)
-    } catch (error: any) {
-      console.error(`Registration Error: ${error.code} - ${error.message}`)
+    } catch (error: unknown) {
+      log.error('Registration operation failed', {
+        error: error instanceof Error ? error.message : String(error),
+        email,
+        name
+      })
+      // Error notification already shown by use case
       throw error
     }
   }
 
-  const initializeAuth = () => {
-    authUseCases.initializeAuth()
+  const initializeAuth = async () => {
+    await authUseCases.initializeAuth()
   }
 
   const refreshUser = async () => {

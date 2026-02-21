@@ -10,6 +10,11 @@ import {
 } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { IMessage } from '@/interfaces/interfaces'
+import { mapFirestoreError } from '@/errors/errorMapper'
+import { ListenerError } from '@/errors'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('messageFirebase')
 
 export function useMessageFirebase() {
   /**
@@ -34,8 +39,9 @@ export function useMessageFirebase() {
       })) as IMessage[]
       onData(messages)
     }, (error) => {
-      console.error('Error loading messages:', error)
-      if (onError) onError(error as Error)
+      const listenerError = new ListenerError('messages', 'errors.listener.failed', { code: error.code })
+      log.error('Messages listener failed', { teamId, code: error.code, error: listenerError.message })
+      if (onError) onError(listenerError)
     })
   }
 
@@ -48,13 +54,19 @@ export function useMessageFirebase() {
     authorName: string,
     content: string
   ): Promise<void> => {
-    await addDoc(collection(db, 'messages'), {
-      content,
-      authorId,
-      authorName,
-      teamId,
-      createdAt: serverTimestamp()
-    })
+    try {
+      await addDoc(collection(db, 'messages'), {
+        content,
+        authorId,
+        authorName,
+        teamId,
+        createdAt: serverTimestamp()
+      })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to send message', { teamId, authorId, error: firestoreError.message })
+      throw firestoreError
+    }
   }
 
   return {
