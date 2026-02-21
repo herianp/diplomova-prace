@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 10 of 13 (Onboarding Wizard & Route Guarding)
-Plan: 2 of 3 in current phase
-Status: In progress — awaiting human-verify checkpoint
-Last activity: 2026-02-21 — Plan 10-02 complete: onboarding wizard (Task 2 awaiting human verification)
+Plan: 3 of 3 in current phase
+Status: In progress — Plan 10-02 complete, ready for Plan 10-03
+Last activity: 2026-02-21 — Plan 10-02 complete: onboarding wizard fully verified by human tester
 
 Progress: [█░░░░░░░░░] 10% (v1.1)
 
@@ -26,7 +26,7 @@ Progress: [█░░░░░░░░░] 10% (v1.1)
 - Files modified: 158 (+26,907/-742 lines)
 
 **v1.1 (in progress):**
-- Plans completed: 0 of 10
+- Plans completed: 2 of 10
 
 ## Accumulated Context
 
@@ -41,6 +41,8 @@ v1.1 decisions:
 - OnboardingLayout: clean full-page with minimal header (app title + logout), no drawer/sidebar
 - [Phase 10]: Display name save is silent if empty — user can proceed without setting a name
 - [Phase 10]: showSuccess ref set from component-level watcher on teamStore.teams.length for reactive team detection
+- [Phase 10 P02]: Separate mobile/desktop wizard components chosen after QStepper internal panel targeting proved fragile across breakpoints
+- [Phase 10 P02]: Step 3 create/browse inline content are placeholder banners — full implementation deferred to Phases 11 and 12
 
 ### Pending Todos
 
@@ -60,6 +62,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21 (Phase 10, Plan 02 execution)
-Stopped at: Completed 10-02-PLAN.md Task 1 — checkpoint:human-verify Task 2 reached
+Last session: 2026-02-21 (Phase 10, Plan 02 completion)
+Stopped at: Completed 10-02-PLAN.md — all tasks done and human-verified, SUMMARY.md created
 Resume file: None
