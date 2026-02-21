@@ -78,45 +78,34 @@ export function useTeamFirebase() {
     }
   }
 
+  const deleteQueryResults = async (
+    teamId: string,
+    colName: string,
+    snapshot: { docs: { ref: { path: string }; id: string }[] }
+  ) => {
+    if (snapshot.docs.length === 0) return
+    for (let i = 0; i < snapshot.docs.length; i += BATCH_SIZE) {
+      const batch = writeBatch(db)
+      const chunk = snapshot.docs.slice(i, i + BATCH_SIZE)
+      chunk.forEach((d) => batch.delete(d.ref as ReturnType<typeof doc>))
+      await batch.commit()
+
+      log.info('Batch delete progress', {
+        teamId,
+        collection: colName,
+        processed: Math.min(i + BATCH_SIZE, snapshot.docs.length),
+        total: snapshot.docs.length
+      })
+
+      if ((Math.floor(i / BATCH_SIZE) + 1) % 10 === 0) {
+        await new Promise(resolve => setTimeout(resolve, 200))
+      }
+    }
+  }
+
   const deleteTeam = async (teamId: string) => {
     try {
-      // Delete root-level collections referencing team
-      const rootCollections = ['surveys', 'messages', 'notifications', 'teamInvitations']
-      for (const col of rootCollections) {
-        const q = query(collection(db, col), where('teamId', '==', teamId))
-        const snapshot = await getDocs(q)
-
-        // Use batch helper for unlimited scale
-        if (snapshot.docs.length > 0) {
-          // Convert query result to a pseudo-collection for batch deletion
-          for (let i = 0; i < snapshot.docs.length; i += BATCH_SIZE) {
-            const batch = writeBatch(db)
-            const chunk = snapshot.docs.slice(i, i + BATCH_SIZE)
-            chunk.forEach((d) => batch.delete(d.ref))
-            await batch.commit()
-
-            log.info('Batch delete progress', {
-              teamId,
-              collection: col,
-              processed: Math.min(i + BATCH_SIZE, snapshot.docs.length),
-              total: snapshot.docs.length
-            })
-
-            if ((Math.floor(i / BATCH_SIZE) + 1) % 10 === 0) {
-              await new Promise(resolve => setTimeout(resolve, 200))
-            }
-          }
-        }
-      }
-
-      // Delete subcollections under team document (includes auditLogs from Phase 5)
-      const subcollections = ['fineRules', 'fines', 'payments', 'cashboxTransactions', 'cashboxHistory', 'auditLogs']
-      for (const sub of subcollections) {
-        const subRef = collection(doc(db, 'teams', teamId), sub)
-        await deleteCollectionInBatches(subRef, `${teamId}/${sub}`)
-      }
-
-      // Delete votes subcollections for all team surveys (Phase 4 data model)
+      // 1. Collect survey IDs and delete votes BEFORE deleting survey docs
       const surveysQuery = query(collection(db, 'surveys'), where('teamId', '==', teamId))
       const surveysSnapshot = await getDocs(surveysQuery)
 
@@ -125,7 +114,27 @@ export function useTeamFirebase() {
         await deleteCollectionInBatches(votesRef, `surveys/${surveyDoc.id}/votes`)
       }
 
-      // Finally, delete the team document itself
+      // 2. Delete root-level collections referencing team (including surveys)
+      const rootCollections = ['surveys', 'messages', 'notifications', 'teamInvitations']
+      for (const col of rootCollections) {
+        if (col === 'surveys') {
+          // Already have the snapshot from step 1
+          await deleteQueryResults(teamId, col, surveysSnapshot)
+        } else {
+          const q = query(collection(db, col), where('teamId', '==', teamId))
+          const snapshot = await getDocs(q)
+          await deleteQueryResults(teamId, col, snapshot)
+        }
+      }
+
+      // 3. Delete subcollections under team document
+      const subcollections = ['fineRules', 'fines', 'payments', 'cashboxTransactions', 'cashboxHistory', 'auditLogs']
+      for (const sub of subcollections) {
+        const subRef = collection(doc(db, 'teams', teamId), sub)
+        await deleteCollectionInBatches(subRef, `${teamId}/${sub}`)
+      }
+
+      // 4. Finally, delete the team document itself
       await deleteDoc(doc(db, 'teams', teamId))
 
       log.info('Team cascade delete complete', { teamId })

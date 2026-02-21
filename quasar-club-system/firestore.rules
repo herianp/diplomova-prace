@@ -230,6 +230,9 @@ service cloud.firestore {
         resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
         (get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.creator == request.auth.uid || isAppAdmin());
+
+      // Allow app admin to read any message
+      allow read: if isAppAdmin();
     }
     
     

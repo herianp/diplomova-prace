@@ -66,7 +66,10 @@ export function useSurveyUseCases() {
       }
 
       // Add survey via firebase
-      const surveyData = await surveyFirebase.addSurvey(newSurvey, teamMembers)
+      const surveyData = await surveyFirebase.addSurvey(newSurvey, teamMembers, authStore.user ? {
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || authStore.user.uid
+      } : undefined)
 
       // Create notifications for all team members (business logic)
       if (teamMembers.length > 0) {
@@ -92,9 +95,18 @@ export function useSurveyUseCases() {
     }
   }
 
-  const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>): Promise<void> => {
+  const updateSurvey = async (
+    surveyId: string,
+    updatedSurvey: Partial<ISurvey>,
+    auditContext?: { teamId: string; before?: Partial<ISurvey> }
+  ): Promise<void> => {
     try {
-      return await surveyFirebase.updateSurvey(surveyId, updatedSurvey)
+      return await surveyFirebase.updateSurvey(surveyId, updatedSurvey, authStore.user && auditContext ? {
+        teamId: auditContext.teamId,
+        actorUid: authStore.user.uid,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || authStore.user.uid,
+        before: auditContext.before
+      } : undefined)
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

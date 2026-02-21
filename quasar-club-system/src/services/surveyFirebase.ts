@@ -123,7 +123,11 @@ export function useSurveyFirebase() {
     }
   }
 
-  const addSurvey = async (newSurvey: ISurvey, teamMembers: string[] = []): Promise<ISurveyNotificationData> => {
+  const addSurvey = async (
+    newSurvey: ISurvey,
+    teamMembers: string[] = [],
+    auditContext?: { actorUid: string; actorDisplayName: string }
+  ): Promise<ISurveyNotificationData> => {
     try {
       // Create the survey
       const surveyRef = await addDoc(collection(db, 'surveys'), {
@@ -131,6 +135,27 @@ export function useSurveyFirebase() {
         createdDate: new Date().getTime().toString(),
         votes: [],
       })
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+        writeAuditLog({
+          teamId: newSurvey.teamId,
+          operation: 'survey.create',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: surveyRef.id,
+          entityType: 'survey',
+          metadata: {
+            title: newSurvey.title,
+            ...(newSurvey.description && { description: newSurvey.description }),
+            ...(newSurvey.date && { date: newSurvey.date }),
+            ...(newSurvey.time && { time: newSurvey.time }),
+            ...(newSurvey.type && { type: newSurvey.type })
+          }
+        })
+      }
 
       // Return survey data for notifications (to be handled by composable)
       return {
@@ -146,9 +171,39 @@ export function useSurveyFirebase() {
     }
   }
 
-  const updateSurvey = async (surveyId: string, updatedSurvey: Partial<ISurvey>): Promise<void> => {
+  const updateSurvey = async (
+    surveyId: string,
+    updatedSurvey: Partial<ISurvey>,
+    auditContext?: { teamId: string; actorUid: string; actorDisplayName: string; before?: Partial<ISurvey> }
+  ): Promise<void> => {
     try {
       await updateDoc(doc(db, 'surveys', surveyId), updatedSurvey)
+
+      // Audit log (non-blocking, SEC-01)
+      if (auditContext) {
+        const { writeAuditLog } = useAuditLogFirebase()
+
+        // Only log fields that actually changed
+        const changes: Record<string, unknown> = {}
+        const before = auditContext.before || {}
+        const trackedFields = ['title', 'description', 'date', 'time', 'type'] as const
+        for (const field of trackedFields) {
+          if (field in updatedSurvey && updatedSurvey[field] !== before[field]) {
+            changes[field] = `${before[field] ?? ''} → ${updatedSurvey[field]}`
+          }
+        }
+
+        writeAuditLog({
+          teamId: auditContext.teamId,
+          operation: 'survey.update',
+          actorUid: auditContext.actorUid,
+          actorDisplayName: auditContext.actorDisplayName,
+          timestamp: new Date(),
+          entityId: surveyId,
+          entityType: 'survey',
+          metadata: Object.keys(changes).length > 0 ? changes : { note: 'no visible changes' }
+        })
+      }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to update survey', { surveyId, error: firestoreError.message })

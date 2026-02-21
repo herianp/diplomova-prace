@@ -279,6 +279,8 @@ export interface ICashboxHistoryEntry {
 // ============================================================
 
 export type AuditOperation =
+  | 'survey.create'
+  | 'survey.update'
   | 'survey.delete'
   | 'fine.create'
   | 'fine.update'

@@ -192,6 +192,15 @@ const handleUpdate = async () => {
       date: formData.value.date,
       time: formData.value.time,
       type: formData.value.type
+    }, {
+      teamId: props.survey.teamId,
+      before: {
+        title: props.survey.title,
+        description: props.survey.description,
+        date: props.survey.date,
+        time: props.survey.time,
+        type: props.survey.type
+      }
     })
     
     $q.notify({
