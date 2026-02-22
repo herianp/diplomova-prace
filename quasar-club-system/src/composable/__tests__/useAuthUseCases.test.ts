@@ -15,7 +15,9 @@ const {
   mockAuthStateReady,
   mockGetCurrentUser,
   mockRefreshUser,
-  mockSetTeamListener
+  mockSetTeamListener,
+  mockGetUserFromFirestore,
+  mockSetOnboardingCompleted
 } = vi.hoisted(() => ({
   mockPush: vi.fn(),
   mockNotifyError: vi.fn(),
@@ -27,7 +29,9 @@ const {
   mockAuthStateReady: vi.fn(),
   mockGetCurrentUser: vi.fn(),
   mockRefreshUser: vi.fn(),
-  mockSetTeamListener: vi.fn()
+  mockSetTeamListener: vi.fn(),
+  mockGetUserFromFirestore: vi.fn(),
+  mockSetOnboardingCompleted: vi.fn()
 }))
 
 // --- Module mocks ---
@@ -53,7 +57,9 @@ vi.mock('@/services/authFirebase', () => ({
     authStateListener: mockAuthStateListener,
     authStateReady: mockAuthStateReady,
     getCurrentUser: mockGetCurrentUser,
-    refreshUser: mockRefreshUser
+    refreshUser: mockRefreshUser,
+    getUserFromFirestore: mockGetUserFromFirestore,
+    setOnboardingCompleted: mockSetOnboardingCompleted
   })
 }))
 
@@ -86,6 +92,8 @@ describe('useAuthUseCases', () => {
     vi.clearAllMocks()
     // Default: auth listener returns a no-op unsubscribe
     mockAuthStateListener.mockReturnValue(vi.fn())
+    // Default: getUserFromFirestore returns null (no Firestore user doc)
+    mockGetUserFromFirestore.mockResolvedValue(null)
   })
 
   // ─── signIn ───────────────────────────────────────────────────────────────

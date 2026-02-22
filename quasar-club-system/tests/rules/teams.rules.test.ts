@@ -47,9 +47,9 @@ describe('teams/{teamId} - read', () => {
     await assertSucceeds(getDoc(doc(ctx.firestore(), `teams/${TEAM_ID}`)))
   })
 
-  it('denies outsider read of team', async () => {
+  it('allows outsider read of team (authenticated users can browse teams)', async () => {
     const ctx = testEnv.authenticatedContext(OUTSIDER_UID)
-    await assertFails(getDoc(doc(ctx.firestore(), `teams/${TEAM_ID}`)))
+    await assertSucceeds(getDoc(doc(ctx.firestore(), `teams/${TEAM_ID}`)))
   })
 
   it('denies unauthenticated read of team', async () => {
