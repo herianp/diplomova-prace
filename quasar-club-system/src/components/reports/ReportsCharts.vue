@@ -26,7 +26,7 @@
 
       <!-- Survey Types Distribution (half) -->
       <div class="col-12 col-md-6" ref="typesContainer">
-        <q-card flat bordered class="chart-card">
+        <q-card flat bordered class="chart-card q-mb-lg">
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="donut_large" size="sm" color="deep-purple" class="q-mr-sm" />
@@ -42,7 +42,7 @@
 
       <!-- Monthly Attendance Trend (half) -->
       <div class="col-12 col-md-6" ref="trendContainer">
-        <q-card flat bordered class="chart-card">
+        <q-card flat bordered class="chart-card q-mb-lg">
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="show_chart" size="sm" color="teal" class="q-mr-sm" />
@@ -58,7 +58,7 @@
 
       <!-- Player Attendance Ranking (full width) -->
       <div class="col-12" ref="rankingContainer">
-        <q-card flat bordered class="chart-card">
+        <q-card flat bordered class="chart-card q-mb-lg">
           <q-card-section>
             <div class="row items-center q-mb-md">
               <q-icon name="leaderboard" size="sm" color="amber-8" class="q-mr-sm" />
