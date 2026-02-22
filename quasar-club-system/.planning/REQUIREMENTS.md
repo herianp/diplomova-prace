@@ -39,6 +39,13 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 - [x] **ROUTE-01**: Teamless users are redirected to onboarding from protected pages
 - [x] **ROUTE-02**: Users with a team skip onboarding and go directly to dashboard
 
+### Rate Limiting & User Quotas
+
+- [ ] **RATE-01**: Admin can view and edit rate limit configurations in the admin UI
+- [ ] **RATE-02**: Users who exceed configured limits receive clear feedback and are blocked from the action
+- [ ] **RATE-03**: Rate limits are enforced client-side before allowing actions
+- [ ] **RATE-04**: Default limits exist out of the box without requiring admin configuration
+
 ## Future Requirements
 
 Deferred to later milestones. Tracked but not in current roadmap.
@@ -80,12 +87,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EMPTY-02 | Phase 13 | Pending |
 | EMPTY-03 | Phase 13 | Pending |
 | EMPTY-04 | Phase 13 | Pending |
+| RATE-01 | Phase 14 | Pending |
+| RATE-02 | Phase 14 | Pending |
+| RATE-03 | Phase 14 | Pending |
+| RATE-04 | Phase 14 | Pending |
 
 **Coverage:**
-- v1.1 requirements: 17 total
-- Mapped to phases: 17
+- v1.1 requirements: 21 total
+- Mapped to phases: 21
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-21 — traceability filled after roadmap creation*
+*Last updated: 2026-02-22 — added RATE-01 through RATE-04 for Phase 14*
