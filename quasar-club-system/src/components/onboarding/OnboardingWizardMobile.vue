@@ -93,12 +93,9 @@
             </q-card>
           </div>
 
-          <!-- Inline Create Team placeholder -->
+          <!-- Inline Create Team form -->
           <div v-else-if="teamChoicePath === 'create'">
-            <q-banner class="bg-info text-white rounded-borders">
-              <template v-slot:avatar><q-icon name="info" /></template>
-              {{ $t('onboarding.teamChoice.createPlaceholder') }}
-            </q-banner>
+            <CreateTeamForm :is-creating="isCreatingTeam" @submit="createTeam" />
           </div>
 
           <!-- Inline Browse Teams placeholder -->
@@ -133,14 +130,17 @@
 import { watch } from 'vue'
 import { useOnboardingComposable } from '@/composable/useOnboardingComposable'
 import { useTeamStore } from '@/stores/teamStore'
+import CreateTeamForm from '@/components/onboarding/CreateTeamForm.vue'
 
 const {
   currentStep,
   displayName,
   isLoading,
+  isCreatingTeam,
   teamChoicePath,
   showSuccess,
   initDisplayName,
+  createTeam,
   selectTeamPath,
   backToCardSelection,
   goToDashboard,
