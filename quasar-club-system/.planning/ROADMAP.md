@@ -72,13 +72,13 @@ Plans:
   3. A team power user sees a badge or list of pending join requests for their team
   4. A power user can approve a join request, after which the requesting user appears in the team's members list
   5. A power user can decline a join request, after which the request disappears without adding the user to the team
-**Plans**: TBD
+**Plans:** 4 plans
 
 Plans:
-- [ ] 12-01: Team browse list — Firestore query for all teams, display in onboarding wizard
-- [ ] 12-02: Join request submission — write join request document, show confirmation to sender
-- [ ] 12-03: Join request management — power user view of pending requests with approve/decline actions
-- [ ] 12-04: Approval handler — add approved user to members array, clean up request document
+- [ ] 12-01-PLAN.md — Data layer: IJoinRequest interface, joinRequestFirebase service, useJoinRequestUseCases, Firestore security rules
+- [ ] 12-02-PLAN.md — Team browse list UI in onboarding wizard with filtering, badges, and join request flow
+- [ ] 12-03-PLAN.md — Power user request management: sidebar badge, approve/decline UI, audit logging
+- [ ] 12-04-PLAN.md — Standalone /teams page integration, My Requests in Settings, end-to-end verification
 
 ### Phase 13: Empty States
 **Goal**: Dashboard, Surveys, Reports, and Players pages each render meaningful guidance with a call-to-action when the authenticated user belongs to no team
