@@ -30,7 +30,7 @@
 - [x] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user (completed 2026-02-22)
 - [ ] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them
 - [ ] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team
-- [ ] **Phase 14: Rate Limiting & User Quotas** — Admin-configurable limits for user actions to prevent bot abuse and spam
+- [x] **Phase 14: Rate Limiting & User Quotas** — Admin-configurable limits for user actions to prevent bot abuse and spam (completed 2026-02-22)
 
 ## Phase Details
 
@@ -105,7 +105,7 @@ Plans:
   2. Users who exceed configured limits receive clear feedback and are blocked from the action
   3. Rate limits are enforced client-side before allowing actions
   4. Default limits exist out of the box without requiring admin configuration
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 14-01-PLAN.md — Data layer (interfaces, Firebase service, store, use cases) and admin Rate Limits tab
@@ -128,4 +128,4 @@ Plans:
 | 11. Team Creation | 1/1 | Complete    | 2026-02-22 | - |
 | 12. Team Discovery & Join Requests | 3/4 | In Progress|  | - |
 | 13. Empty States | v1.1 | 0/2 | Not started | - |
-| 14. Rate Limiting & User Quotas | 1/2 | In Progress|  | - |
+| 14. Rate Limiting & User Quotas | 2/2 | Complete   | 2026-02-22 | - |

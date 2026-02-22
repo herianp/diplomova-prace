@@ -42,8 +42,8 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 ### Rate Limiting & User Quotas
 
 - [x] **RATE-01**: Admin can view and edit rate limit configurations in the admin UI
-- [ ] **RATE-02**: Users who exceed configured limits receive clear feedback and are blocked from the action
-- [ ] **RATE-03**: Rate limits are enforced client-side before allowing actions
+- [x] **RATE-02**: Users who exceed configured limits receive clear feedback and are blocked from the action
+- [x] **RATE-03**: Rate limits are enforced client-side before allowing actions
 - [x] **RATE-04**: Default limits exist out of the box without requiring admin configuration
 
 ## Future Requirements
@@ -88,8 +88,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EMPTY-03 | Phase 13 | Pending |
 | EMPTY-04 | Phase 13 | Pending |
 | RATE-01 | Phase 14 | Complete |
-| RATE-02 | Phase 14 | Pending |
-| RATE-03 | Phase 14 | Pending |
+| RATE-02 | Phase 14 | Complete |
+| RATE-03 | Phase 14 | Complete |
 | RATE-04 | Phase 14 | Complete |
 
 **Coverage:**

@@ -11,11 +11,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 14 of 14 (Rate Limiting & User Quotas)
-Plan: 1 of 2 in current phase
-Status: In progress — Plan 14-01 complete
-Last activity: 2026-02-22 — Plan 14-01 complete: rate limit data layer (interfaces, Firebase service, Pinia store, use cases) and Admin Rate Limits tab with inline editing
+Plan: 2 of 2 in current phase
+Status: Complete — Phase 14 fully done
+Last activity: 2026-02-22 — Plan 14-02 complete: useRateLimiter enforcement composable wired into all 5 actions with disabled buttons and tooltips
 
-Progress: [███░░░░░░░] 30% (v1.1)
+Progress: [██████████] 100% (v1.1)
 
 ## Performance Metrics
 
@@ -25,8 +25,8 @@ Progress: [███░░░░░░░] 30% (v1.1)
 - Timeline: 6 days (2026-02-14 → 2026-02-19)
 - Files modified: 158 (+26,907/-742 lines)
 
-**v1.1 (in progress):**
-- Plans completed: 7 of 11
+**v1.1 (complete):**
+- Plans completed: 8 of 8 (Phase 14 done)
 
 ## Accumulated Context
 
@@ -55,6 +55,9 @@ v1.1 decisions:
 - [Phase 12 P03]: Badge uses q-item-section side with route comparison inside v-for — simpler than special-casing Teams entry in topLinks
 - [Phase 14-01]: rateLimits/global Firestore document auto-seeded with defaults on first access — no migration needed
 - [Phase 14-01]: 'rateLimits' ListenerId added to listenerRegistry — follows established lifecycle pattern
+- [Phase 14-02]: useActionLimitStatus uses onMounted — works correctly in Vue SFC setup context
+- [Phase 14-02]: Weekly window uses Luxon startOf('week') = Monday (ISO 8601); daily uses ISO date string comparison for timezone safety
+- [Phase 14-02]: messageFirebase.ts hosts rate check since no separate message use case composable exists
 
 ### Roadmap Evolution
 
@@ -78,9 +81,10 @@ None.
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
 | Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
 | Phase 14-rate-limiting-user-quotas P01 | 25 | 2 tasks | 9 files |
+| Phase 14-rate-limiting-user-quotas P02 | 6 | 2 tasks | 11 files |
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Phase 14 Plan 01 execution)
-Stopped at: Completed 14-01-PLAN.md — rate limiting data layer and Admin Rate Limits tab
+Last session: 2026-02-22 (Phase 14 Plan 02 execution)
+Stopped at: Completed 14-02-PLAN.md — rate limit enforcement composable and UI feedback
 Resume file: None
