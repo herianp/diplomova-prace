@@ -27,7 +27,7 @@
 **Milestone Goal:** New users see a guided onboarding wizard and all pages handle the "no team" state gracefully.
 
 - [x] **Phase 10: Onboarding Wizard & Route Guarding** — Intercept teamless users, collect display name, and branch to create or join a team (completed 2026-02-21)
-- [ ] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user
+- [x] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user (completed 2026-02-22)
 - [ ] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them
 - [ ] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team
 
@@ -57,7 +57,7 @@ Plans:
   1. A user who has never been a power user can create a new team and see it appear in the app immediately
   2. The team creator appears in the team's power user list and has access to power user actions (survey management, join request approval)
   3. No admin approval or pre-existing power user role is required to create a team
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 11-01-PLAN.md — Inline team creation form in onboarding wizard, wired to existing createTeam use case
@@ -109,6 +109,6 @@ Plans:
 | 8. Test Implementation | v1.0 | 5/5 | Complete | 2026-02-18 |
 | 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |
 | 10. Onboarding Wizard & Route Guarding | 2/2 | Complete    | 2026-02-21 | - |
-| 11. Team Creation | v1.1 | 0/1 | Planned | - |
+| 11. Team Creation | 1/1 | Complete   | 2026-02-22 | - |
 | 12. Team Discovery & Join Requests | v1.1 | 0/4 | Not started | - |
 | 13. Empty States | v1.1 | 0/2 | Not started | - |

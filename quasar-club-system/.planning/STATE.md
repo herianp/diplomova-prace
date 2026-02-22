@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.1 — Phase 10: Onboarding Wizard & Route Guarding
+**Current focus:** v1.1 — Phase 11: Team Creation
 
 ## Current Position
 
 Milestone: v1.1 New User Onboarding & No-Team UX
-Phase: 10 of 13 (Onboarding Wizard & Route Guarding)
-Plan: 3 of 3 in current phase
-Status: In progress — Plan 10-02 complete, ready for Plan 10-03
-Last activity: 2026-02-21 — Plan 10-02 complete: onboarding wizard fully verified by human tester
+Phase: 11 of 13 (Team Creation)
+Plan: 1 of 1 in current phase
+Status: In progress — Plan 11-01 complete
+Last activity: 2026-02-22 — Plan 11-01 complete: team creation form wired in onboarding wizard
 
-Progress: [█░░░░░░░░░] 10% (v1.1)
+Progress: [██░░░░░░░░] 20% (v1.1)
 
 ## Performance Metrics
 
@@ -26,7 +26,7 @@ Progress: [█░░░░░░░░░] 10% (v1.1)
 - Files modified: 158 (+26,907/-742 lines)
 
 **v1.1 (in progress):**
-- Plans completed: 2 of 10
+- Plans completed: 3 of 10
 
 ## Accumulated Context
 
@@ -43,6 +43,9 @@ v1.1 decisions:
 - [Phase 10]: showSuccess ref set from component-level watcher on teamStore.teams.length for reactive team detection
 - [Phase 10 P02]: Separate mobile/desktop wizard components chosen after QStepper internal panel targeting proved fragile across breakpoints
 - [Phase 10 P02]: Step 3 create/browse inline content are placeholder banners — full implementation deferred to Phases 11 and 12
+- [Phase 11 P01]: CreateTeamForm is minimal (no q-card) — parent wizard provides the visual container
+- [Phase 11 P01]: Success detection reuses existing teamStore.teams.length watcher in both wizard variants — no new watcher needed
+- [Phase 11 P01]: isCreatingTeam lives in composable so both wizard variants share state through the composable instance
 
 ### Pending Todos
 
@@ -62,6 +65,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-21 (Phase 10, Plan 02 completion)
-Stopped at: Completed 10-02-PLAN.md — all tasks done and human-verified, SUMMARY.md created
+Last session: 2026-02-22 (Phase 11, Plan 01 completion)
+Stopped at: Completed 11-01-PLAN.md — all tasks done, SUMMARY.md created
 Resume file: None

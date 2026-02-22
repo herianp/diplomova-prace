@@ -16,8 +16,8 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 
 ### Team Creation
 
-- [ ] **TEAM-01**: Any authenticated user can create a team (not restricted to power users)
-- [ ] **TEAM-02**: Team creator automatically becomes power user of that team only
+- [x] **TEAM-01**: Any authenticated user can create a team (not restricted to power users)
+- [x] **TEAM-02**: Team creator automatically becomes power user of that team only
 
 ### Team Discovery & Joining
 
@@ -69,8 +69,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ONB-04 | Phase 10 | Complete |
 | ROUTE-01 | Phase 10 | Complete |
 | ROUTE-02 | Phase 10 | Complete |
-| TEAM-01 | Phase 11 | Pending |
-| TEAM-02 | Phase 11 | Pending |
+| TEAM-01 | Phase 11 | Complete |
+| TEAM-02 | Phase 11 | Complete |
 | DISC-01 | Phase 12 | Pending |
 | DISC-02 | Phase 12 | Pending |
 | DISC-03 | Phase 12 | Pending |
