@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
-import { ISurvey, ITeam } from '@/interfaces/interfaces'
+import { ref, computed } from "vue";
+import { IJoinRequest, ISurvey, ITeam } from '@/interfaces/interfaces'
 
 export const useTeamStore = defineStore("team", () => {
   // State
@@ -8,6 +8,7 @@ export const useTeamStore = defineStore("team", () => {
   const surveys = ref<ISurvey[]>([]);
   const editedSurvey = ref<ISurvey | null>(null);
   const currentTeam = ref<ITeam | null>(null);
+  const pendingJoinRequests = ref<IJoinRequest[]>([]);
 
   // Pure state mutations (no business logic)
   const setTeams = (teamsList: ITeam[]) => {
@@ -26,11 +27,18 @@ export const useTeamStore = defineStore("team", () => {
     editedSurvey.value = survey;
   };
 
+  const setPendingJoinRequests = (requests: IJoinRequest[]) => {
+    pendingJoinRequests.value = requests;
+  };
+
+  const pendingJoinRequestCount = computed(() => pendingJoinRequests.value.length);
+
   const clearData = () => {
     teams.value = [];
     surveys.value = [];
     currentTeam.value = null;
     editedSurvey.value = null;
+    pendingJoinRequests.value = [];
   };
 
   return {
@@ -39,11 +47,14 @@ export const useTeamStore = defineStore("team", () => {
     surveys,
     editedSurvey,
     currentTeam,
+    pendingJoinRequests,
+    pendingJoinRequestCount,
     // Pure state mutations
     setTeams,
     setSurveys,
     setCurrentTeam,
     setEditedSurvey,
+    setPendingJoinRequests,
     clearData
   };
 });

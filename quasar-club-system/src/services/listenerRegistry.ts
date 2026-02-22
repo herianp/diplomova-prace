@@ -16,6 +16,7 @@ export type ListenerId =
   | 'cashbox-payments'
   | 'cashbox-rules'
   | 'cashbox-history'
+  | 'pendingJoinRequests'
 
 /**
  * Metadata for a registered listener
@@ -112,7 +113,8 @@ export class ListenerRegistry {
       'cashbox-fines',
       'cashbox-payments',
       'cashbox-rules',
-      'cashbox-history'
+      'cashbox-history',
+      'pendingJoinRequests'
     ]
 
     const userScopedIds: ListenerId[] = ['auth', 'teams']

@@ -1,6 +1,7 @@
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
+import { useJoinRequestFirebase } from '@/services/joinRequestFirebase'
 import { ITeam } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
@@ -112,12 +113,36 @@ export function useTeamUseCases() {
     teamStore.clearData()
   }
 
+  /**
+   * Set up a real-time listener for pending join requests for the current team.
+   * Only activates for power users — regular members get an empty array.
+   * Registered under 'team' scope so it cleans up on team switch.
+   */
+  const setPendingJoinRequestsListener = (teamId: string): void => {
+    const joinRequestFirebase = useJoinRequestFirebase()
+    const currentUserId = authStore.user?.uid
+
+    // Only power users need this listener
+    const isPowerUser = teamStore.currentTeam?.powerusers?.includes(currentUserId ?? '')
+    if (!isPowerUser) {
+      teamStore.setPendingJoinRequests([])
+      return
+    }
+
+    const unsubscribe = joinRequestFirebase.getJoinRequestsByTeam(teamId, (requests) => {
+      teamStore.setPendingJoinRequests(requests)
+    })
+
+    listenerRegistry.register('pendingJoinRequests', unsubscribe, { teamId })
+  }
+
   return {
     setTeamListener,
     createTeam,
     deleteTeam,
     getTeamById,
     getTeamByIdAndSetCurrentTeam,
-    clearTeamData
+    clearTeamData,
+    setPendingJoinRequestsListener
   }
 }
