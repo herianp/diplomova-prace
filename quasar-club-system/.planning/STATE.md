@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 12 of 13 (Team Discovery & Join Requests)
-Plan: 1 of 4 in current phase
-Status: In progress — Plan 12-01 complete
-Last activity: 2026-02-22 — Plan 12-01 complete: join request data layer (interface, firebase service, use cases, firestore rules)
+Plan: 2 of 4 in current phase
+Status: In progress — Plan 12-02 complete
+Last activity: 2026-02-22 — Plan 12-02 complete: TeamBrowseList component with search filter, badges, join/cancel flow, integrated into both wizard variants
 
 Progress: [███░░░░░░░] 30% (v1.1)
 
@@ -26,7 +26,7 @@ Progress: [███░░░░░░░] 30% (v1.1)
 - Files modified: 158 (+26,907/-742 lines)
 
 **v1.1 (in progress):**
-- Plans completed: 4 of 10
+- Plans completed: 5 of 10
 
 ## Accumulated Context
 
@@ -48,6 +48,8 @@ v1.1 decisions:
 - [Phase 11 P01]: isCreatingTeam lives in composable so both wizard variants share state through the composable instance
 - [Phase 12]: joinRequests Firestore rules use separate allow read blocks (Firestore OR logic) for own and power-user access
 - [Phase 12]: teams collection gets broad read rule for authenticated users enabling team browse without membership
+- [Phase 12 P02]: TeamBrowseList is self-contained (no props) — manages its own Firestore listeners internally, keeping wizard components clean
+- [Phase 12 P02]: Cancel request button shown inline next to pending badge — no separate cancel view needed for onboarding flow
 
 ### Pending Todos
 
@@ -68,6 +70,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Phase 12, Plan 01 completion)
-Stopped at: Completed 12-01-PLAN.md — all tasks done, SUMMARY.md created
+Last session: 2026-02-22 (Phase 12, Plan 02 completion)
+Stopped at: Completed 12-02-PLAN.md — all tasks done, SUMMARY.md created
 Resume file: None
