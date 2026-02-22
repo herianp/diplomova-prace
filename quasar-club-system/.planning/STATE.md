@@ -5,15 +5,15 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.1 — Phase 12: Team Discovery & Join Requests
+**Current focus:** v1.1 — Phase 14: Rate Limiting & User Quotas
 
 ## Current Position
 
 Milestone: v1.1 New User Onboarding & No-Team UX
-Phase: 12 of 13 (Team Discovery & Join Requests)
-Plan: 3 of 4 in current phase
-Status: In progress — Plan 12-03 complete
-Last activity: 2026-02-22 — Plan 12-03 complete: real-time sidebar badge and JoinRequestManagement component with approve/decline for power users
+Phase: 14 of 14 (Rate Limiting & User Quotas)
+Plan: 1 of 2 in current phase
+Status: In progress — Plan 14-01 complete
+Last activity: 2026-02-22 — Plan 14-01 complete: rate limit data layer (interfaces, Firebase service, Pinia store, use cases) and Admin Rate Limits tab with inline editing
 
 Progress: [███░░░░░░░] 30% (v1.1)
 
@@ -26,7 +26,7 @@ Progress: [███░░░░░░░] 30% (v1.1)
 - Files modified: 158 (+26,907/-742 lines)
 
 **v1.1 (in progress):**
-- Plans completed: 6 of 10
+- Plans completed: 7 of 11
 
 ## Accumulated Context
 
@@ -53,6 +53,12 @@ v1.1 decisions:
 - [Phase 12 P03]: pendingJoinRequests ListenerId added to listenerRegistry team scope for automatic cleanup on team switch
 - [Phase 12 P03]: Power user guard in setPendingJoinRequestsListener uses teamStore.currentTeam.powerusers — avoids extra Firestore reads
 - [Phase 12 P03]: Badge uses q-item-section side with route comparison inside v-for — simpler than special-casing Teams entry in topLinks
+- [Phase 14-01]: rateLimits/global Firestore document auto-seeded with defaults on first access — no migration needed
+- [Phase 14-01]: 'rateLimits' ListenerId added to listenerRegistry — follows established lifecycle pattern
+
+### Roadmap Evolution
+
+- Phase 14 added: Rate Limiting & User Quotas — Admin-configurable limits for user actions to prevent bot abuse and spam
 
 ### Pending Todos
 
@@ -71,9 +77,10 @@ None.
 | 2 | Fix TeamsPage UI — show Create Team button and JoinRequestManagement for all users | 2026-02-22 | 1bcf6fa | [2-fix-teamspage-ui-show-create-team-and-jo](./quick/2-fix-teamspage-ui-show-create-team-and-jo/) |
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
 | Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
+| Phase 14-rate-limiting-user-quotas P01 | 25 | 2 tasks | 9 files |
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Quick task 2 completion)
-Stopped at: Completed quick task 2 — TeamsPage UI consistency fix
+Last session: 2026-02-22 (Phase 14 Plan 01 execution)
+Stopped at: Completed 14-01-PLAN.md — rate limiting data layer and Admin Rate Limits tab
 Resume file: None
