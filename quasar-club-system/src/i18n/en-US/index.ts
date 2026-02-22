@@ -494,6 +494,24 @@ export default {
         submitButton: 'Create Team'
       }
     },
+    teamBrowse: {
+      searchPlaceholder: 'Search teams...',
+      memberBadge: 'Member',
+      pendingBadge: 'Request Pending',
+      joinButton: 'Join',
+      cancelRequest: 'Cancel Request',
+      confirmTitle: 'Join Request',
+      confirmMessage: 'Send join request to {teamName}?',
+      confirmSend: 'Send',
+      confirmCancel: 'Cancel',
+      requestSent: 'Join request sent to {teamName}',
+      requestCancelled: 'Join request cancelled',
+      noTeams: 'No teams available yet',
+      noResults: 'No teams match your search',
+      memberCount: '{count} members',
+      maxRequests: 'You can have at most 5 pending requests',
+      alreadyMember: 'You are already a member of this team'
+    },
     success: {
       title: "You're all set!",
       subtitle: "Your team is ready. Let's get started.",

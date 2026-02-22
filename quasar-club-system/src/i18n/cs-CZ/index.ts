@@ -494,6 +494,24 @@ export default {
         submitButton: 'Vytvořit tým'
       }
     },
+    teamBrowse: {
+      searchPlaceholder: 'Hledat týmy...',
+      memberBadge: 'Člen',
+      pendingBadge: 'Žádost odeslána',
+      joinButton: 'Přidat se',
+      cancelRequest: 'Zrušit žádost',
+      confirmTitle: 'Žádost o přiřazení',
+      confirmMessage: 'Odeslat žádost o přiřazení k týmu {teamName}?',
+      confirmSend: 'Odeslat',
+      confirmCancel: 'Zrušit',
+      requestSent: 'Žádost odeslána týmu {teamName}',
+      requestCancelled: 'Žádost zrušena',
+      noTeams: 'Žádné týmy zatím nejsou k dispozici',
+      noResults: 'Žádné týmy neodpovídají vyhledávání',
+      memberCount: '{count} členů',
+      maxRequests: 'Můžete mít maximálně 5 nevyřízených žádostí',
+      alreadyMember: 'Jste již členem tohoto týmu'
+    },
     success: {
       title: 'Vše je připraveno!',
       subtitle: 'Váš tým je připraven. Pojďme na to.',
