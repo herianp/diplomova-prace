@@ -275,6 +275,24 @@ export interface ICashboxHistoryEntry {
 }
 
 // ============================================================
+// Join Requests
+// ============================================================
+
+export interface IJoinRequest {
+  id?: string
+  userId: string
+  userDisplayName: string
+  userEmail: string
+  teamId: string
+  teamName: string
+  status: 'pending' | 'approved' | 'declined' | 'cancelled'
+  createdAt: Date
+  respondedAt?: Date
+  respondedBy?: string
+  respondedByName?: string
+}
+
+// ============================================================
 // Audit Log
 // ============================================================
 
@@ -287,6 +305,8 @@ export type AuditOperation =
   | 'fine.delete'
   | 'member.remove'
   | 'vote.verify'
+  | 'joinRequest.approve'
+  | 'joinRequest.decline'
 
 export interface IAuditLog {
   id?: string
