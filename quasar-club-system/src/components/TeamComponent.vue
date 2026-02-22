@@ -1,8 +1,8 @@
 <template>
   <div class="teams-container">
 
-    <!-- Join Request Management (power users only) -->
-    <q-card v-if="isCurrentUserPowerUser" flat bordered class="q-mb-lg">
+    <!-- Join Request Management -->
+    <q-card flat bordered class="q-mb-lg">
       <q-card-section class="bg-primary text-white">
         <div class="text-h6">
           <q-icon name="how_to_reg" class="q-mr-sm" />
@@ -34,7 +34,6 @@
         <div class="text-body2 text-grey-7">{{ $t('team.teamOverview') }}</div>
       </div>
       <q-btn
-        v-if="isCurrentUserPowerUser"
         color="primary"
         icon="add"
         :label="$t('team.create')"
@@ -107,7 +106,7 @@ import { useTeamStore } from '@/stores/teamStore'
 import { createLogger } from 'src/utils/logger'
 
 const log = createLogger('TeamComponent')
-const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
+const { currentUser } = useAuthComposable()
 const { createTeam } = useTeamUseCases()
 const { teams } = storeToRefs(useTeamStore())
 
