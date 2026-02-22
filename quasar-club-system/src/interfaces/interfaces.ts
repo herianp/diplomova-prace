@@ -294,6 +294,33 @@ export interface IJoinRequest {
 }
 
 // ============================================================
+// Rate Limiting
+// ============================================================
+
+export interface IRateLimitAction {
+  key: string            // e.g. 'teamCreation', 'messages', 'joinRequests', 'surveys', 'fines'
+  limit: number          // max count
+  windowType: 'total' | 'weekly' | 'daily' | 'concurrent'
+}
+
+export interface IRateLimitConfig {
+  teamCreation: number    // default 5, total
+  messages: number        // default 50, weekly
+  joinRequests: number    // default 5, concurrent pending
+  surveys: number         // default 10, weekly
+  fines: number           // default 500, daily per team
+}
+
+export interface IUserUsage {
+  teamsCreated?: number
+  messagesThisWeek?: number
+  messagesWeekStart?: Date
+  surveysThisWeek?: number
+  surveysWeekStart?: Date
+  pendingJoinRequests?: number  // computed from query, not stored
+}
+
+// ============================================================
 // Audit Log
 // ============================================================
 

@@ -17,6 +17,7 @@ export type ListenerId =
   | 'cashbox-rules'
   | 'cashbox-history'
   | 'pendingJoinRequests'
+  | 'rateLimits'
 
 /**
  * Metadata for a registered listener
