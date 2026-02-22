@@ -7,12 +7,14 @@ import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
 import { createLogger } from 'src/utils/logger'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 
 export function useTeamUseCases() {
   const log = createLogger('useTeamUseCases')
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
+  const { checkLimit, incrementUsage } = useRateLimiter()
 
   const setTeamListener = (userId: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -57,8 +59,19 @@ export function useTeamUseCases() {
   }
 
   const createTeam = async (teamName: string, userId: string): Promise<void> => {
+    // Rate limit check before reaching Firestore
+    const limitResult = await checkLimit('teamCreation')
+    if (!limitResult.allowed) {
+      notifyError('rateLimits.teamCreationExceeded', {
+        context: { limit: limitResult.limit }
+      })
+      throw new Error('rateLimits.teamCreationExceeded')
+    }
+
     try {
-      return await teamFirebase.createTeam(teamName, userId)
+      await teamFirebase.createTeam(teamName, userId)
+      // Increment usage counter after successful creation
+      void incrementUsage('teamCreation')
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

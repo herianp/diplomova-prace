@@ -77,8 +77,11 @@
           :label="$t('survey.create')"
           color="positive"
           size="sm"
+          :disable="isSurveyLimited"
           @click="showCreateDialog = true"
-        />
+        >
+          <q-tooltip v-if="isSurveyLimited">{{ surveyLimitInfo }}</q-tooltip>
+        </q-btn>
       </div>
 
       <!-- Create Survey Dialog -->
@@ -167,6 +170,7 @@ import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
 import { useSurveyMetrics } from '@/composable/useSurveyMetrics'
 import { useDateHelpers } from '@/composable/useDateHelpers'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 import { useI18n } from 'vue-i18n'
 import MetricCard from '@/components/dashboard/MetricCard.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
@@ -180,6 +184,8 @@ const { waitForTeam } = useReadiness()
 const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
 const { setSurveysListener, addSurvey } = useSurveyUseCases()
 const { filters, createFilteredSurveys, updateFilters } = useSurveyFilters()
+const { useActionLimitStatus } = useRateLimiter()
+const { isLimited: isSurveyLimited, limitInfo: surveyLimitInfo } = useActionLimitStatus('surveys')
 const i18n = useI18n()
 const { getDateByDateAndTime } = useDateHelpers(i18n.locale.value)
 

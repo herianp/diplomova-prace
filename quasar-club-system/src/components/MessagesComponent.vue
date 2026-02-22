@@ -113,9 +113,11 @@
                   :label="$t('messages.send')"
                   @click="sendNewMessage"
                   :loading="sending"
-                  :disable="!newMessage.trim()"
+                  :disable="!newMessage.trim() || isMessageLimited"
                   unelevated
-                />
+                >
+                  <q-tooltip v-if="isMessageLimited">{{ messageLimitInfo }}</q-tooltip>
+                </q-btn>
               </div>
             </div>
           </q-card-section>
@@ -141,6 +143,7 @@ import { useTeamStore } from '@/stores/teamStore.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useReadiness } from '@/composable/useReadiness'
 import { useMessageFirebase } from '@/services/messageFirebase'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
@@ -154,6 +157,8 @@ const teamStore = useTeamStore()
 const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { waitForTeam } = useReadiness()
 const messageFirebase = useMessageFirebase()
+const { useActionLimitStatus } = useRateLimiter()
+const { isLimited: isMessageLimited, limitInfo: messageLimitInfo } = useActionLimitStatus('messages')
 const $q = useQuasar()
 const { t } = useI18n()
 

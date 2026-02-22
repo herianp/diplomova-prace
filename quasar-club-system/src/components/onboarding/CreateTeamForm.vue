@@ -9,19 +9,23 @@
       class="q-mb-md"
       @keyup.enter="handleSubmit"
     />
-    <q-btn
-      color="primary"
-      :label="$t('onboarding.teamChoice.createTeam.submitButton')"
-      :loading="isCreating"
-      :disable="!teamName.trim()"
-      class="full-width"
-      @click="handleSubmit"
-    />
+    <div>
+      <q-btn
+        color="primary"
+        :label="$t('onboarding.teamChoice.createTeam.submitButton')"
+        :loading="isCreating"
+        :disable="!teamName.trim() || isLimited"
+        class="full-width"
+        @click="handleSubmit"
+      />
+      <q-tooltip v-if="isLimited">{{ limitInfo }}</q-tooltip>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 
 defineProps({
   isCreating: {
@@ -34,8 +38,12 @@ const emit = defineEmits(['submit'])
 
 const teamName = ref('')
 
+const { useActionLimitStatus } = useRateLimiter()
+const { isLimited, limitInfo } = useActionLimitStatus('teamCreation')
+
 const handleSubmit = () => {
   if (!teamName.value.trim()) return
+  if (isLimited.value) return
   emit('submit', teamName.value.trim())
 }
 </script>

@@ -673,5 +673,17 @@ export default {
       noHistory: "Zatím žádná historie",
       viewDetails: "Zobrazit detaily"
     }
+  },
+  rateLimits: {
+    exceeded: "Limit dosažen",
+    resetPermanent: "Tento limit je trvalý",
+    resetWeekly: "Obnoví se {date}",
+    resetDaily: "Obnoví se zítra",
+    resetConcurrent: "Nejprve vyřešte čekající žádosti",
+    teamCreationExceeded: "Vytvořili jste maximální počet týmů ({limit})",
+    messagesExceeded: "Týdenní limit zpráv dosažen ({current}/{limit})",
+    surveysExceeded: "Týdenní limit anket dosažen ({current}/{limit})",
+    joinRequestsExceeded: "Dosažen maximální počet čekajících žádostí ({limit})",
+    finesExceeded: "Denní limit pokut pro tento tým dosažen ({current}/{limit})"
   }
 } as const

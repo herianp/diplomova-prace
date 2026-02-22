@@ -673,5 +673,17 @@ export default {
       noHistory: "No history yet",
       viewDetails: "View Details"
     }
+  },
+  rateLimits: {
+    exceeded: "Limit reached",
+    resetPermanent: "This limit is permanent",
+    resetWeekly: "Resets on {date}",
+    resetDaily: "Resets tomorrow",
+    resetConcurrent: "Resolve pending requests first",
+    teamCreationExceeded: "You've created the maximum number of teams ({limit})",
+    messagesExceeded: "Weekly message limit reached ({current}/{limit})",
+    surveysExceeded: "Weekly survey limit reached ({current}/{limit})",
+    joinRequestsExceeded: "Maximum pending join requests reached ({limit})",
+    finesExceeded: "Daily fine limit reached for this team ({current}/{limit})"
   }
 } as const

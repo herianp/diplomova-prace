@@ -7,6 +7,7 @@ import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
 import { Unsubscribe } from 'firebase/firestore'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 
 const log = createLogger('useJoinRequestUseCases')
 
@@ -14,6 +15,7 @@ export function useJoinRequestUseCases() {
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const joinRequestFirebase = useJoinRequestFirebase()
+  const { checkLimit } = useRateLimiter()
 
   /**
    * Send a join request for the current user to a team.
@@ -31,22 +33,13 @@ export function useJoinRequestUseCases() {
       throw new Error('You are already a member of this team')
     }
 
-    // Check max 5 pending requests
-    try {
-      const pendingCount = await joinRequestFirebase.countPendingRequestsByUser(currentUser.uid)
-      if (pendingCount >= 5) {
-        throw new Error('You already have 5 pending join requests. Cancel one before sending a new request.')
-      }
-    } catch (error: unknown) {
-      if (error instanceof Error && !((error as { code?: string }).code)) {
-        // Re-throw validation errors (not FirestoreErrors)
-        throw error
-      }
-      if (error instanceof FirestoreError) {
-        notifyError(error.message)
-        throw error
-      }
-      throw error
+    // Check concurrent pending join request limit
+    const limitResult = await checkLimit('joinRequests')
+    if (!limitResult.allowed) {
+      notifyError('rateLimits.joinRequestsExceeded', {
+        context: { limit: limitResult.limit }
+      })
+      throw new Error('rateLimits.joinRequestsExceeded')
     }
 
     try {
