@@ -20,16 +20,17 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref } from 'vue'
 
-defineProps<{
-  isCreating: boolean
-}>()
+defineProps({
+  isCreating: {
+    type: Boolean,
+    default: false
+  }
+})
 
-const emit = defineEmits<{
-  submit: [teamName: string]
-}>()
+const emit = defineEmits(['submit'])
 
 const teamName = ref('')
 

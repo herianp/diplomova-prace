@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { useJoinRequestFirebase } from '@/services/joinRequestFirebase'
-import { ITeam } from '@/interfaces/interfaces'
+import { IJoinRequest, ITeam } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
@@ -25,6 +25,11 @@ export function useTeamUseCases() {
         // Only auto-select on first load when no team is selected
         if (!teamStore.currentTeam && teamsList.length > 0) {
           teamStore.setCurrentTeam(teamsList[0])
+        }
+
+        // Set up join request listeners for all power-user teams
+        if (isFirstCallback) {
+          setPendingJoinRequestsListener()
         }
 
         if (isFirstCallback) {
@@ -114,26 +119,43 @@ export function useTeamUseCases() {
   }
 
   /**
-   * Set up a real-time listener for pending join requests for the current team.
-   * Only activates for power users — regular members get an empty array.
-   * Registered under 'team' scope so it cleans up on team switch.
+   * Set up real-time listeners for pending join requests across all teams
+   * where the current user is a power user. Merges results into one list.
    */
-  const setPendingJoinRequestsListener = (teamId: string): void => {
+  const setPendingJoinRequestsListener = (): void => {
     const joinRequestFirebase = useJoinRequestFirebase()
     const currentUserId = authStore.user?.uid
+    if (!currentUserId) return
 
-    // Only power users need this listener
-    const isPowerUser = teamStore.currentTeam?.powerusers?.includes(currentUserId ?? '')
-    if (!isPowerUser) {
+    // Unregister previous listeners
+    listenerRegistry.unregister('pendingJoinRequests')
+
+    // Find all teams where user is a power user
+    const powerUserTeams = teamStore.teams.filter(t => t.powerusers?.includes(currentUserId))
+    if (powerUserTeams.length === 0) {
       teamStore.setPendingJoinRequests([])
       return
     }
 
-    const unsubscribe = joinRequestFirebase.getJoinRequestsByTeam(teamId, (requests) => {
-      teamStore.setPendingJoinRequests(requests)
-    })
+    // Track requests per team and merge
+    const requestsByTeam: Record<string, IJoinRequest[]> = {}
+    const unsubscribes: (() => void)[] = []
 
-    listenerRegistry.register('pendingJoinRequests', unsubscribe, { teamId })
+    for (const team of powerUserTeams) {
+      if (!team.id) continue
+      const unsubscribe = joinRequestFirebase.getJoinRequestsByTeam(team.id, (requests) => {
+        requestsByTeam[team.id!] = requests
+        // Merge all teams' requests into a single list
+        const allRequests = Object.values(requestsByTeam).flat()
+        teamStore.setPendingJoinRequests(allRequests)
+      })
+      unsubscribes.push(unsubscribe)
+    }
+
+    // Register a single cleanup that unsubscribes all
+    listenerRegistry.register('pendingJoinRequests', () => {
+      unsubscribes.forEach(unsub => unsub())
+    })
   }
 
   return {

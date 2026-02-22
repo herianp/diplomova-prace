@@ -27,6 +27,7 @@ export interface IUser {
   displayName?: string
   createdAt: Date
   photoURL?: string
+  onboardingCompleted?: boolean
 }
 
 export interface ICredentials {

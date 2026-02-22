@@ -465,6 +465,7 @@ export default {
   onboarding: {
     next: 'Continue',
     back: 'Back',
+    skip: 'Skip for now',
     welcome: {
       title: 'Welcome',
       heading: 'Welcome to Club System',

@@ -215,12 +215,15 @@ export function useSurveyFirebase() {
   // NOTE: Subcollection architecture eliminates IN query limit issues (DAT-03).
   // Votes are queried per-survey via getDocs on the subcollection, not by user ID list.
   const addVoteToSubcollection = async (surveyId: string, userUid: string, vote: boolean): Promise<void> => {
+    const batch = writeBatch(db)
     const voteRef = doc(db, 'surveys', surveyId, 'votes', userUid)
-    await setDoc(voteRef, {
-      userUid,
-      vote,
-      updatedAt: new Date()
-    }, { merge: true })
+    const surveyRef = doc(db, 'surveys', surveyId)
+
+    batch.set(voteRef, { userUid, vote, updatedAt: new Date() }, { merge: true })
+    // Touch survey doc to trigger the real-time listener for all clients
+    batch.update(surveyRef, { lastVoteAt: new Date() })
+
+    await batch.commit()
   }
 
   // Internal helper: Dual-write vote to both array and subcollection atomically

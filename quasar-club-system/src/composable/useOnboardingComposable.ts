@@ -61,8 +61,21 @@ export function useOnboardingComposable() {
     teamChoicePath.value = null
   }
 
-  const goToDashboard = () => {
+  const goToDashboard = async () => {
+    await completeOnboarding()
     void router.push(RouteEnum.DASHBOARD.path)
+  }
+
+  const completeOnboarding = async () => {
+    const uid = authStore.user?.uid
+    if (!uid) return
+    await useAuthFirebase().setOnboardingCompleted(uid)
+    authStore.setOnboardingComplete(true)
+  }
+
+  const skipOnboarding = async () => {
+    await completeOnboarding()
+    void router.push(RouteEnum.TEAM.path)
   }
 
   const nextStep = async () => {
@@ -89,6 +102,7 @@ export function useOnboardingComposable() {
     selectTeamPath,
     backToCardSelection,
     goToDashboard,
+    skipOnboarding,
     nextStep,
     prevStep
   }

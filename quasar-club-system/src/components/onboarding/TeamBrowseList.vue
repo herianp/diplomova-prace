@@ -52,12 +52,12 @@
         <q-item-section side>
           <div class="row items-center q-gutter-xs">
             <!-- Already a member -->
-            <template v-if="isUserMember(team.id!)">
+            <template v-if="isUserMember(team.id)">
               <q-badge color="positive" :label="$t('onboarding.teamBrowse.memberBadge')" />
             </template>
 
             <!-- Pending request -->
-            <template v-else-if="getUserPendingRequest(team.id!)">
+            <template v-else-if="getUserPendingRequest(team.id)">
               <q-badge color="warning" :label="$t('onboarding.teamBrowse.pendingBadge')" />
               <q-btn
                 flat
@@ -66,7 +66,7 @@
                 icon="close"
                 color="warning"
                 size="sm"
-                @click="cancelRequest(getUserPendingRequest(team.id!)!.id!)"
+                @click="cancelRequest(getUserPendingRequest(team.id)?.id)"
               >
                 <q-tooltip>{{ $t('onboarding.teamBrowse.cancelRequest') }}</q-tooltip>
               </q-btn>
@@ -114,14 +114,12 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useJoinRequestUseCases } from '@/composable/useJoinRequestUseCases'
 import { useTeamStore } from '@/stores/teamStore'
-import { ITeam, IJoinRequest } from '@/interfaces/interfaces'
-import type { Unsubscribe } from 'firebase/firestore'
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -129,15 +127,15 @@ const teamStore = useTeamStore()
 const joinRequestUseCases = useJoinRequestUseCases()
 
 const filterText = ref('')
-const allTeams = ref<ITeam[]>([])
-const userRequests = ref<IJoinRequest[]>([])
+const allTeams = ref([])
+const userRequests = ref([])
 const isLoading = ref(true)
 const isSending = ref(false)
 const showConfirmDialog = ref(false)
-const selectedTeam = ref<ITeam | null>(null)
+const selectedTeam = ref(null)
 
-let unsubscribeTeams: Unsubscribe | null = null
-let unsubscribeRequests: Unsubscribe | null = null
+let unsubscribeTeams = null
+let unsubscribeRequests = null
 
 onMounted(() => {
   unsubscribeTeams = joinRequestUseCases.setAllTeamsListener((teams) => {
@@ -164,33 +162,33 @@ const filteredTeams = computed(() => {
   return [...teams].sort((a, b) => a.name.localeCompare(b.name))
 })
 
-const isUserMember = (teamId: string): boolean => {
+const isUserMember = (teamId) => {
   return teamStore.teams.some((t) => t.id === teamId)
 }
 
-const getUserPendingRequest = (teamId: string): IJoinRequest | undefined => {
+const getUserPendingRequest = (teamId) => {
   return userRequests.value.find((r) => r.teamId === teamId && r.status === 'pending')
 }
 
-const confirmJoinRequest = (team: ITeam): void => {
+const confirmJoinRequest = (team) => {
   selectedTeam.value = team
   showConfirmDialog.value = true
 }
 
-const sendJoinRequest = async (): Promise<void> => {
+const sendJoinRequest = async () => {
   if (!selectedTeam.value) return
 
   const team = selectedTeam.value
   isSending.value = true
   try {
-    await joinRequestUseCases.sendJoinRequest(team.id!, team.name)
+    await joinRequestUseCases.sendJoinRequest(team.id, team.name)
     showConfirmDialog.value = false
     selectedTeam.value = null
     $q.notify({
       type: 'positive',
       message: t('onboarding.teamBrowse.requestSent', { teamName: team.name }),
     })
-  } catch (error: unknown) {
+  } catch (error) {
     showConfirmDialog.value = false
     const message =
       error instanceof Error ? error.message : t('onboarding.teamBrowse.requestSent', { teamName: team.name })
@@ -203,7 +201,7 @@ const sendJoinRequest = async (): Promise<void> => {
   }
 }
 
-const cancelRequest = async (requestId: string): Promise<void> => {
+const cancelRequest = async (requestId) => {
   try {
     await joinRequestUseCases.cancelJoinRequest(requestId)
     $q.notify({

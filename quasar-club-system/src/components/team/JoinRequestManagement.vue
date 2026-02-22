@@ -29,8 +29,9 @@
 
         <!-- User info -->
         <q-item-section>
-          <q-item-label>{{ request.userDisplayName }}</q-item-label>
+          <q-item-label>{{ request.userDisplayName || request.userEmail }}</q-item-label>
           <q-item-label caption>{{ request.userEmail }}</q-item-label>
+          <q-item-label caption class="text-primary">{{ request.teamName }}</q-item-label>
         </q-item-section>
 
         <!-- Approve / Decline actions -->
@@ -74,12 +75,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { ref, computed } from 'vue'
 import { useQuasar } from 'quasar'
 import { useTeamStore } from '@/stores/teamStore'
 import { useJoinRequestUseCases } from '@/composable/useJoinRequestUseCases'
-import { IJoinRequest } from '@/interfaces/interfaces'
 import { useI18n } from 'vue-i18n'
 
 const $q = useQuasar()
@@ -91,7 +91,7 @@ const isProcessing = ref(false)
 
 const pendingJoinRequests = computed(() => teamStore.pendingJoinRequests)
 
-const approve = async (request: IJoinRequest) => {
+const approve = async (request) => {
   isProcessing.value = true
   try {
     await approveJoinRequest(request)
@@ -111,7 +111,7 @@ const approve = async (request: IJoinRequest) => {
   }
 }
 
-const decline = async (request: IJoinRequest) => {
+const decline = async (request) => {
   isProcessing.value = true
   try {
     await declineJoinRequest(request)

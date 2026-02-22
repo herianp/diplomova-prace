@@ -107,6 +107,14 @@
 
       <!-- Navigation buttons — always pinned at bottom -->
       <div class="wizard-nav">
+        <q-btn
+          flat
+          dense
+          :label="$t('onboarding.skip')"
+          color="grey-7"
+          class="full-width q-mb-sm"
+          @click="skipOnboarding"
+        />
         <!-- Step 1 -->
         <q-btn v-if="currentStep === 1" color="primary" :label="$t('onboarding.next')" @click="nextStep" class="full-width" size="lg" />
 
@@ -142,6 +150,7 @@ const {
   selectTeamPath,
   backToCardSelection,
   goToDashboard,
+  skipOnboarding,
   nextStep,
   prevStep
 } = useOnboardingComposable()

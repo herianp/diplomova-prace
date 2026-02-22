@@ -1,7 +1,7 @@
 <template>
   <q-drawer v-model="drawerOpen" show-if-above bordered class="drawer">
     <!-- Season & Team selectors for mobile (hidden on desktop where they appear in header) -->
-    <div class="lt-md q-pa-sm">
+    <div v-if="hasTeam" class="lt-md q-pa-sm">
       <q-list dense>
         <!-- Season selector -->
         <q-item-label header class="q-pb-xs">{{ $t('season.label') }}</q-item-label>
@@ -126,18 +126,19 @@ const { setPendingJoinRequestsListener } = useTeamUseCases();
 const userTeams = computed(() => teamStore.teams);
 const currentTeam = computed(() => teamStore.currentTeam);
 const pendingJoinRequestCount = computed(() => teamStore.pendingJoinRequestCount);
+const hasTeam = computed(() => teamStore.teams.length > 0);
 
 const selectTeam = (team) => {
   listenerRegistry.unregisterByScope('team');
   teamStore.currentTeam = team;
   setSurveysListener(team.id);
-  setPendingJoinRequestsListener(team.id);
+  setPendingJoinRequestsListener();
 };
 
 const drawerOpen = ref(true);
 
 // Top navigation links
-const topLinks = [
+const allLinks = [
   { title: "Dashboard", icon: "dashboard", route: RouteEnum.DASHBOARD.path },
   { title: "Teams", icon: "groups", route: RouteEnum.TEAM.path },
   { title: "Surveys", icon: "poll", route: RouteEnum.SURVEY.path },
@@ -146,6 +147,10 @@ const topLinks = [
   { title: "Cashbox", icon: "account_balance_wallet", route: RouteEnum.CASHBOX.path },
   { title: "Messages", icon: "chat", route: RouteEnum.MESSAGES.path },
 ];
+
+const topLinks = computed(() =>
+  hasTeam.value ? allLinks : allLinks.filter(l => l.route === RouteEnum.TEAM.path)
+);
 
 // Navigation function
 const navigateTo = (route) => {

@@ -329,8 +329,6 @@ import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { AuthError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
-import type { IJoinRequest } from '@/interfaces/interfaces'
-import type { Unsubscribe } from 'firebase/firestore'
 
 const log = createLogger('SettingsPage')
 import { notifyError, notifySuccess } from '@/services/notificationService'
@@ -350,15 +348,17 @@ const changingPassword = ref(false)
 const showSignOutDialog = ref(false)
 
 // My Requests state
-const myJoinRequests = ref<IJoinRequest[]>([])
-const cancellingId = ref<string | null>(null)
-let unsubscribeJoinRequests: Unsubscribe | null = null
+const myJoinRequests = ref([])
+const cancellingId = ref(null)
+let unsubscribeJoinRequests = null
 
 onMounted(() => {
   unsubscribeJoinRequests = setUserJoinRequestsListener((requests) => {
-    myJoinRequests.value = requests.slice().sort(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-    )
+    myJoinRequests.value = requests.slice().sort((a, b) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt)
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt)
+      return dateB.getTime() - dateA.getTime()
+    })
   })
 })
 
@@ -368,7 +368,7 @@ onUnmounted(() => {
   }
 })
 
-const statusColor = (status: IJoinRequest['status']): string => {
+const statusColor = (status) => {
   switch (status) {
     case 'pending': return 'warning'
     case 'approved': return 'positive'
@@ -378,13 +378,13 @@ const statusColor = (status: IJoinRequest['status']): string => {
   }
 }
 
-const formatDate = (date: Date): string => {
+const formatDate = (date) => {
   if (!date) return ''
-  const d = date instanceof Date ? date : new Date(date)
+  const d = date?.toDate ? date.toDate() : (date instanceof Date ? date : new Date(date))
   return d.toLocaleDateString()
 }
 
-const handleCancelRequest = async (request: IJoinRequest) => {
+const handleCancelRequest = async (request) => {
   if (!request.id) return
   cancellingId.value = request.id
   try {

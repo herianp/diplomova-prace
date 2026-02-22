@@ -126,6 +126,14 @@ export function useSurveyUseCases() {
     if (survey) {
       try {
         await surveyFirebase.addOrUpdateVote(surveyId, userUid, newVote, survey.votes)
+
+        // Optimistic local update — subcollection writes don't trigger the survey snapshot listener
+        const existingVote = survey.votes.find((v) => v.userUid === userUid)
+        if (existingVote) {
+          existingVote.vote = newVote
+        } else {
+          survey.votes.push({ userUid, vote: newVote })
+        }
       } catch (error: unknown) {
         if (error instanceof FirestoreError) {
           const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

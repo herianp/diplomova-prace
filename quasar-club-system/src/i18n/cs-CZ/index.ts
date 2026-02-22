@@ -465,6 +465,7 @@ export default {
   onboarding: {
     next: 'Pokračovat',
     back: 'Zpět',
+    skip: 'Prozatím přeskočit',
     welcome: {
       title: 'Vítejte',
       heading: 'Vítejte v Club System',

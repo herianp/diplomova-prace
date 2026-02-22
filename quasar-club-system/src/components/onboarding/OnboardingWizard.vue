@@ -9,7 +9,8 @@
     </div>
 
     <!-- Wizard stepper -->
-    <q-stepper v-else v-model="currentStep" animated flat bordered style="max-width: 600px; width: 100%">
+    <div v-else style="max-width: 600px; width: 100%">
+      <q-stepper v-model="currentStep" animated flat bordered>
 
       <!-- Step 1: Welcome -->
       <q-step :name="1" :title="$t('onboarding.welcome.title')" icon="waving_hand" :done="currentStep > 1">
@@ -103,7 +104,17 @@
         </q-stepper-navigation>
       </q-step>
 
-    </q-stepper>
+      </q-stepper>
+      <div class="row justify-center q-mt-md">
+        <q-btn
+          flat
+          dense
+          :label="$t('onboarding.skip')"
+          color="grey-7"
+          @click="skipOnboarding"
+        />
+      </div>
+    </div>
   </q-page>
 </template>
 
@@ -126,6 +137,7 @@ const {
   selectTeamPath,
   backToCardSelection,
   goToDashboard,
+  skipOnboarding,
   nextStep,
   prevStep
 } = useOnboardingComposable()

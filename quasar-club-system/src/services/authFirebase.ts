@@ -82,6 +82,7 @@ export function useAuthFirebase() {
       name: name || "",
       displayName: user.displayName || name || "",
       createdAt: new Date(),
+      onboardingCompleted: false,
     };
 
     try {
@@ -161,6 +162,17 @@ export function useAuthFirebase() {
     }
   };
 
+  const setOnboardingCompleted = async (uid: string): Promise<void> => {
+    try {
+      const userRef = doc(db, 'users', uid);
+      await updateDoc(userRef, { onboardingCompleted: true });
+    } catch (error: unknown) {
+      const authError = mapFirebaseAuthError(error)
+      log.error('Failed to set onboarding completed', { uid, error: authError.message })
+      throw authError
+    }
+  };
+
   return {
     authStateListener,
     authStateReady,
@@ -172,6 +184,7 @@ export function useAuthFirebase() {
     refreshUser,
     getUserFromFirestore,
     updateUserProfile,
-    changeUserPassword
+    changeUserPassword,
+    setOnboardingCompleted
   };
 }
