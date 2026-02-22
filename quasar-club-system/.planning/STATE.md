@@ -11,9 +11,9 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 12 of 13 (Team Discovery & Join Requests)
-Plan: 2 of 4 in current phase
-Status: In progress — Plan 12-02 complete
-Last activity: 2026-02-22 — Plan 12-02 complete: TeamBrowseList component with search filter, badges, join/cancel flow, integrated into both wizard variants
+Plan: 3 of 4 in current phase
+Status: In progress — Plan 12-03 complete
+Last activity: 2026-02-22 — Plan 12-03 complete: real-time sidebar badge and JoinRequestManagement component with approve/decline for power users
 
 Progress: [███░░░░░░░] 30% (v1.1)
 
@@ -26,7 +26,7 @@ Progress: [███░░░░░░░] 30% (v1.1)
 - Files modified: 158 (+26,907/-742 lines)
 
 **v1.1 (in progress):**
-- Plans completed: 5 of 10
+- Plans completed: 6 of 10
 
 ## Accumulated Context
 
@@ -50,6 +50,9 @@ v1.1 decisions:
 - [Phase 12]: teams collection gets broad read rule for authenticated users enabling team browse without membership
 - [Phase 12 P02]: TeamBrowseList is self-contained (no props) — manages its own Firestore listeners internally, keeping wizard components clean
 - [Phase 12 P02]: Cancel request button shown inline next to pending badge — no separate cancel view needed for onboarding flow
+- [Phase 12 P03]: pendingJoinRequests ListenerId added to listenerRegistry team scope for automatic cleanup on team switch
+- [Phase 12 P03]: Power user guard in setPendingJoinRequestsListener uses teamStore.currentTeam.powerusers — avoids extra Firestore reads
+- [Phase 12 P03]: Badge uses q-item-section side with route comparison inside v-for — simpler than special-casing Teams entry in topLinks
 
 ### Pending Todos
 
@@ -70,6 +73,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Phase 12, Plan 02 completion)
-Stopped at: Completed 12-02-PLAN.md — all tasks done, SUMMARY.md created
+Last session: 2026-02-22 (Phase 12, Plan 03 completion)
+Stopped at: Completed 12-03-PLAN.md — all tasks done, SUMMARY.md created
 Resume file: None

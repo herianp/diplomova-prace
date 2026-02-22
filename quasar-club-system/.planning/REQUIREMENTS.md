@@ -23,9 +23,9 @@ Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 
 - [x] **DISC-01**: User can browse a list of all existing teams
 - [x] **DISC-02**: User can send a join request to a team
-- [ ] **DISC-03**: Team power user sees pending join requests
-- [ ] **DISC-04**: Team power user can approve or decline a join request
-- [ ] **DISC-05**: Approved user is added to the team's members array
+- [x] **DISC-03**: Team power user sees pending join requests
+- [x] **DISC-04**: Team power user can approve or decline a join request
+- [x] **DISC-05**: Approved user is added to the team's members array
 
 ### Empty States
 
@@ -73,9 +73,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEAM-02 | Phase 11 | Complete |
 | DISC-01 | Phase 12 | Complete |
 | DISC-02 | Phase 12 | Complete |
-| DISC-03 | Phase 12 | Pending |
-| DISC-04 | Phase 12 | Pending |
-| DISC-05 | Phase 12 | Pending |
+| DISC-03 | Phase 12 | Complete |
+| DISC-04 | Phase 12 | Complete |
+| DISC-05 | Phase 12 | Complete |
 | EMPTY-01 | Phase 13 | Pending |
 | EMPTY-02 | Phase 13 | Pending |
 | EMPTY-03 | Phase 13 | Pending |
