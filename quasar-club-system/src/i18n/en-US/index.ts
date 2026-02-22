@@ -518,6 +518,17 @@ export default {
       goToDashboard: 'Go to Dashboard'
     }
   },
+  joinRequests: {
+    title: 'Join Requests',
+    approve: 'Approve',
+    decline: 'Decline',
+    approved: '{name} has been added to the team',
+    declined: 'Request from {name} declined',
+    noRequests: 'No pending join requests',
+    pendingCount: '{count} pending request | {count} pending requests',
+    approveError: 'Failed to approve join request',
+    declineError: 'Failed to decline join request'
+  },
   cashbox: {
     title: "Cashbox",
     subtitle: "Manage fines and payments for your team",

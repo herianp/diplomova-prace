@@ -68,6 +68,9 @@
           <q-icon :name="link.icon" />
         </q-item-section>
         <q-item-section>{{ link.title }}</q-item-section>
+        <q-item-section side v-if="link.route === RouteEnum.TEAM.path && pendingJoinRequestCount > 0">
+          <q-badge color="red">{{ pendingJoinRequestCount }}</q-badge>
+        </q-item-section>
       </q-item>
     </q-list>
 
@@ -110,6 +113,7 @@ import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import { useSeasonStore } from '@/stores/seasonStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { listenerRegistry } from '@/services/listenerRegistry'
 
 const router = useRouter();
@@ -117,14 +121,17 @@ const { logoutUser, isAdmin } = useAuthComposable();
 const seasonStore = useSeasonStore();
 const teamStore = useTeamStore();
 const { setSurveysListener } = useSurveyUseCases();
+const { setPendingJoinRequestsListener } = useTeamUseCases();
 
 const userTeams = computed(() => teamStore.teams);
 const currentTeam = computed(() => teamStore.currentTeam);
+const pendingJoinRequestCount = computed(() => teamStore.pendingJoinRequestCount);
 
 const selectTeam = (team) => {
   listenerRegistry.unregisterByScope('team');
   teamStore.currentTeam = team;
   setSurveysListener(team.id);
+  setPendingJoinRequestsListener(team.id);
 };
 
 const drawerOpen = ref(true);

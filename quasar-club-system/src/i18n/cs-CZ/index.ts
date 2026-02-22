@@ -518,6 +518,17 @@ export default {
       goToDashboard: 'Přejít na nástěnku'
     }
   },
+  joinRequests: {
+    title: 'Žádosti o přiřazení',
+    approve: 'Schválit',
+    decline: 'Zamítnout',
+    approved: '{name} byl přidán do týmu',
+    declined: 'Žádost od {name} zamítnuta',
+    noRequests: 'Žádné nevyřízené žádosti',
+    pendingCount: '{count} nevyřízená žádost | {count} nevyřízené žádosti | {count} nevyřízených žádostí',
+    approveError: 'Nepodařilo se schválit žádost',
+    declineError: 'Nepodařilo se zamítnout žádost'
+  },
   cashbox: {
     title: "Pokladna",
     subtitle: "Správa pokut a plateb vašeho týmu",
