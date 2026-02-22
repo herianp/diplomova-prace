@@ -28,7 +28,7 @@
 
 - [x] **Phase 10: Onboarding Wizard & Route Guarding** — Intercept teamless users, collect display name, and branch to create or join a team (completed 2026-02-21)
 - [x] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user (completed 2026-02-22)
-- [ ] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them
+- [x] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them (completed 2026-02-22)
 - [ ] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team
 - [x] **Phase 14: Rate Limiting & User Quotas** — Admin-configurable limits for user actions to prevent bot abuse and spam (completed 2026-02-22)
 
@@ -73,7 +73,7 @@ Plans:
   3. A team power user sees a badge or list of pending join requests for their team
   4. A power user can approve a join request, after which the requesting user appears in the team's members list
   5. A power user can decline a join request, after which the request disappears without adding the user to the team
-**Plans:** 3/4 plans executed
+**Plans:** 4/4 plans complete
 
 Plans:
 - [ ] 12-01-PLAN.md — Data layer: IJoinRequest interface, joinRequestFirebase service, useJoinRequestUseCases, Firestore security rules
@@ -126,6 +126,6 @@ Plans:
 | 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |
 | 10. Onboarding Wizard & Route Guarding | 2/2 | Complete    | 2026-02-21 | - |
 | 11. Team Creation | 1/1 | Complete    | 2026-02-22 | - |
-| 12. Team Discovery & Join Requests | 3/4 | In Progress|  | - |
+| 12. Team Discovery & Join Requests | 4/4 | Complete    | 2026-02-22 | - |
 | 13. Empty States | v1.1 | 0/2 | Not started | - |
 | 14. Rate Limiting & User Quotas | 2/2 | Complete    | 2026-02-22 | - |
