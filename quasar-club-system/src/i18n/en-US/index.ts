@@ -486,7 +486,13 @@ export default {
       browseTitle: 'Browse Teams',
       browseDescription: 'Find and join an existing team.',
       createPlaceholder: 'Team creation will be available soon.',
-      browsePlaceholder: 'Team browsing will be available soon.'
+      browsePlaceholder: 'Team browsing will be available soon.',
+      createTeam: {
+        teamNameLabel: 'Team Name',
+        teamNameHint: 'Choose a name for your new team',
+        nameRequired: 'Team name is required',
+        submitButton: 'Create Team'
+      }
     },
     success: {
       title: "You're all set!",

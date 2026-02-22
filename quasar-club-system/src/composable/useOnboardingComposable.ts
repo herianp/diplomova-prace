@@ -3,6 +3,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/authStore'
 import { useAuthFirebase } from '@/services/authFirebase'
 import { useAuthUseCases } from '@/composable/useAuthUseCases'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { RouteEnum } from '@/enums/routesEnum'
 
 export function useOnboardingComposable() {
@@ -12,6 +13,7 @@ export function useOnboardingComposable() {
   const currentStep = ref(1)
   const displayName = ref('')
   const isLoading = ref(false)
+  const isCreatingTeam = ref(false)
   const teamChoicePath = ref<'create' | 'browse' | null>(null)
   const showSuccess = ref(false)
 
@@ -35,6 +37,19 @@ export function useOnboardingComposable() {
       await useAuthUseCases().refreshCurrentUser()
     } finally {
       isLoading.value = false
+    }
+  }
+
+  const createTeam = async (teamName: string): Promise<void> => {
+    const uid = authStore.user?.uid
+    if (!uid) return
+    isCreatingTeam.value = true
+    try {
+      await useTeamUseCases().createTeam(teamName, uid)
+      // Success is handled by the teamStore.teams watcher in the wizard component
+      // which sets showSuccess = true when teams.length > 0
+    } finally {
+      isCreatingTeam.value = false
     }
   }
 
@@ -65,10 +80,12 @@ export function useOnboardingComposable() {
     currentStep,
     displayName,
     isLoading,
+    isCreatingTeam,
     teamChoicePath,
     showSuccess,
     initDisplayName,
     saveDisplayName,
+    createTeam,
     selectTeamPath,
     backToCardSelection,
     goToDashboard,

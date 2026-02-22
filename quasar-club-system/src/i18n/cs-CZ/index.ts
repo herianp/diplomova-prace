@@ -486,7 +486,13 @@ export default {
       browseTitle: 'Procházet týmy',
       browseDescription: 'Najděte a připojte se k existujícímu týmu.',
       createPlaceholder: 'Vytváření týmů bude brzy dostupné.',
-      browsePlaceholder: 'Procházení týmů bude brzy dostupné.'
+      browsePlaceholder: 'Procházení týmů bude brzy dostupné.',
+      createTeam: {
+        teamNameLabel: 'Název týmu',
+        teamNameHint: 'Zvolte název pro váš nový tým',
+        nameRequired: 'Název týmu je povinný',
+        submitButton: 'Vytvořit tým'
+      }
     },
     success: {
       title: 'Vše je připraveno!',
