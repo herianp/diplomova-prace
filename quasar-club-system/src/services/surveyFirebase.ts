@@ -87,7 +87,14 @@ export function useSurveyFirebase() {
 
       if (!surveyDoc.exists()) return null
 
-      return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
+      const survey = { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
+
+      // Enrich with subcollection votes when enabled
+      if (isFeatureEnabled('USE_VOTE_SUBCOLLECTIONS')) {
+        survey.votes = await getVotesFromSubcollection(surveyId)
+      }
+
+      return survey
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
       log.error('Failed to get survey', { surveyId, error: firestoreError.message })
@@ -342,13 +349,14 @@ export function useSurveyFirebase() {
         updateData.votes = updatedVotes
       }
 
-      // If dual-write enabled and votes provided, also write to subcollection
-      if (isFeatureEnabled('DUAL_WRITE_VOTES') && updatedVotes) {
+      // Write votes to subcollection when subcollections are enabled
+      if (isFeatureEnabled('USE_VOTE_SUBCOLLECTIONS') && updatedVotes) {
         const batch = writeBatch(db)
         const surveyRef = doc(db, 'surveys', surveyId)
 
-        // Update survey document
-        batch.update(surveyRef, updateData)
+        // Update survey document (status, verifiedAt, verifiedBy — no votes array needed)
+        const { votes: _votes, ...surveyUpdateData } = updateData
+        batch.update(surveyRef, surveyUpdateData)
 
         // Write each vote to subcollection
         updatedVotes.forEach((vote) => {
@@ -362,7 +370,7 @@ export function useSurveyFirebase() {
 
         await batch.commit()
       } else {
-        // Array-only mode
+        // Array-only mode (legacy)
         await updateDoc(doc(db, 'surveys', surveyId), updateData)
       }
 
