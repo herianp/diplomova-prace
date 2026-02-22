@@ -72,7 +72,7 @@ Plans:
   3. A team power user sees a badge or list of pending join requests for their team
   4. A power user can approve a join request, after which the requesting user appears in the team's members list
   5. A power user can decline a join request, after which the request disappears without adding the user to the team
-**Plans:** 4 plans
+**Plans:** 1/4 plans executed
 
 Plans:
 - [ ] 12-01-PLAN.md — Data layer: IJoinRequest interface, joinRequestFirebase service, useJoinRequestUseCases, Firestore security rules
@@ -110,5 +110,5 @@ Plans:
 | 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |
 | 10. Onboarding Wizard & Route Guarding | 2/2 | Complete    | 2026-02-21 | - |
 | 11. Team Creation | 1/1 | Complete    | 2026-02-22 | - |
-| 12. Team Discovery & Join Requests | v1.1 | 0/4 | Not started | - |
+| 12. Team Discovery & Join Requests | 1/4 | In Progress|  | - |
 | 13. Empty States | v1.1 | 0/2 | Not started | - |

@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.1 — Phase 11: Team Creation
+**Current focus:** v1.1 — Phase 12: Team Discovery & Join Requests
 
 ## Current Position
 
 Milestone: v1.1 New User Onboarding & No-Team UX
-Phase: 11 of 13 (Team Creation)
-Plan: 1 of 1 in current phase
-Status: In progress — Plan 11-01 complete
-Last activity: 2026-02-22 — Plan 11-01 complete: team creation form wired in onboarding wizard
+Phase: 12 of 13 (Team Discovery & Join Requests)
+Plan: 1 of 4 in current phase
+Status: In progress — Plan 12-01 complete
+Last activity: 2026-02-22 — Plan 12-01 complete: join request data layer (interface, firebase service, use cases, firestore rules)
 
-Progress: [██░░░░░░░░] 20% (v1.1)
+Progress: [███░░░░░░░] 30% (v1.1)
 
 ## Performance Metrics
 
@@ -26,7 +26,7 @@ Progress: [██░░░░░░░░] 20% (v1.1)
 - Files modified: 158 (+26,907/-742 lines)
 
 **v1.1 (in progress):**
-- Plans completed: 3 of 10
+- Plans completed: 4 of 10
 
 ## Accumulated Context
 
@@ -46,6 +46,8 @@ v1.1 decisions:
 - [Phase 11 P01]: CreateTeamForm is minimal (no q-card) — parent wizard provides the visual container
 - [Phase 11 P01]: Success detection reuses existing teamStore.teams.length watcher in both wizard variants — no new watcher needed
 - [Phase 11 P01]: isCreatingTeam lives in composable so both wizard variants share state through the composable instance
+- [Phase 12]: joinRequests Firestore rules use separate allow read blocks (Firestore OR logic) for own and power-user access
+- [Phase 12]: teams collection gets broad read rule for authenticated users enabling team browse without membership
 
 ### Pending Todos
 
@@ -62,9 +64,10 @@ None.
 |---|-------------|------|--------|-----------|
 | 1 | Fix admin page styling and create PlayersPage with player cards and detail dialog | 2026-02-21 | 6f54409 | [1-fix-admin-page-styling-and-create-player](./quick/1-fix-admin-page-styling-and-create-player/) |
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
+| Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Phase 11, Plan 01 completion)
-Stopped at: Completed 11-01-PLAN.md — all tasks done, SUMMARY.md created
+Last session: 2026-02-22 (Phase 12, Plan 01 completion)
+Stopped at: Completed 12-01-PLAN.md — all tasks done, SUMMARY.md created
 Resume file: None
