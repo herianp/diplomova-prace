@@ -68,11 +68,12 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Fix admin page styling and create PlayersPage with player cards and detail dialog | 2026-02-21 | 6f54409 | [1-fix-admin-page-styling-and-create-player](./quick/1-fix-admin-page-styling-and-create-player/) |
+| 2 | Fix TeamsPage UI — show Create Team button and JoinRequestManagement for all users | 2026-02-22 | 1bcf6fa | [2-fix-teamspage-ui-show-create-team-and-jo](./quick/2-fix-teamspage-ui-show-create-team-and-jo/) |
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
 | Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Phase 12, Plan 03 completion)
-Stopped at: Completed 12-03-PLAN.md — all tasks done, SUMMARY.md created
+Last session: 2026-02-22 (Quick task 2 completion)
+Stopped at: Completed quick task 2 — TeamsPage UI consistency fix
 Resume file: None
