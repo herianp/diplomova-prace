@@ -529,6 +529,19 @@ export default {
     approveError: 'Nepodařilo se schválit žádost',
     declineError: 'Nepodařilo se zamítnout žádost'
   },
+  myRequests: {
+    title: 'Moje žádosti o přiřazení',
+    noRequests: 'Zatím žádné žádosti',
+    cancel: 'Zrušit',
+    status: {
+      pending: 'Čekající',
+      approved: 'Schválená',
+      declined: 'Zamítnutá',
+      cancelled: 'Zrušená'
+    },
+    cancelConfirm: 'Zrušit tuto žádost?',
+    cancelled: 'Žádost zrušena'
+  },
   cashbox: {
     title: "Pokladna",
     subtitle: "Správa pokut a plateb vašeho týmu",

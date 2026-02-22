@@ -529,6 +529,19 @@ export default {
     approveError: 'Failed to approve join request',
     declineError: 'Failed to decline join request'
   },
+  myRequests: {
+    title: 'My Join Requests',
+    noRequests: 'No join requests yet',
+    cancel: 'Cancel',
+    status: {
+      pending: 'Pending',
+      approved: 'Approved',
+      declined: 'Declined',
+      cancelled: 'Cancelled'
+    },
+    cancelConfirm: 'Cancel this join request?',
+    cancelled: 'Request cancelled'
+  },
   cashbox: {
     title: "Cashbox",
     subtitle: "Manage fines and payments for your team",
