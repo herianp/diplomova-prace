@@ -1,5 +1,5 @@
 import { Notify, QNotifyCreateOptions } from 'quasar'
-import { useI18n } from 'vue-i18n'
+import { i18n } from '@/boot/i18n'
 
 interface NotifyErrorOptions {
   context?: Record<string, unknown>
@@ -17,7 +17,7 @@ export const notifyError = (
   messageKey: string,
   options: NotifyErrorOptions = {}
 ): void => {
-  const { t } = useI18n()
+  const t = (i18n.global as any).t as (key: string, named?: Record<string, unknown>) => string
   const maxRetries = 3
   const currentRetryCount = options.retryCount || 0
 
@@ -75,7 +75,7 @@ export const notifySuccess = (
   messageKey: string,
   context?: Record<string, unknown>
 ): void => {
-  const { t } = useI18n()
+  const t = (i18n.global as any).t as (key: string, named?: Record<string, unknown>) => string
   Notify.create({
     type: 'positive',
     message: t(messageKey, context || {}),

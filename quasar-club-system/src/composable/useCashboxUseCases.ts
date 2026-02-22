@@ -5,10 +5,12 @@ import { Unsubscribe } from 'firebase/firestore'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { useAuthStore } from '@/stores/authStore'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 
 export function useCashboxUseCases() {
   const cashboxFirebase = useCashboxFirebase()
   const authStore = useAuthStore()
+  const { checkLimit, incrementUsage } = useRateLimiter()
 
   // ============================================================
   // Listeners
@@ -89,6 +91,15 @@ export function useCashboxUseCases() {
     reason: string,
     createdBy: string
   ): Promise<void> => {
+    // Rate limit check before reaching Firestore
+    const limitResult = await checkLimit('fines', { teamId })
+    if (!limitResult.allowed) {
+      notifyError('rateLimits.finesExceeded', {
+        context: { current: limitResult.current, limit: limitResult.limit }
+      })
+      throw new Error('rateLimits.finesExceeded')
+    }
+
     const fine: Omit<IFine, 'id'> = {
       playerId,
       amount,
@@ -103,7 +114,9 @@ export function useCashboxUseCases() {
         actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown'
       } : undefined
 
-      return await cashboxFirebase.addFine(teamId, fine, auditContext)
+      await cashboxFirebase.addFine(teamId, fine, auditContext)
+      // Increment usage counter after successful creation
+      void incrementUsage('fines', { teamId })
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

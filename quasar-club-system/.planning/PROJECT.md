@@ -63,7 +63,16 @@ Reliable real-time survey voting and team management that works correctly under 
 
 ### Active
 
-(None — define with next milestone)
+#### Current Milestone: v1.1 New User Onboarding & No-Team UX
+
+**Goal:** New users see a guided onboarding wizard and all pages handle the "no team" state gracefully.
+
+- [ ] Onboarding wizard for teamless users (display name + create/join team)
+- [ ] Any authenticated user can create a team (creator becomes team power user)
+- [ ] Team discovery — browse all teams, send join requests
+- [ ] Join request approval by team power users
+- [ ] Empty states on all pages for teamless users with CTA
+- [ ] Route guarding — redirect teamless users to onboarding
 
 ### Out of Scope
 
@@ -109,5 +118,8 @@ Reliable real-time survey voting and team management that works correctly under 
 | fileParallelism: false for rules tests | Multiple test files sharing emulator cause clearFirestore() races | ✓ Good — sequential runs prevent data conflicts |
 | vi.hoisted() for mock functions | vitest hoists vi.mock() above const declarations | ✓ Good — prevents ReferenceError in test factories |
 
+| Allow any user to create teams | New users need to bootstrap without admin help | — Pending |
+| Join request system for team discovery | Invitation-only limits growth, browsing enables self-service | — Pending |
+
 ---
-*Last updated: 2026-02-19 after v1.0 milestone*
+*Last updated: 2026-02-21 after v1.1 milestone start*

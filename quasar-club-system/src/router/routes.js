@@ -11,6 +11,13 @@ const routes = [
   },
   {
     path: "/",
+    component: () => import("layouts/OnboardingLayout.vue"),
+    children: [
+      { path: RouteEnum.ONBOARDING.path, name: RouteEnum.ONBOARDING.name, component: () => import("pages/OnboardingPage.vue") },
+    ]
+  },
+  {
+    path: "/",
     component: () => import("layouts/MainLayout.vue"),
     children: [
       { path: RouteEnum.ABOUT.path, name: RouteEnum.ABOUT.name, component: () => import("pages/AboutPage.vue") },

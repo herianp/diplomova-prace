@@ -11,6 +11,9 @@ export const useAuthStore = defineStore("auth", () => {
   const isAuthReady = ref(false)
   const isTeamReady = ref(false)
 
+  // Onboarding completion flag (loaded from Firestore user document)
+  const onboardingComplete = ref(false)
+
   // Pure state mutations (no business logic)
   const setUser = (newUser: User | null) => {
     user.value = newUser
@@ -32,12 +35,17 @@ export const useAuthStore = defineStore("auth", () => {
     isTeamReady.value = ready
   }
 
+  const setOnboardingComplete = (value: boolean) => {
+    onboardingComplete.value = value
+  }
+
   const cleanup = () => {
     user.value = null
     isLoading.value = false
     isAdmin.value = false
     isAuthReady.value = false
     isTeamReady.value = false
+    onboardingComplete.value = false
   }
 
   return {
@@ -47,12 +55,14 @@ export const useAuthStore = defineStore("auth", () => {
     isAdmin,
     isAuthReady,
     isTeamReady,
+    onboardingComplete,
     // Pure state mutations
     setUser,
     setLoading,
     setAdmin,
     setAuthReady,
     setTeamReady,
+    setOnboardingComplete,
     cleanup
   }
 })

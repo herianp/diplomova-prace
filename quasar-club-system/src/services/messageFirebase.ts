@@ -13,10 +13,14 @@ import { IMessage } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { ListenerError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
+import { useRateLimiter } from '@/composable/useRateLimiter'
+import { notifyError } from '@/services/notificationService'
 
 const log = createLogger('messageFirebase')
 
 export function useMessageFirebase() {
+  const { checkLimit, incrementUsage } = useRateLimiter()
+
   /**
    * Listen to messages for a team (real-time)
    */
@@ -54,6 +58,15 @@ export function useMessageFirebase() {
     authorName: string,
     content: string
   ): Promise<void> => {
+    // Rate limit check before reaching Firestore
+    const limitResult = await checkLimit('messages')
+    if (!limitResult.allowed) {
+      notifyError('rateLimits.messagesExceeded', {
+        context: { current: limitResult.current, limit: limitResult.limit }
+      })
+      throw new Error('rateLimits.messagesExceeded')
+    }
+
     try {
       await addDoc(collection(db, 'messages'), {
         content,
@@ -62,6 +75,8 @@ export function useMessageFirebase() {
         teamId,
         createdAt: serverTimestamp()
       })
+      // Increment usage counter after successful send
+      void incrementUsage('messages')
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
       log.error('Failed to send message', { teamId, authorId, error: firestoreError.message })

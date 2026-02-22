@@ -15,7 +15,7 @@ export function useAuthUseCases() {
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const router = useRouter()
-  const { authStateListener, authStateReady, loginUser, logoutUser, registerUser, refreshUser, getCurrentUser } = useAuthFirebase()
+  const { authStateListener, authStateReady, loginUser, logoutUser, registerUser, refreshUser, getCurrentUser, getUserFromFirestore, setOnboardingCompleted: setOnboardingCompletedInFirestore } = useAuthFirebase()
 
   /**
    * Initializes auth state using Promise-based coordination (Phase 2).
@@ -36,6 +36,10 @@ export function useAuthUseCases() {
       // Check admin custom claim
       const tokenResult = await initialUser.getIdTokenResult()
       authStore.setAdmin(tokenResult.claims.admin === true)
+
+      // Load onboarding status from Firestore
+      const firestoreUser = await getUserFromFirestore(initialUser.uid)
+      authStore.setOnboardingComplete(firestoreUser?.onboardingCompleted === true)
     }
 
     // Auth state is now resolved - safe to set ready flag
@@ -74,6 +78,7 @@ export function useAuthUseCases() {
       } else {
         authStore.setUser(null)
         authStore.setAdmin(false)
+        authStore.setTeamReady(false)
         router.push(RouteEnum.HOME.path)
         teamStore.clearData()
 

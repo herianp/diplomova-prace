@@ -9,6 +9,7 @@ import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
 import { createLogger } from 'src/utils/logger'
 import { useAuthStore } from '@/stores/authStore'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 
 export function useSurveyUseCases() {
   const log = createLogger('useSurveyUseCases')
@@ -16,6 +17,7 @@ export function useSurveyUseCases() {
   const authStore = useAuthStore()
   const { createSurveyNotification } = useNotifications()
   const surveyFirebase = useSurveyFirebase()
+  const { checkLimit, incrementUsage } = useRateLimiter()
 
   const setSurveysListener = (teamId: string) => {
     // Set up new listener
@@ -55,6 +57,15 @@ export function useSurveyUseCases() {
   }
 
   const addSurvey = async (newSurvey: ISurvey): Promise<void> => {
+    // Rate limit check before reaching Firestore
+    const limitResult = await checkLimit('surveys')
+    if (!limitResult.allowed) {
+      notifyError('rateLimits.surveysExceeded', {
+        context: { current: limitResult.current, limit: limitResult.limit }
+      })
+      throw new Error('rateLimits.surveysExceeded')
+    }
+
     try {
       // Get team data to access members for notifications
       const teamDoc = await getDoc(doc(db, 'teams', newSurvey.teamId))
@@ -75,6 +86,9 @@ export function useSurveyUseCases() {
       if (teamMembers.length > 0) {
         await createSurveyNotification(surveyData, teamMembers)
       }
+
+      // Increment usage counter after successful creation
+      void incrementUsage('surveys')
     } catch (error: unknown) {
       log.error('Failed to add survey', {
         error: error instanceof Error ? error.message : String(error),
@@ -126,6 +140,14 @@ export function useSurveyUseCases() {
     if (survey) {
       try {
         await surveyFirebase.addOrUpdateVote(surveyId, userUid, newVote, survey.votes)
+
+        // Optimistic local update — subcollection writes don't trigger the survey snapshot listener
+        const existingVote = survey.votes.find((v) => v.userUid === userUid)
+        if (existingVote) {
+          existingVote.vote = newVote
+        } else {
+          survey.votes.push({ userUid, vote: newVote })
+        }
       } catch (error: unknown) {
         if (error instanceof FirestoreError) {
           const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

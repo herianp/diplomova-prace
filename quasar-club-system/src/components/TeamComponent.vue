@@ -1,5 +1,32 @@
 <template>
   <div class="teams-container">
+
+    <!-- Join Request Management -->
+    <q-card flat bordered class="q-mb-lg">
+      <q-card-section class="bg-primary text-white">
+        <div class="text-h6">
+          <q-icon name="how_to_reg" class="q-mr-sm" />
+          {{ $t('joinRequests.title') }}
+        </div>
+      </q-card-section>
+      <q-card-section class="q-pa-none">
+        <JoinRequestManagement />
+      </q-card-section>
+    </q-card>
+
+    <!-- Browse Teams Section -->
+    <q-card flat bordered class="q-mb-lg">
+      <q-card-section class="bg-teal text-white">
+        <div class="text-h6">
+          <q-icon name="search" class="q-mr-sm" />
+          {{ $t('onboarding.teamChoice.browseTitle') }}
+        </div>
+      </q-card-section>
+      <q-card-section class="q-pa-none">
+        <TeamBrowseList />
+      </q-card-section>
+    </q-card>
+
     <!-- Page Header -->
     <div class="row items-center justify-between q-mb-lg">
       <div class="col">
@@ -7,7 +34,6 @@
         <div class="text-body2 text-grey-7">{{ $t('team.teamOverview') }}</div>
       </div>
       <q-btn
-        v-if="isCurrentUserPowerUser"
         color="primary"
         icon="add"
         :label="$t('team.create')"
@@ -72,13 +98,15 @@
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import TeamCard from '@/components/new/TeamCard.vue'
+import TeamBrowseList from '@/components/onboarding/TeamBrowseList.vue'
+import JoinRequestManagement from '@/components/team/JoinRequestManagement.vue'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { useTeamStore } from '@/stores/teamStore'
 import { createLogger } from 'src/utils/logger'
 
 const log = createLogger('TeamComponent')
-const { isCurrentUserPowerUser, currentUser } = useAuthComposable()
+const { currentUser } = useAuthComposable()
 const { createTeam } = useTeamUseCases()
 const { teams } = storeToRefs(useTeamStore())
 

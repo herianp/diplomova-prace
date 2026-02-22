@@ -359,6 +359,24 @@ export default {
     noUsers: "Žádní uživatelé nenalezeni",
     loadError: "Nepodařilo se načíst data administrace",
     auditTab: "Audit logy",
+    rateLimitsTab: "Limity",
+    rateLimits: {
+      teamCreation: "Vytvoření týmu",
+      messages: "Zprávy",
+      joinRequests: "Žádosti o připojení",
+      surveys: "Ankety",
+      fines: "Pokuty (za tým)",
+      actionColumn: "Akce",
+      limitColumn: "Limit",
+      windowColumn: "Okno",
+      editColumn: "Upravit",
+      saveSuccess: "Limit aktualizován",
+      saveError: "Nepodařilo se aktualizovat limit",
+      windowTotal: "celkem",
+      windowWeekly: "/týden",
+      windowDaily: "/den",
+      windowPending: "čekající"
+    },
     audit: {
       selectTeam: "Vyberte tým",
       operation: "Operace",
@@ -461,6 +479,87 @@ export default {
       balance: "Zůstatek",
       close: "Zavřít"
     }
+  },
+  onboarding: {
+    next: 'Pokračovat',
+    back: 'Zpět',
+    skip: 'Prozatím přeskočit',
+    welcome: {
+      title: 'Vítejte',
+      heading: 'Vítejte v Club System',
+      description: 'Vaše platforma pro správu týmu, ankety, reporty a spolupráci.',
+      feature1: 'Ankety a docházka',
+      feature2: 'Reporty a statistiky',
+      feature3: 'Správa týmu'
+    },
+    displayName: {
+      title: 'Vaše jméno',
+      description: 'Nastavte si zobrazované jméno, aby vás spoluhráči poznali.',
+      label: 'Zobrazované jméno',
+      hint: 'Toto jméno uvidí vaši spoluhráči'
+    },
+    teamChoice: {
+      title: 'Připojte se k týmu',
+      createTitle: 'Vytvořit tým',
+      createDescription: 'Založte nový tým a pozvěte ostatní.',
+      browseTitle: 'Procházet týmy',
+      browseDescription: 'Najděte a připojte se k existujícímu týmu.',
+      createPlaceholder: 'Vytváření týmů bude brzy dostupné.',
+      browsePlaceholder: 'Procházení týmů bude brzy dostupné.',
+      createTeam: {
+        teamNameLabel: 'Název týmu',
+        teamNameHint: 'Zvolte název pro váš nový tým',
+        nameRequired: 'Název týmu je povinný',
+        submitButton: 'Vytvořit tým'
+      }
+    },
+    teamBrowse: {
+      searchPlaceholder: 'Hledat týmy...',
+      memberBadge: 'Člen',
+      pendingBadge: 'Žádost odeslána',
+      joinButton: 'Přidat se',
+      cancelRequest: 'Zrušit žádost',
+      confirmTitle: 'Žádost o přiřazení',
+      confirmMessage: 'Odeslat žádost o přiřazení k týmu {teamName}?',
+      confirmSend: 'Odeslat',
+      confirmCancel: 'Zrušit',
+      requestSent: 'Žádost odeslána týmu {teamName}',
+      requestCancelled: 'Žádost zrušena',
+      noTeams: 'Žádné týmy zatím nejsou k dispozici',
+      noResults: 'Žádné týmy neodpovídají vyhledávání',
+      memberCount: '{count} členů',
+      maxRequests: 'Můžete mít maximálně 5 nevyřízených žádostí',
+      alreadyMember: 'Jste již členem tohoto týmu'
+    },
+    success: {
+      title: 'Vše je připraveno!',
+      subtitle: 'Váš tým je připraven. Pojďme na to.',
+      goToDashboard: 'Přejít na nástěnku'
+    }
+  },
+  joinRequests: {
+    title: 'Žádosti o přiřazení',
+    approve: 'Schválit',
+    decline: 'Zamítnout',
+    approved: '{name} byl přidán do týmu',
+    declined: 'Žádost od {name} zamítnuta',
+    noRequests: 'Žádné nevyřízené žádosti',
+    pendingCount: '{count} nevyřízená žádost | {count} nevyřízené žádosti | {count} nevyřízených žádostí',
+    approveError: 'Nepodařilo se schválit žádost',
+    declineError: 'Nepodařilo se zamítnout žádost'
+  },
+  myRequests: {
+    title: 'Moje žádosti o přiřazení',
+    noRequests: 'Zatím žádné žádosti',
+    cancel: 'Zrušit',
+    status: {
+      pending: 'Čekající',
+      approved: 'Schválená',
+      declined: 'Zamítnutá',
+      cancelled: 'Zrušená'
+    },
+    cancelConfirm: 'Zrušit tuto žádost?',
+    cancelled: 'Žádost zrušena'
   },
   cashbox: {
     title: "Pokladna",
@@ -574,5 +673,17 @@ export default {
       noHistory: "Zatím žádná historie",
       viewDetails: "Zobrazit detaily"
     }
+  },
+  rateLimits: {
+    exceeded: "Limit dosažen",
+    resetPermanent: "Tento limit je trvalý",
+    resetWeekly: "Obnoví se {date}",
+    resetDaily: "Obnoví se zítra",
+    resetConcurrent: "Nejprve vyřešte čekající žádosti",
+    teamCreationExceeded: "Vytvořili jste maximální počet týmů ({limit})",
+    messagesExceeded: "Týdenní limit zpráv dosažen ({current}/{limit})",
+    surveysExceeded: "Týdenní limit anket dosažen ({current}/{limit})",
+    joinRequestsExceeded: "Dosažen maximální počet čekajících žádostí ({limit})",
+    finesExceeded: "Denní limit pokut pro tento tým dosažen ({current}/{limit})"
   }
 } as const
