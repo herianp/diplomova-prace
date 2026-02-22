@@ -67,6 +67,7 @@
           <q-tab name="teams" :label="$t('admin.teamsTab')" icon="groups" />
           <q-tab name="users" :label="$t('admin.usersTab')" icon="person" />
           <q-tab name="audit" :label="$t('admin.auditTab')" icon="history" />
+          <q-tab name="rateLimits" :label="$t('admin.rateLimitsTab')" icon="speed" />
         </q-tabs>
 
         <q-separator />
@@ -95,6 +96,10 @@
           <q-tab-panel name="audit">
             <AdminAuditTab :filtered-teams="filteredTeams" />
           </q-tab-panel>
+
+          <q-tab-panel name="rateLimits">
+            <AdminRateLimitsTab />
+          </q-tab-panel>
         </q-tab-panels>
       </q-card>
     </template>
@@ -110,6 +115,7 @@ import MetricCard from '@/components/dashboard/MetricCard.vue'
 import AdminTeamsTab from '@/components/admin/AdminTeamsTab.vue'
 import AdminUsersTab from '@/components/admin/AdminUsersTab.vue'
 import AdminAuditTab from '@/components/admin/AdminAuditTab.vue'
+import AdminRateLimitsTab from '@/components/admin/AdminRateLimitsTab.vue'
 
 const $q = useQuasar()
 const { t } = useI18n()
