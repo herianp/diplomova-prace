@@ -1,11 +1,12 @@
 import { ref, onMounted, Ref } from 'vue'
 import { DateTime } from 'luxon'
-import { useI18n } from 'vue-i18n'
+import { i18n } from '@/boot/i18n'
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useRateLimitStore } from '@/stores/rateLimitStore'
 import { useRateLimitFirebase } from '@/services/rateLimitFirebase'
 import { useJoinRequestFirebase } from '@/services/joinRequestFirebase'
+import { listenerRegistry } from '@/services/listenerRegistry'
 import { IRateLimitConfig } from '@/interfaces/interfaces'
 
 // ============================================================
@@ -50,7 +51,7 @@ const actionConfig: Record<RateLimitAction, ActionConfig> = {
 // ============================================================
 
 export function useRateLimiter() {
-  const { t } = useI18n()
+  const t = (i18n.global as any).t as (key: string, named?: Record<string, unknown>) => string
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const rateLimitStore = useRateLimitStore()
@@ -87,7 +88,8 @@ export function useRateLimiter() {
   }
 
   /**
-   * Ensure the rate limit config is loaded. If not yet loaded, load it.
+   * Ensure the rate limit config is loaded and real-time listener is active.
+   * First call loads config + starts listener. Subsequent calls return cached config.
    */
   const ensureConfigLoaded = async (): Promise<IRateLimitConfig> => {
     if (rateLimitStore.isLoaded && rateLimitStore.config) {
@@ -95,6 +97,15 @@ export function useRateLimiter() {
     }
     const config = await rateLimitFirebase.getRateLimitConfig()
     rateLimitStore.setConfig(config)
+
+    // Start real-time listener so admin changes propagate immediately
+    if (!listenerRegistry.isActive('rateLimits')) {
+      const unsubscribe = rateLimitFirebase.setRateLimitListener((updated) => {
+        rateLimitStore.setConfig(updated)
+      })
+      listenerRegistry.register('rateLimits', unsubscribe, { scope: 'global' })
+    }
+
     return config
   }
 
@@ -123,6 +134,22 @@ export function useRateLimiter() {
         current: pendingCount,
         limit,
         resetInfo: formatResetInfo('concurrent'),
+      }
+    }
+
+    // ---- Team creation — count actual teams from store ----
+    if (action === 'teamCreation') {
+      const userId = authStore.user?.uid
+      if (!userId) {
+        return { allowed: false, current: 0, limit, resetInfo: formatResetInfo('total') }
+      }
+      const current = teamStore.teams.filter(team => team.creator === userId).length
+      const allowed = current < limit
+      return {
+        allowed,
+        current,
+        limit,
+        resetInfo: formatResetInfo('total'),
       }
     }
 

@@ -14,7 +14,7 @@ export function useTeamUseCases() {
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
-  const { checkLimit, incrementUsage } = useRateLimiter()
+  const { checkLimit } = useRateLimiter()
 
   const setTeamListener = (userId: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -70,8 +70,6 @@ export function useTeamUseCases() {
 
     try {
       await teamFirebase.createTeam(teamName, userId)
-      // Increment usage counter after successful creation
-      void incrementUsage('teamCreation')
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'

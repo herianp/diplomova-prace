@@ -273,6 +273,12 @@ service cloud.firestore {
     }
     
     
+    // Rate limits - admin can read/write config, authenticated users can read
+    match /rateLimits/{docId} {
+      allow read: if request.auth != null;
+      allow write: if isAppAdmin();
+    }
+
     // pri create a update mel firebase problemy, takze u kazdeho requestu musim vzit neco jineho
     function getTeamId() {
   		return request.resource.data.teamId != null

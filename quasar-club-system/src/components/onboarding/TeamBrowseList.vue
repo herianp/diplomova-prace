@@ -190,6 +190,8 @@ const sendJoinRequest = async () => {
     })
   } catch (error) {
     showConfirmDialog.value = false
+    // Rate limit errors already show a notification via notifyError — don't double-notify
+    if (error instanceof Error && error.message.startsWith('rateLimits.')) return
     const message =
       error instanceof Error ? error.message : t('onboarding.teamBrowse.requestSent', { teamName: team.name })
     $q.notify({
