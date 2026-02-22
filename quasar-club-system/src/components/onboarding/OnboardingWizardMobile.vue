@@ -98,12 +98,9 @@
             <CreateTeamForm :is-creating="isCreatingTeam" @submit="createTeam" />
           </div>
 
-          <!-- Inline Browse Teams placeholder -->
+          <!-- Inline Browse Teams list -->
           <div v-else-if="teamChoicePath === 'browse'">
-            <q-banner class="bg-info text-white rounded-borders">
-              <template v-slot:avatar><q-icon name="info" /></template>
-              {{ $t('onboarding.teamChoice.browsePlaceholder') }}
-            </q-banner>
+            <TeamBrowseList />
           </div>
         </div>
       </div>
@@ -131,6 +128,7 @@ import { watch } from 'vue'
 import { useOnboardingComposable } from '@/composable/useOnboardingComposable'
 import { useTeamStore } from '@/stores/teamStore'
 import CreateTeamForm from '@/components/onboarding/CreateTeamForm.vue'
+import TeamBrowseList from '@/components/onboarding/TeamBrowseList.vue'
 
 const {
   currentStep,
