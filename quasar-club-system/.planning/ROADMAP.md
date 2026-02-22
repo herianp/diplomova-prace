@@ -57,10 +57,10 @@ Plans:
   1. A user who has never been a power user can create a new team and see it appear in the app immediately
   2. The team creator appears in the team's power user list and has access to power user actions (survey management, join request approval)
   3. No admin approval or pre-existing power user role is required to create a team
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 11-01: Team creation use case and Firestore service — open creation, auto-assign power user role
+- [ ] 11-01-PLAN.md — Inline team creation form in onboarding wizard, wired to existing createTeam use case
 
 ### Phase 12: Team Discovery & Join Requests
 **Goal**: Users can browse all existing teams and send join requests; team power users can approve or decline those requests; approved users become team members
@@ -109,6 +109,6 @@ Plans:
 | 8. Test Implementation | v1.0 | 5/5 | Complete | 2026-02-18 |
 | 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |
 | 10. Onboarding Wizard & Route Guarding | 2/2 | Complete    | 2026-02-21 | - |
-| 11. Team Creation | v1.1 | 0/1 | Not started | - |
+| 11. Team Creation | v1.1 | 0/1 | Planned | - |
 | 12. Team Discovery & Join Requests | v1.1 | 0/4 | Not started | - |
 | 13. Empty States | v1.1 | 0/2 | Not started | - |
