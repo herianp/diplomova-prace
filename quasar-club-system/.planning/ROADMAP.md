@@ -29,7 +29,7 @@
 - [x] **Phase 10: Onboarding Wizard & Route Guarding** — Intercept teamless users, collect display name, and branch to create or join a team (completed 2026-02-21)
 - [x] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user (completed 2026-02-22)
 - [x] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them (completed 2026-02-22)
-- [ ] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team
+- [x] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team (completed 2026-02-22)
 - [x] **Phase 14: Rate Limiting & User Quotas** — Admin-configurable limits for user actions to prevent bot abuse and spam (completed 2026-02-22)
 
 ## Phase Details
@@ -90,11 +90,10 @@ Plans:
   2. A teamless user who visits the Surveys page sees an empty state with a call-to-action rather than a blank or broken page
   3. A teamless user who visits the Reports page sees an empty state with a call-to-action rather than broken charts
   4. A teamless user who visits the Players page sees an empty state with a call-to-action rather than an empty list with no context
-**Plans**: TBD
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 13-01: Shared empty-state component — reusable no-team banner with configurable CTA
-- [ ] 13-02: Apply empty state to Dashboard, Surveys, Reports, and Players pages
+- [x] 13-01-SUMMARY.md — Route-guarding approach: teamless users restricted to /team, /settings, /about; sidebar filtered to show only Teams link
 
 ### Phase 14: Rate Limiting & User Quotas
 **Goal**: Admin-configurable limits for user actions (team creation, messages per week, surveys per week, join requests, fines per day) to prevent abuse. Includes admin UI table for managing limits and client-side enforcement across the app.
@@ -105,7 +104,7 @@ Plans:
   2. Users who exceed configured limits receive clear feedback and are blocked from the action
   3. Rate limits are enforced client-side before allowing actions
   4. Default limits exist out of the box without requiring admin configuration
-**Plans:** 2/2 plans complete
+**Plans:** 1/0 plans complete
 
 Plans:
 - [ ] 14-01-PLAN.md — Data layer (interfaces, Firebase service, store, use cases) and admin Rate Limits tab
@@ -127,5 +126,5 @@ Plans:
 | 10. Onboarding Wizard & Route Guarding | 2/2 | Complete    | 2026-02-21 | - |
 | 11. Team Creation | 1/1 | Complete    | 2026-02-22 | - |
 | 12. Team Discovery & Join Requests | 4/4 | Complete    | 2026-02-22 | - |
-| 13. Empty States | v1.1 | 0/2 | Not started | - |
+| 13. Empty States | v1.1 | Complete    | 2026-02-22 | - |
 | 14. Rate Limiting & User Quotas | 2/2 | Complete    | 2026-02-22 | - |
