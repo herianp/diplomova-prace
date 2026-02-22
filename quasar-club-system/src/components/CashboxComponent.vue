@@ -52,8 +52,11 @@
           :label="$t('cashbox.fines.addFine')"
           no-caps
           unelevated
+          :disable="isFinesLimited"
           @click="showAddFineDialog = true"
-        />
+        >
+          <q-tooltip v-if="isFinesLimited">{{ finesLimitInfo }}</q-tooltip>
+        </q-btn>
         <q-btn
           color="positive"
           icon="payments"
@@ -243,6 +246,7 @@ import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useReadiness } from '@/composable/useReadiness'
 import { useCashboxUseCases } from '@/composable/useCashboxUseCases'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 import { useTeamMemberUtils } from '@/composable/useTeamMemberUtils'
 import CashboxDashboard from '@/components/cashbox/CashboxDashboard.vue'
 import CashboxPlayerList from '@/components/cashbox/CashboxPlayerList.vue'
@@ -259,6 +263,8 @@ const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { waitForTeam } = useReadiness()
 const cashbox = useCashboxUseCases()
 const { loadTeamMembers, getPlayerName } = useTeamMemberUtils()
+const { useActionLimitStatus } = useRateLimiter()
+const { isLimited: isFinesLimited, limitInfo: finesLimitInfo } = useActionLimitStatus('fines')
 
 // State
 const fines = ref([])

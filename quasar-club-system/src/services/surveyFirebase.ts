@@ -87,7 +87,14 @@ export function useSurveyFirebase() {
 
       if (!surveyDoc.exists()) return null
 
-      return { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
+      const survey = { id: surveyDoc.id, ...surveyDoc.data() } as ISurvey
+
+      // Enrich with subcollection votes when enabled
+      if (isFeatureEnabled('USE_VOTE_SUBCOLLECTIONS')) {
+        survey.votes = await getVotesFromSubcollection(surveyId)
+      }
+
+      return survey
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'read')
       log.error('Failed to get survey', { surveyId, error: firestoreError.message })
@@ -215,12 +222,15 @@ export function useSurveyFirebase() {
   // NOTE: Subcollection architecture eliminates IN query limit issues (DAT-03).
   // Votes are queried per-survey via getDocs on the subcollection, not by user ID list.
   const addVoteToSubcollection = async (surveyId: string, userUid: string, vote: boolean): Promise<void> => {
+    const batch = writeBatch(db)
     const voteRef = doc(db, 'surveys', surveyId, 'votes', userUid)
-    await setDoc(voteRef, {
-      userUid,
-      vote,
-      updatedAt: new Date()
-    }, { merge: true })
+    const surveyRef = doc(db, 'surveys', surveyId)
+
+    batch.set(voteRef, { userUid, vote, updatedAt: new Date() }, { merge: true })
+    // Touch survey doc to trigger the real-time listener for all clients
+    batch.update(surveyRef, { lastVoteAt: new Date() })
+
+    await batch.commit()
   }
 
   // Internal helper: Dual-write vote to both array and subcollection atomically
@@ -339,13 +349,14 @@ export function useSurveyFirebase() {
         updateData.votes = updatedVotes
       }
 
-      // If dual-write enabled and votes provided, also write to subcollection
-      if (isFeatureEnabled('DUAL_WRITE_VOTES') && updatedVotes) {
+      // Write votes to subcollection when subcollections are enabled
+      if (isFeatureEnabled('USE_VOTE_SUBCOLLECTIONS') && updatedVotes) {
         const batch = writeBatch(db)
         const surveyRef = doc(db, 'surveys', surveyId)
 
-        // Update survey document
-        batch.update(surveyRef, updateData)
+        // Update survey document (status, verifiedAt, verifiedBy — no votes array needed)
+        const { votes: _votes, ...surveyUpdateData } = updateData
+        batch.update(surveyRef, surveyUpdateData)
 
         // Write each vote to subcollection
         updatedVotes.forEach((vote) => {
@@ -359,7 +370,7 @@ export function useSurveyFirebase() {
 
         await batch.commit()
       } else {
-        // Array-only mode
+        // Array-only mode (legacy)
         await updateDoc(doc(db, 'surveys', surveyId), updateData)
       }
 

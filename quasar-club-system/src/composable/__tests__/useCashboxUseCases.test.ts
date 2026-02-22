@@ -19,6 +19,15 @@ vi.mock('src/utils/logger', () => ({
   createLogger: () => ({ debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() })
 }))
 
+vi.mock('@/composable/useRateLimiter', () => ({
+  useRateLimiter: () => ({
+    checkLimit: vi.fn().mockResolvedValue({ allowed: true, current: 0, limit: 100, resetInfo: '' }),
+    incrementUsage: vi.fn().mockResolvedValue(undefined),
+    formatResetInfo: vi.fn().mockReturnValue(''),
+    useActionLimitStatus: vi.fn()
+  })
+}))
+
 const mockLoadFineRules = vi.fn()
 const mockBulkAddFines = vi.fn()
 const mockAddFineRule = vi.fn()

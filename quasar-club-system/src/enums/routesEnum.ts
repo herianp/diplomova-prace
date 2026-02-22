@@ -5,6 +5,7 @@ export const RouteEnum = Object.freeze({
   SURVEY: { path: '/survey', name: 'survey' },
   LOGIN: { path: '/login', name: 'login' },
   REGISTER: { path: '/register', name: 'register' },
+  ONBOARDING: { path: '/onboarding', name: 'onboarding' },
   TEAM: { path: '/teams', name: 'team'},
   SINGLE_TEAM: { path: '/team/:teamId', name: 'singleTeam'},
   NOTIFICATIONS: { path: '/notifications', name: 'notifications'},

@@ -1,17 +1,20 @@
 import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
-import { ITeam } from '@/interfaces/interfaces'
+import { useJoinRequestFirebase } from '@/services/joinRequestFirebase'
+import { IJoinRequest, ITeam } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
 import { createLogger } from 'src/utils/logger'
+import { useRateLimiter } from '@/composable/useRateLimiter'
 
 export function useTeamUseCases() {
   const log = createLogger('useTeamUseCases')
   const authStore = useAuthStore()
   const teamStore = useTeamStore()
   const teamFirebase = useTeamFirebase()
+  const { checkLimit } = useRateLimiter()
 
   const setTeamListener = (userId: string): Promise<void> => {
     return new Promise((resolve) => {
@@ -24,6 +27,11 @@ export function useTeamUseCases() {
         // Only auto-select on first load when no team is selected
         if (!teamStore.currentTeam && teamsList.length > 0) {
           teamStore.setCurrentTeam(teamsList[0])
+        }
+
+        // Set up join request listeners for all power-user teams
+        if (isFirstCallback) {
+          setPendingJoinRequestsListener()
         }
 
         if (isFirstCallback) {
@@ -51,8 +59,17 @@ export function useTeamUseCases() {
   }
 
   const createTeam = async (teamName: string, userId: string): Promise<void> => {
+    // Rate limit check before reaching Firestore
+    const limitResult = await checkLimit('teamCreation')
+    if (!limitResult.allowed) {
+      notifyError('rateLimits.teamCreationExceeded', {
+        context: { limit: limitResult.limit }
+      })
+      throw new Error('rateLimits.teamCreationExceeded')
+    }
+
     try {
-      return await teamFirebase.createTeam(teamName, userId)
+      await teamFirebase.createTeam(teamName, userId)
     } catch (error: unknown) {
       if (error instanceof FirestoreError) {
         const shouldRetry = error.code === 'unavailable' || error.code === 'deadline-exceeded'
@@ -112,12 +129,53 @@ export function useTeamUseCases() {
     teamStore.clearData()
   }
 
+  /**
+   * Set up real-time listeners for pending join requests across all teams
+   * where the current user is a power user. Merges results into one list.
+   */
+  const setPendingJoinRequestsListener = (): void => {
+    const joinRequestFirebase = useJoinRequestFirebase()
+    const currentUserId = authStore.user?.uid
+    if (!currentUserId) return
+
+    // Unregister previous listeners
+    listenerRegistry.unregister('pendingJoinRequests')
+
+    // Find all teams where user is a power user
+    const powerUserTeams = teamStore.teams.filter(t => t.powerusers?.includes(currentUserId))
+    if (powerUserTeams.length === 0) {
+      teamStore.setPendingJoinRequests([])
+      return
+    }
+
+    // Track requests per team and merge
+    const requestsByTeam: Record<string, IJoinRequest[]> = {}
+    const unsubscribes: (() => void)[] = []
+
+    for (const team of powerUserTeams) {
+      if (!team.id) continue
+      const unsubscribe = joinRequestFirebase.getJoinRequestsByTeam(team.id, (requests) => {
+        requestsByTeam[team.id!] = requests
+        // Merge all teams' requests into a single list
+        const allRequests = Object.values(requestsByTeam).flat()
+        teamStore.setPendingJoinRequests(allRequests)
+      })
+      unsubscribes.push(unsubscribe)
+    }
+
+    // Register a single cleanup that unsubscribes all
+    listenerRegistry.register('pendingJoinRequests', () => {
+      unsubscribes.forEach(unsub => unsub())
+    })
+  }
+
   return {
     setTeamListener,
     createTeam,
     deleteTeam,
     getTeamById,
     getTeamByIdAndSetCurrentTeam,
-    clearTeamData
+    clearTeamData,
+    setPendingJoinRequestsListener
   }
 }

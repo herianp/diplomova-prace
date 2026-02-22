@@ -27,6 +27,7 @@ export interface IUser {
   displayName?: string
   createdAt: Date
   photoURL?: string
+  onboardingCompleted?: boolean
 }
 
 export interface ICredentials {
@@ -275,6 +276,51 @@ export interface ICashboxHistoryEntry {
 }
 
 // ============================================================
+// Join Requests
+// ============================================================
+
+export interface IJoinRequest {
+  id?: string
+  userId: string
+  userDisplayName: string
+  userEmail: string
+  teamId: string
+  teamName: string
+  status: 'pending' | 'approved' | 'declined' | 'cancelled'
+  createdAt: Date
+  respondedAt?: Date
+  respondedBy?: string
+  respondedByName?: string
+}
+
+// ============================================================
+// Rate Limiting
+// ============================================================
+
+export interface IRateLimitAction {
+  key: string            // e.g. 'teamCreation', 'messages', 'joinRequests', 'surveys', 'fines'
+  limit: number          // max count
+  windowType: 'total' | 'weekly' | 'daily' | 'concurrent'
+}
+
+export interface IRateLimitConfig {
+  teamCreation: number    // default 5, total
+  messages: number        // default 50, weekly
+  joinRequests: number    // default 5, concurrent pending
+  surveys: number         // default 10, weekly
+  fines: number           // default 500, daily per team
+}
+
+export interface IUserUsage {
+  teamsCreated?: number
+  messagesThisWeek?: number
+  messagesWeekStart?: Date
+  surveysThisWeek?: number
+  surveysWeekStart?: Date
+  pendingJoinRequests?: number  // computed from query, not stored
+}
+
+// ============================================================
 // Audit Log
 // ============================================================
 
@@ -287,6 +333,8 @@ export type AuditOperation =
   | 'fine.delete'
   | 'member.remove'
   | 'vote.verify'
+  | 'joinRequest.approve'
+  | 'joinRequest.decline'
 
 export interface IAuditLog {
   id?: string

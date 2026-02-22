@@ -205,6 +205,61 @@
           </q-card-section>
         </q-card>
 
+        <!-- My Requests Card -->
+        <q-card flat bordered class="q-mb-lg bg-grey-1">
+          <q-card-section class="bg-purple text-white">
+            <div class="text-h6">
+              <q-icon name="how_to_reg" class="q-mr-sm" />
+              {{ $t('myRequests.title') }}
+            </div>
+          </q-card-section>
+
+          <q-card-section class="q-pa-none">
+            <q-list separator>
+              <q-item
+                v-for="request in myJoinRequests"
+                :key="request.id"
+                class="q-py-sm"
+              >
+                <!-- Team info -->
+                <q-item-section>
+                  <q-item-label>{{ request.teamName }}</q-item-label>
+                  <q-item-label caption>{{ formatDate(request.createdAt) }}</q-item-label>
+                </q-item-section>
+
+                <!-- Status badge and cancel button -->
+                <q-item-section side class="row no-wrap items-center q-gutter-xs">
+                  <q-badge
+                    :color="statusColor(request.status)"
+                    class="q-mr-xs"
+                  >
+                    {{ $t('myRequests.status.' + request.status) }}
+                  </q-badge>
+                  <q-btn
+                    v-if="request.status === 'pending'"
+                    flat
+                    dense
+                    size="sm"
+                    color="grey-7"
+                    :label="$t('myRequests.cancel')"
+                    :loading="cancellingId === request.id"
+                    @click="handleCancelRequest(request)"
+                  />
+                </q-item-section>
+              </q-item>
+
+              <!-- Empty state -->
+              <q-item v-if="myJoinRequests.length === 0">
+                <q-item-section>
+                  <q-item-label caption class="text-center q-py-md text-grey-6">
+                    {{ $t('myRequests.noRequests') }}
+                  </q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-card-section>
+        </q-card>
+
         <!-- Account Actions Card -->
         <q-card flat bordered class="bg-grey-1">
           <q-card-section class="bg-negative text-white">
@@ -264,11 +319,12 @@
 </template>
 
 <script setup>
-import { ref, computed, reactive } from 'vue'
+import { ref, computed, reactive, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '@/stores/authStore.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.ts'
 import { useScreenComposable } from '@/composable/useScreenComposable'
 import { useAuthFirebase } from '@/services/authFirebase'
+import { useJoinRequestUseCases } from '@/composable/useJoinRequestUseCases'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { AuthError } from '@/errors'
@@ -283,12 +339,70 @@ const { isMobile } = useScreenComposable()
 const $q = useQuasar()
 const { t, locale } = useI18n()
 const authFirebase = useAuthFirebase()
+const { setUserJoinRequestsListener, cancelJoinRequest } = useJoinRequestUseCases()
 
 // State
 const editingProfile = ref(false)
 const savingProfile = ref(false)
 const changingPassword = ref(false)
 const showSignOutDialog = ref(false)
+
+// My Requests state
+const myJoinRequests = ref([])
+const cancellingId = ref(null)
+let unsubscribeJoinRequests = null
+
+onMounted(() => {
+  unsubscribeJoinRequests = setUserJoinRequestsListener((requests) => {
+    myJoinRequests.value = requests.slice().sort((a, b) => {
+      const dateA = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt)
+      const dateB = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt)
+      return dateB.getTime() - dateA.getTime()
+    })
+  })
+})
+
+onUnmounted(() => {
+  if (unsubscribeJoinRequests) {
+    unsubscribeJoinRequests()
+  }
+})
+
+const statusColor = (status) => {
+  switch (status) {
+    case 'pending': return 'warning'
+    case 'approved': return 'positive'
+    case 'declined': return 'negative'
+    case 'cancelled': return 'grey'
+    default: return 'grey'
+  }
+}
+
+const formatDate = (date) => {
+  if (!date) return ''
+  const d = date?.toDate ? date.toDate() : (date instanceof Date ? date : new Date(date))
+  return d.toLocaleDateString()
+}
+
+const handleCancelRequest = async (request) => {
+  if (!request.id) return
+  cancellingId.value = request.id
+  try {
+    await cancelJoinRequest(request.id)
+    $q.notify({
+      type: 'positive',
+      message: t('myRequests.cancelled'),
+      timeout: 3000
+    })
+  } catch (err) {
+    log.error('Failed to cancel join request', {
+      error: err instanceof Error ? err.message : String(err),
+      requestId: request.id
+    })
+  } finally {
+    cancellingId.value = null
+  }
+}
 
 // Password visibility toggles
 const passwordVisible = reactive({

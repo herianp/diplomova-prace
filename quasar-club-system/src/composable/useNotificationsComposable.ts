@@ -18,7 +18,7 @@ export const useNotifications = () => {
     const notificationData: Partial<INotification> = {
       userId: invitation.inviteeId,
       type: 'team_invitation',
-      title: 'Team Invitation',
+      title: `Team Invitation — ${invitation.teamName}`,
       message: `${invitation.inviterName} invited you to join "${invitation.teamName}"`,
       teamId: invitation.teamId,
       invitationId: invitation.id,

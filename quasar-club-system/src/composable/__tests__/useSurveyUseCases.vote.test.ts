@@ -18,7 +18,16 @@ vi.mock('src/utils/logger', () => ({
 }))
 
 vi.mock('@/services/listenerRegistry', () => ({
-  listenerRegistry: { register: vi.fn(), unregister: vi.fn(), unregisterAll: vi.fn() }
+  listenerRegistry: { register: vi.fn(), unregister: vi.fn(), unregisterAll: vi.fn(), isActive: vi.fn().mockReturnValue(false) }
+}))
+
+vi.mock('@/composable/useRateLimiter', () => ({
+  useRateLimiter: () => ({
+    checkLimit: vi.fn().mockResolvedValue({ allowed: true, current: 0, limit: 100, resetInfo: '' }),
+    incrementUsage: vi.fn().mockResolvedValue(undefined),
+    formatResetInfo: vi.fn().mockReturnValue(''),
+    useActionLimitStatus: vi.fn()
+  })
 }))
 
 const mockAddOrUpdateVote = vi.fn()
@@ -118,14 +127,16 @@ describe('useSurveyUseCases - voteOnSurvey (TST-04)', () => {
   // New vote (survey exists, no prior votes)
   // ------------------------------------------------------------------
   it('calls addOrUpdateVote with correct args when survey exists and user has not voted', async () => {
-    const survey = makeSurvey({ votes: [] })
+    const votes: any[] = []
+    const survey = makeSurvey({ votes })
     teamStore.setSurveys([survey])
 
     const { voteOnSurvey } = useSurveyUseCases()
     await voteOnSurvey('survey-1', 'user-1', true)
 
     expect(mockAddOrUpdateVote).toHaveBeenCalledOnce()
-    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-1', 'user-1', true, [])
+    // votes is passed by reference; optimistic update mutates it after the call
+    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-1', 'user-1', true, votes)
   })
 
   // ------------------------------------------------------------------
@@ -246,20 +257,23 @@ describe('useSurveyUseCases - voteOnSurvey (TST-04)', () => {
   // ------------------------------------------------------------------
   it('finds the correct survey when multiple surveys are in the store', async () => {
     const survey1 = makeSurvey({ id: 'survey-1', votes: [{ userUid: 'user-2', vote: true }] })
-    const survey2 = makeSurvey({ id: 'survey-2', votes: [] })
+    const votes2: any[] = []
+    const survey2 = makeSurvey({ id: 'survey-2', votes: votes2 })
     teamStore.setSurveys([survey1, survey2])
 
     const { voteOnSurvey } = useSurveyUseCases()
     await voteOnSurvey('survey-2', 'user-1', false)
 
-    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-2', 'user-1', false, [])
+    // votes2 is passed by reference; optimistic update mutates it after the call
+    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-2', 'user-1', false, votes2)
   })
 
   // ------------------------------------------------------------------
   // Concurrent vote test (ROADMAP success criterion 2)
   // ------------------------------------------------------------------
   it('handles concurrent votes on same survey without data loss', async () => {
-    const survey = makeSurvey({ votes: [] })
+    const votes: any[] = []
+    const survey = makeSurvey({ votes })
     teamStore.setSurveys([survey])
     mockAddOrUpdateVote.mockResolvedValue(undefined)
 
@@ -270,8 +284,9 @@ describe('useSurveyUseCases - voteOnSurvey (TST-04)', () => {
     ])
 
     expect(mockAddOrUpdateVote).toHaveBeenCalledTimes(2)
-    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-1', 'user-1', true, [])
-    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-1', 'user-2', false, [])
+    // Both calls receive the same votes array reference (optimistic updates mutate it after each call)
+    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-1', 'user-1', true, votes)
+    expect(mockAddOrUpdateVote).toHaveBeenCalledWith('survey-1', 'user-2', false, votes)
   })
 })
 

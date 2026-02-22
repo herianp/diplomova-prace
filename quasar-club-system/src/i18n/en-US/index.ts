@@ -359,6 +359,24 @@ export default {
     noUsers: "No users found",
     loadError: "Failed to load admin data",
     auditTab: "Audit Logs",
+    rateLimitsTab: "Rate Limits",
+    rateLimits: {
+      teamCreation: "Team creation",
+      messages: "Messages",
+      joinRequests: "Join requests",
+      surveys: "Surveys",
+      fines: "Fines (per team)",
+      actionColumn: "Action",
+      limitColumn: "Limit",
+      windowColumn: "Window",
+      editColumn: "Edit",
+      saveSuccess: "Limit updated",
+      saveError: "Failed to update limit",
+      windowTotal: "total",
+      windowWeekly: "/week",
+      windowDaily: "/day",
+      windowPending: "pending"
+    },
     audit: {
       selectTeam: "Select team",
       operation: "Operation",
@@ -461,6 +479,87 @@ export default {
       balance: "Balance",
       close: "Close"
     }
+  },
+  onboarding: {
+    next: 'Continue',
+    back: 'Back',
+    skip: 'Skip for now',
+    welcome: {
+      title: 'Welcome',
+      heading: 'Welcome to Club System',
+      description: 'Your team management platform for surveys, reports, and collaboration.',
+      feature1: 'Surveys & Attendance',
+      feature2: 'Reports & Statistics',
+      feature3: 'Team Management'
+    },
+    displayName: {
+      title: 'Your Name',
+      description: 'Set a display name so your teammates can recognize you.',
+      label: 'Display name',
+      hint: 'Your teammates will see this name'
+    },
+    teamChoice: {
+      title: 'Join a Team',
+      createTitle: 'Create a Team',
+      createDescription: 'Start a new team and invite others to join.',
+      browseTitle: 'Browse Teams',
+      browseDescription: 'Find and join an existing team.',
+      createPlaceholder: 'Team creation will be available soon.',
+      browsePlaceholder: 'Team browsing will be available soon.',
+      createTeam: {
+        teamNameLabel: 'Team Name',
+        teamNameHint: 'Choose a name for your new team',
+        nameRequired: 'Team name is required',
+        submitButton: 'Create Team'
+      }
+    },
+    teamBrowse: {
+      searchPlaceholder: 'Search teams...',
+      memberBadge: 'Member',
+      pendingBadge: 'Request Pending',
+      joinButton: 'Join',
+      cancelRequest: 'Cancel Request',
+      confirmTitle: 'Join Request',
+      confirmMessage: 'Send join request to {teamName}?',
+      confirmSend: 'Send',
+      confirmCancel: 'Cancel',
+      requestSent: 'Join request sent to {teamName}',
+      requestCancelled: 'Join request cancelled',
+      noTeams: 'No teams available yet',
+      noResults: 'No teams match your search',
+      memberCount: '{count} members',
+      maxRequests: 'You can have at most 5 pending requests',
+      alreadyMember: 'You are already a member of this team'
+    },
+    success: {
+      title: "You're all set!",
+      subtitle: "Your team is ready. Let's get started.",
+      goToDashboard: 'Go to Dashboard'
+    }
+  },
+  joinRequests: {
+    title: 'Join Requests',
+    approve: 'Approve',
+    decline: 'Decline',
+    approved: '{name} has been added to the team',
+    declined: 'Request from {name} declined',
+    noRequests: 'No pending join requests',
+    pendingCount: '{count} pending request | {count} pending requests',
+    approveError: 'Failed to approve join request',
+    declineError: 'Failed to decline join request'
+  },
+  myRequests: {
+    title: 'My Join Requests',
+    noRequests: 'No join requests yet',
+    cancel: 'Cancel',
+    status: {
+      pending: 'Pending',
+      approved: 'Approved',
+      declined: 'Declined',
+      cancelled: 'Cancelled'
+    },
+    cancelConfirm: 'Cancel this join request?',
+    cancelled: 'Request cancelled'
   },
   cashbox: {
     title: "Cashbox",
@@ -574,5 +673,17 @@ export default {
       noHistory: "No history yet",
       viewDetails: "View Details"
     }
+  },
+  rateLimits: {
+    exceeded: "Limit reached",
+    resetPermanent: "This limit is permanent",
+    resetWeekly: "Resets on {date}",
+    resetDaily: "Resets tomorrow",
+    resetConcurrent: "Resolve pending requests first",
+    teamCreationExceeded: "You've created the maximum number of teams ({limit})",
+    messagesExceeded: "Weekly message limit reached ({current}/{limit})",
+    surveysExceeded: "Weekly survey limit reached ({current}/{limit})",
+    joinRequestsExceeded: "Maximum pending join requests reached ({limit})",
+    finesExceeded: "Daily fine limit reached for this team ({current}/{limit})"
   }
 } as const
