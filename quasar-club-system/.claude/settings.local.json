@@ -26,7 +26,10 @@
       "Skill(gsd:execute-phase)",
       "WebSearch",
       "mcp__firebase__*",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(head:*)",
+      "Bash(cd /c/Users/Developer/Documents/projekty/diplomova-prace/quasar-club-system && npm run lint 2>&1)",
+      "Skill(gsd:discuss-phase)"
     ]
   },
   "enableAllProjectMcpServers": true,

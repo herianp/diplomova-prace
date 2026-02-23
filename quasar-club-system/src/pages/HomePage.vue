@@ -1,6 +1,6 @@
 <template>
   <div class="view">
-    <h1>Home page</h1>
+    <h1>{{ $t('app.homePage') }}</h1>
   </div>
 </template>
 

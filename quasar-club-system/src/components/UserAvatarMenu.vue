@@ -26,7 +26,7 @@
           <q-item-section avatar>
             <q-icon name="logout" color="red" />
           </q-item-section>
-          <q-item-section>Logout</q-item-section>
+          <q-item-section>{{ $t('navigation.logout') }}</q-item-section>
         </q-item>
       </q-list>
     </q-menu>

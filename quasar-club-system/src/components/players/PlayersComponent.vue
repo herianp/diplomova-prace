@@ -101,8 +101,8 @@
     </div>
 
     <!-- Detail Dialog -->
-    <q-dialog v-model="showDetail" :persistent="false">
-      <q-card style="min-width: 400px; max-width: 600px; width: 90vw;">
+    <q-dialog v-model="showDetail" :persistent="false" position="standard">
+      <q-card class="q-ma-md" style="min-width: 400px; max-width: 600px; width: 90vw; max-height: 85vh;">
         <!-- Header -->
         <q-card-section class="row items-center q-pb-none">
           <q-avatar size="48px" color="primary" text-color="white">
@@ -118,86 +118,89 @@
 
         <q-separator class="q-mt-md" />
 
-        <!-- Stats Grid -->
-        <q-card-section>
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">{{ $t('players.detail.stats') }}</div>
-          <div class="row q-col-gutter-sm">
-            <div class="col-6">
-              <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
-                <div class="text-h6 text-weight-bold text-primary">{{ selectedStats?.totalSurveys ?? 0 }}</div>
-                <div class="text-caption text-grey-7">{{ $t('players.detail.totalSurveys') }}</div>
+        <!-- Scrollable Content -->
+        <div style="max-height: calc(85vh - 130px); overflow-y: auto;">
+          <!-- Stats Grid -->
+          <q-card-section>
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">{{ $t('players.detail.stats') }}</div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-6">
+                <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
+                  <div class="text-h6 text-weight-bold text-primary">{{ selectedStats?.totalSurveys ?? 0 }}</div>
+                  <div class="text-caption text-grey-7">{{ $t('players.detail.totalSurveys') }}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
+                  <div class="text-h6 text-weight-bold text-positive">{{ selectedStats?.yesVotes ?? 0 }}</div>
+                  <div class="text-caption text-grey-7">{{ $t('players.detail.yesVotes') }}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
+                  <div class="text-h6 text-weight-bold text-negative">{{ selectedStats?.noVotes ?? 0 }}</div>
+                  <div class="text-caption text-grey-7">{{ $t('players.detail.noVotes') }}</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
+                  <div class="text-h6 text-weight-bold text-grey-7">{{ selectedStats?.unvoted ?? 0 }}</div>
+                  <div class="text-caption text-grey-7">{{ $t('players.detail.unvoted') }}</div>
+                </div>
               </div>
             </div>
-            <div class="col-6">
-              <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
-                <div class="text-h6 text-weight-bold text-positive">{{ selectedStats?.yesVotes ?? 0 }}</div>
-                <div class="text-caption text-grey-7">{{ $t('players.detail.yesVotes') }}</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
-                <div class="text-h6 text-weight-bold text-negative">{{ selectedStats?.noVotes ?? 0 }}</div>
-                <div class="text-caption text-grey-7">{{ $t('players.detail.noVotes') }}</div>
-              </div>
-            </div>
-            <div class="col-6">
-              <div class="stat-box bg-grey-2 rounded-borders q-pa-sm text-center">
-                <div class="text-h6 text-weight-bold text-grey-7">{{ selectedStats?.unvoted ?? 0 }}</div>
-                <div class="text-caption text-grey-7">{{ $t('players.detail.unvoted') }}</div>
-              </div>
-            </div>
-          </div>
-        </q-card-section>
+          </q-card-section>
 
-        <!-- Doughnut Chart -->
-        <q-card-section>
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">{{ $t('players.detail.voteBreakdown') }}</div>
-          <div class="flex flex-center">
-            <canvas ref="chartRef" width="200" height="200" style="max-width: 200px;" />
-          </div>
-        </q-card-section>
+          <!-- Doughnut Chart -->
+          <q-card-section>
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">{{ $t('players.detail.voteBreakdown') }}</div>
+            <div class="flex flex-center">
+              <canvas ref="chartRef" width="200" height="200" style="max-width: 200px;" />
+            </div>
+          </q-card-section>
 
-        <!-- Progress Bars -->
-        <q-card-section>
-          <div>
-            <div class="row items-center q-mb-xs">
-              <div class="col text-caption text-weight-medium">{{ $t('players.detail.attendanceRate') }}</div>
-              <div class="col-auto text-caption text-positive text-weight-bold">{{ selectedStats?.attendanceRate ?? 0 }}%</div>
+          <!-- Progress Bars -->
+          <q-card-section>
+            <div>
+              <div class="row items-center q-mb-xs">
+                <div class="col text-caption text-weight-medium">{{ $t('players.detail.attendanceRate') }}</div>
+                <div class="col-auto text-caption text-positive text-weight-bold">{{ selectedStats?.attendanceRate ?? 0 }}%</div>
+              </div>
+              <q-linear-progress
+                :value="(selectedStats?.attendanceRate ?? 0) / 100"
+                color="positive"
+                track-color="grey-3"
+                rounded
+                size="8px"
+              />
             </div>
-            <q-linear-progress
-              :value="(selectedStats?.attendanceRate ?? 0) / 100"
-              color="positive"
-              track-color="grey-3"
-              rounded
-              size="8px"
-            />
-          </div>
-        </q-card-section>
+          </q-card-section>
 
-        <!-- Finances -->
-        <q-card-section v-if="selectedBalance">
-          <q-separator class="q-mb-md" />
-          <div class="text-subtitle2 text-weight-bold q-mb-sm">{{ $t('players.detail.finances') }}</div>
-          <div class="row q-col-gutter-sm">
-            <div class="col-4 text-center">
-              <div class="text-caption text-grey-7">{{ $t('players.detail.totalFined') }}</div>
-              <div class="text-body2 text-weight-bold text-negative">{{ selectedBalance.totalFined }} CZK</div>
-            </div>
-            <div class="col-4 text-center">
-              <div class="text-caption text-grey-7">{{ $t('players.detail.totalPaid') }}</div>
-              <div class="text-body2 text-weight-bold text-positive">{{ selectedBalance.totalPaid }} CZK</div>
-            </div>
-            <div class="col-4 text-center">
-              <div class="text-caption text-grey-7">{{ $t('players.detail.balance') }}</div>
-              <div
-                class="text-body2 text-weight-bold"
-                :class="selectedBalance.balance >= 0 ? 'text-positive' : 'text-negative'"
-              >
-                {{ selectedBalance.balance }} CZK
+          <!-- Finances -->
+          <q-card-section v-if="selectedBalance">
+            <q-separator class="q-mb-md" />
+            <div class="text-subtitle2 text-weight-bold q-mb-sm">{{ $t('players.detail.finances') }}</div>
+            <div class="row q-col-gutter-sm">
+              <div class="col-4 text-center">
+                <div class="text-caption text-grey-7">{{ $t('players.detail.totalFined') }}</div>
+                <div class="text-body2 text-weight-bold text-negative">{{ selectedBalance.totalFined }} CZK</div>
+              </div>
+              <div class="col-4 text-center">
+                <div class="text-caption text-grey-7">{{ $t('players.detail.totalPaid') }}</div>
+                <div class="text-body2 text-weight-bold text-positive">{{ selectedBalance.totalPaid }} CZK</div>
+              </div>
+              <div class="col-4 text-center">
+                <div class="text-caption text-grey-7">{{ $t('players.detail.balance') }}</div>
+                <div
+                  class="text-body2 text-weight-bold"
+                  :class="selectedBalance.balance >= 0 ? 'text-positive' : 'text-negative'"
+                >
+                  {{ selectedBalance.balance }} CZK
+                </div>
               </div>
             </div>
-          </div>
-        </q-card-section>
+          </q-card-section>
+        </div>
 
         <!-- Close Button -->
         <q-card-actions align="right">

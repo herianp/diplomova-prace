@@ -157,6 +157,15 @@ service cloud.firestore {
         // App admin full access
         allow read, delete: if isAppAdmin();
       }
+
+      // Subcollection: settings - members read, power users write
+      match /settings/{settingId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+        allow read: if isAppAdmin();
+      }
     }
     
     // Secure access to the 'users' collection - users can only access their own data
@@ -255,11 +264,11 @@ service cloud.firestore {
         exists(/databases/$(database)/documents/teams/$(resource.data.teamId)) &&
         get(/databases/$(database)/documents/teams/$(resource.data.teamId)).data.members.hasAny([request.auth.uid]);
 
-      // Allow power users to create messages for their team
+      // Allow team members to create messages for their team
       allow create: if request.auth != null &&
         request.resource.data.teamId != null &&
         exists(/databases/$(database)/documents/teams/$(request.resource.data.teamId)) &&
-        get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.powerusers.hasAny([request.auth.uid]) &&
+        get(/databases/$(database)/documents/teams/$(request.resource.data.teamId)).data.members.hasAny([request.auth.uid]) &&
         request.resource.data.authorId == request.auth.uid;
 
       // Allow team creator or app admin to delete messages when deleting team

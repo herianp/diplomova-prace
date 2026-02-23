@@ -6,20 +6,33 @@
         <div class="text-grey-8 rounded-borders">
           {{ getDisplayedDateTime(survey.date, survey.time) }}
         </div>
-        <!-- Status Chip -->
-        <q-chip
-          :color="surveyStatusDisplay.color"
-          :icon="surveyStatusDisplay.icon"
-          text-color="white"
-          dense
-          :size="isMobile ? 'sm' : undefined"
-        >
-          {{ $t(surveyStatusDisplay.label) }}
-        </q-chip>
+        <div class="row items-center q-gutter-xs">
+          <!-- Weather Chip -->
+          <q-chip
+            v-if="weather"
+            :icon="weather.icon"
+            color="blue-1"
+            text-color="blue-8"
+            dense
+            :size="isMobile ? 'sm' : undefined"
+          >
+            {{ weather.temp }}°
+          </q-chip>
+          <!-- Status Chip -->
+          <q-chip
+            :color="surveyStatusDisplay.color"
+            :icon="surveyStatusDisplay.icon"
+            text-color="white"
+            dense
+            :size="isMobile ? 'sm' : undefined"
+          >
+            {{ $t(surveyStatusDisplay.label) }}
+          </q-chip>
+        </div>
       </div>
 
       <div class="row items-center no-wrap q-gutter-sm">
-        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ survey.title }}</div>
+        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ $t('survey.type.' + survey.type) }}</div>
       </div>
       <div class="text-grey-9" :class="isMobile ? 'q-pa-sm' : 'text-h6 q-pl-lg'">{{ survey.description }}</div>
 
@@ -138,6 +151,7 @@ import SurveyTag from '@/components/SurveyTag.vue'
 import { useRouter } from 'vue-router'
 import { getSurveyStatus, getSurveyStatusDisplay, canModifyVotes } from '@/utils/surveyStatusUtils'
 import { SurveyStatus } from '@/interfaces/interfaces'
+import { useWeatherService } from '@/composable/useWeatherService'
 
 const props = defineProps({
   survey: {
@@ -157,6 +171,11 @@ const { isMobile } = useScreenComposable()
 const router = useRouter()
 const i18n = useI18n()
 const { getDisplayedDateTime } = useDateHelpers(i18n.locale.value)
+
+const { getWeatherForDate } = useWeatherService()
+const lat = teamStore.currentTeamSettings?.address?.latitude ?? 50.08
+const lng = teamStore.currentTeamSettings?.address?.longitude ?? 14.42
+const weather = getWeatherForDate(props.survey.date, props.survey.time, lat, lng)
 
 const showModal = ref(false)
 

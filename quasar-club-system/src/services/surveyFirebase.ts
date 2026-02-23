@@ -155,11 +155,11 @@ export function useSurveyFirebase() {
           entityId: surveyRef.id,
           entityType: 'survey',
           metadata: {
-            title: newSurvey.title,
+            type: newSurvey.type,
+            ...(newSurvey.title && { title: newSurvey.title }),
             ...(newSurvey.description && { description: newSurvey.description }),
             ...(newSurvey.date && { date: newSurvey.date }),
-            ...(newSurvey.time && { time: newSurvey.time }),
-            ...(newSurvey.type && { type: newSurvey.type })
+            ...(newSurvey.time && { time: newSurvey.time })
           }
         })
       }
@@ -167,13 +167,13 @@ export function useSurveyFirebase() {
       // Return survey data for notifications (to be handled by composable)
       return {
         id: surveyRef.id,
-        title: newSurvey.title,
+        type: newSurvey.type,
         teamId: newSurvey.teamId,
         teamMembers
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')
-      log.error('Failed to add survey', { teamId: newSurvey.teamId, title: newSurvey.title, error: firestoreError.message })
+      log.error('Failed to add survey', { teamId: newSurvey.teamId, type: newSurvey.type, error: firestoreError.message })
       throw firestoreError
     }
   }
@@ -193,7 +193,7 @@ export function useSurveyFirebase() {
         // Only log fields that actually changed
         const changes: Record<string, unknown> = {}
         const before = auditContext.before || {}
-        const trackedFields = ['title', 'description', 'date', 'time', 'type'] as const
+        const trackedFields = ['description', 'date', 'time', 'type'] as const
         for (const field of trackedFields) {
           if (field in updatedSurvey && updatedSurvey[field] !== before[field]) {
             changes[field] = `${before[field] ?? ''} → ${updatedSurvey[field]}`

@@ -22,7 +22,7 @@
         />
 
         <!-- Team Management Section (Power Users Only) -->
-        <div v-if="isCurrentUserPowerUser" class="col-12 col-lg-4">
+        <div v-if="isPageUserPowerUser" class="col-12 col-lg-4">
           <TeamInvitationComponent
             :invite-form="inviteForm"
             :sending-invite="sendingInvite"
@@ -37,6 +37,88 @@
             @cancel-invitation="cancelInvitation"
           />
         </div>
+      </div>
+
+      <!-- Team Settings (Power Users Only) -->
+      <div v-if="isPageUserPowerUser && teamSettings" class="q-mt-lg">
+        <q-card flat bordered>
+          <q-card-section>
+            <div class="text-h6 q-mb-md">
+              <q-icon name="settings" class="q-mr-sm" />
+              {{ $t('team.single.settings.title') }}
+            </div>
+
+            <!-- Chat Toggle -->
+            <q-toggle
+              v-model="teamSettings.chatEnabled"
+              :label="$t('team.single.settings.chatEnabled')"
+              color="primary"
+            />
+            <div class="text-caption text-grey-6 q-ml-xl q-mb-md">
+              {{ $t('team.single.settings.chatEnabledHint') }}
+            </div>
+
+            <!-- Address Section -->
+            <div class="text-subtitle2 q-mb-sm">{{ $t('team.single.settings.address') }}</div>
+            <div class="row q-gutter-sm q-mb-md">
+              <div class="col">
+                <q-input
+                  v-model="addressSearch"
+                  :placeholder="$t('team.single.settings.addressPlaceholder')"
+                  outlined
+                  dense
+                  @keydown.enter.prevent="searchAddress"
+                />
+              </div>
+              <div class="col-auto">
+                <q-btn
+                  :label="$t('team.single.settings.searchAddress')"
+                  icon="search"
+                  color="primary"
+                  outline
+                  dense
+                  :loading="searchingAddress"
+                  @click="searchAddress"
+                />
+              </div>
+            </div>
+
+            <!-- Current address display -->
+            <div v-if="teamSettings.address?.name" class="text-body2 q-mb-sm">
+              <q-icon name="place" color="primary" /> {{ teamSettings.address.name }}
+            </div>
+            <div class="row q-gutter-sm q-mb-md">
+              <q-input
+                v-model.number="teamSettings.address.latitude"
+                :label="$t('team.single.settings.latitude')"
+                type="number"
+                outlined
+                dense
+                class="col"
+                step="0.01"
+              />
+              <q-input
+                v-model.number="teamSettings.address.longitude"
+                :label="$t('team.single.settings.longitude')"
+                type="number"
+                outlined
+                dense
+                class="col"
+                step="0.01"
+              />
+            </div>
+
+            <!-- Save Button -->
+            <q-btn
+              :label="$t('common.save')"
+              icon="save"
+              color="primary"
+              unelevated
+              :loading="savingSettings"
+              @click="saveSettings"
+            />
+          </q-card-section>
+        </q-card>
       </div>
 
       <!-- Danger Zone (Creator Only) -->
@@ -133,6 +215,7 @@ import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 import { useNotifications } from '@/composable/useNotificationsComposable'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { useTeamUseCases } from '@/composable/useTeamUseCases'
+import { useTeamStore } from '@/stores/teamStore'
 import { RouteEnum } from '@/enums/routesEnum'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import TeamPlayerCardsComponent from '@/components/team/TeamPlayerCardsComponent.vue'
@@ -150,6 +233,7 @@ const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
 const teamFirebase = useTeamFirebase()
 const { deleteTeam } = useTeamUseCases()
+const teamStore = useTeamStore()
 
 // State
 const loading = ref(true)
@@ -162,6 +246,10 @@ const memberToRemove = ref(null)
 const showDeleteDialog = ref(false)
 const deleteConfirmName = ref('')
 const isDeleting = ref(false)
+const teamSettings = ref(null)
+const savingSettings = ref(false)
+const addressSearch = ref('')
+const searchingAddress = ref(false)
 
 // Form
 const inviteForm = reactive({
@@ -171,8 +259,11 @@ const inviteForm = reactive({
 
 // Computed
 const teamId = computed(() => route.params.teamId)
-const { isCurrentUserPowerUser }  = useAuthComposable()
 const canDeleteTeam = computed(() => team.value?.creator === currentUser.value?.uid || isAdmin.value)
+const isPageUserPowerUser = computed(() => {
+  const uid = currentUser.value?.uid
+  return uid ? (team.value?.powerusers?.includes(uid) || false) : false
+})
 
 const loadTeam = async () => {
   try {
@@ -180,7 +271,11 @@ const loadTeam = async () => {
     if (teamData) {
       team.value = { id: teamId.value, ...teamData }
       await loadTeamMembers()
-      if (isCurrentUserPowerUser.value) {
+      await loadSettingsData()
+      // Check power user status against the loaded team (not teamStore.currentTeam)
+      const uid = currentUser.value?.uid
+      const isPowerUserForThisTeam = uid ? (teamData.powerusers?.includes(uid) || false) : false
+      if (isPowerUserForThisTeam) {
         await loadPendingInvitations()
       }
     }
@@ -196,6 +291,81 @@ const loadTeam = async () => {
     })
   } finally {
     loading.value = false
+  }
+}
+
+const loadSettingsData = async () => {
+  try {
+    const settings = await teamFirebase.getTeamSettings(teamId.value)
+    teamSettings.value = settings
+    teamStore.setCurrentTeamSettings(settings)
+  } catch (error) {
+    log.error('Failed to load team settings', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value
+    })
+    $q.notify({
+      type: 'negative',
+      message: t('team.single.settings.loadError'),
+      icon: 'error'
+    })
+  }
+}
+
+const saveSettings = async () => {
+  if (!teamSettings.value) return
+  savingSettings.value = true
+  try {
+    await teamFirebase.updateTeamSettings(teamId.value, teamSettings.value)
+    teamStore.setCurrentTeamSettings(teamSettings.value)
+    $q.notify({
+      type: 'positive',
+      message: t('team.single.settings.saveSuccess'),
+      icon: 'check'
+    })
+  } catch (error) {
+    log.error('Failed to save team settings', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value
+    })
+    $q.notify({
+      type: 'negative',
+      message: t('team.single.settings.saveError'),
+      icon: 'error'
+    })
+  } finally {
+    savingSettings.value = false
+  }
+}
+
+const searchAddress = async () => {
+  if (!addressSearch.value.trim()) return
+  searchingAddress.value = true
+  try {
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addressSearch.value)}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'QuasarClubSystem/1.0' } }
+    )
+    const results = await response.json()
+    if (results.length > 0) {
+      teamSettings.value.address = {
+        name: results[0].display_name,
+        latitude: parseFloat(results[0].lat),
+        longitude: parseFloat(results[0].lon),
+      }
+    } else {
+      $q.notify({
+        type: 'negative',
+        message: t('team.single.settings.addressNotFound') || 'Address not found',
+        icon: 'error'
+      })
+    }
+  } catch (error) {
+    log.error('Failed to search address', {
+      error: error instanceof Error ? error.message : String(error)
+    })
+  } finally {
+    searchingAddress.value = false
   }
 }
 

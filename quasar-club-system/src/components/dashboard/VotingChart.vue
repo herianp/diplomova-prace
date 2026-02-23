@@ -78,6 +78,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTeamStore } from '@/stores/teamStore'
 
 const props = defineProps({
@@ -90,6 +91,7 @@ const props = defineProps({
     default: null
   }
 })
+const { t } = useI18n()
 const teamStore = useTeamStore()
 
 const chartData = computed(() => {
@@ -105,7 +107,7 @@ const chartData = computed(() => {
     const userVote = survey.votes?.find(vote => vote.userUid === props.userUid)
 
     return {
-      title: survey.title,
+      title: t(`survey.type.${survey.type}`),
       date: survey.date,
       positiveVotes,
       negativeVotes,

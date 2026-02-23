@@ -1,18 +1,5 @@
 <template>
   <q-form @submit.prevent="handleUpdate" class="q-gutter-md">
-    <!-- Title Field -->
-    <q-input
-      v-model="formData.title"
-      :label="$t('survey.form.title')"
-      :rules="[val => val && val.length > 0 || $t('validation.required')]"
-      outlined
-      dense
-    >
-      <template v-slot:prepend>
-        <q-icon name="title" />
-      </template>
-    </q-input>
-
     <!-- Description Field -->
     <q-input
       v-model="formData.description"
@@ -147,7 +134,6 @@ const { updateSurvey, deleteSurvey } = useSurveyUseCases()
 
 // Form state
 const formData = ref({
-  title: '',
   description: '',
   date: '',
   time: '',
@@ -170,7 +156,6 @@ const typeOptions = computed(() => [
 // Initialize form with survey data
 const initializeForm = () => {
   formData.value = {
-    title: props.survey.title || '',
     description: props.survey.description || '',
     date: props.survey.date || '',
     time: props.survey.time || '',
@@ -187,7 +172,6 @@ const handleUpdate = async () => {
   
   try {
     await updateSurvey(props.survey.id, {
-      title: formData.value.title,
       description: formData.value.description,
       date: formData.value.date,
       time: formData.value.time,
@@ -195,7 +179,6 @@ const handleUpdate = async () => {
     }, {
       teamId: props.survey.teamId,
       before: {
-        title: props.survey.title,
         description: props.survey.description,
         date: props.survey.date,
         time: props.survey.time,
@@ -216,7 +199,7 @@ const handleUpdate = async () => {
     log.error('Failed to update survey', {
       error: err instanceof Error ? err.message : String(err),
       surveyId: props.survey.id,
-      title: formData.value.title
+      type: formData.value.type
     })
     error.value = t('survey.updateError')
     

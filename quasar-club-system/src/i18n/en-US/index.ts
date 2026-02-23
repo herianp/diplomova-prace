@@ -3,7 +3,23 @@ import errors from './errors'
 export default {
   errors,
   app: {
-    title: "Club Manager"
+    title: "Club Manager",
+    homePage: "Home page"
+  },
+  navigation: {
+    dashboard: "Dashboard",
+    teams: "Teams",
+    surveys: "Surveys",
+    reports: "Reports",
+    players: "Players",
+    cashbox: "Cashbox",
+    messages: "Messages",
+    settings: "Settings",
+    logout: "Logout"
+  },
+  errorPage: {
+    message: "Oops. Nothing here...",
+    goHome: "Go Home"
   },
   season: {
     selector: "Select Season",
@@ -44,8 +60,8 @@ export default {
     },
     filters: {
       title: "Search & Filter",
-      searchByName: "Search by name",
-      searchPlaceholder: "Enter survey title...",
+      searchByName: "Search surveys",
+      searchPlaceholder: "Search by type or description...",
       dateFrom: "From date",
       dateTo: "To date",
       customRange: "Custom Date Range",
@@ -169,6 +185,20 @@ export default {
         nameMismatch: "Team name does not match",
         success: "Team deleted successfully",
         error: "Failed to delete team"
+      },
+      settings: {
+        title: "Team Settings",
+        chatEnabled: "Enable Chat",
+        chatEnabledHint: "When disabled, no one can send messages",
+        address: "Team Address",
+        addressPlaceholder: "Enter address...",
+        searchAddress: "Search Address",
+        latitude: "Latitude",
+        longitude: "Longitude",
+        saveSuccess: "Team settings saved",
+        saveError: "Failed to save team settings",
+        loadError: "Failed to load team settings",
+        chatDisabled: "Chat is temporarily disabled by team admin"
       }
     }
   },
@@ -196,6 +226,7 @@ export default {
     december: "december"
   },
   dashboard: {
+    noTeamSelected: "No Team Selected",
     teamOverview: "Team Overview",
     powerUser: "Power User",
     member: "Member",
@@ -308,7 +339,13 @@ export default {
       accepted: "Invitation accepted",
       declined: "Invitation declined",
       error: "Failed to respond to invitation",
-      actionRequired: "Action required"
+      actionRequired: "Action required",
+      title: "Team Invitation — {teamName}",
+      message: "{inviterName} invited you to join \"{teamName}\""
+    },
+    survey: {
+      title: "New Survey",
+      message: "A new \"{type}\" survey has been created"
     }
   },
   messages: {
@@ -325,6 +362,7 @@ export default {
     sendError: "Failed to send message",
     loadError: "Failed to load messages",
     powerUserOnly: "Only team power users can send messages",
+    chatDisabled: "Chat is temporarily disabled by team admin",
     messagesCount: "messages",
     today: "Today",
     yesterday: "Yesterday"
@@ -672,6 +710,19 @@ export default {
       clearedBy: "Cleared by",
       noHistory: "No history yet",
       viewDetails: "View Details"
+    }
+  },
+  weather: {
+    forecast: "Weather forecast",
+    code: {
+      clear: "Clear sky",
+      partlyCloudy: "Partly cloudy",
+      fog: "Foggy",
+      rain: "Rain",
+      snow: "Snow",
+      showers: "Showers",
+      thunderstorm: "Thunderstorm",
+      unknown: "Unknown"
     }
   },
   rateLimits: {

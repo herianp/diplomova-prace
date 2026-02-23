@@ -624,41 +624,6 @@ describe('useFormValidation', () => {
   })
 
   // -------------------------------------------------------------------------
-  // surveyRules presets
-  // -------------------------------------------------------------------------
-  describe('surveyRules.title', () => {
-    it('returns array with required, minLength, and maxLength rules', () => {
-      const titleRules = surveyRules.title()
-      expect(titleRules).toHaveLength(3)
-    })
-
-    it('fails for empty title (required)', () => {
-      const titleRules = surveyRules.title()
-      const error = validateField('', titleRules)
-      expect(error).toBe('Survey title is required')
-    })
-
-    it('fails for title too short (minLength 3)', () => {
-      const titleRules = surveyRules.title()
-      const error = validateField('ab', titleRules)
-      expect(error).toBe('Title must be at least 3 characters')
-    })
-
-    it('fails for title too long (maxLength 100)', () => {
-      const titleRules = surveyRules.title()
-      const longTitle = 'a'.repeat(101)
-      const error = validateField(longTitle, titleRules)
-      expect(error).toBe('Title must be no more than 100 characters')
-    })
-
-    it('passes for valid title', () => {
-      const titleRules = surveyRules.title()
-      const error = validateField('Match vs Praha', titleRules)
-      expect(error).toBeNull()
-    })
-  })
-
-  // -------------------------------------------------------------------------
   // userRules presets
   // -------------------------------------------------------------------------
   describe('userRules.email', () => {

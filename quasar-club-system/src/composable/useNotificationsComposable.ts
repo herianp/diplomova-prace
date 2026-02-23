@@ -1,8 +1,10 @@
 import { useNotificationFirebase } from '@/services/notificationFirebase'
 import { INotification } from '@/interfaces/interfaces'
+import { useI18n } from 'vue-i18n'
 
 export const useNotifications = () => {
   const notificationFirebase = useNotificationFirebase()
+  const { t } = useI18n()
 
   const createNotification = async (notification: Partial<INotification>): Promise<void> => {
     await notificationFirebase.createNotification(notification)
@@ -18,23 +20,27 @@ export const useNotifications = () => {
     const notificationData: Partial<INotification> = {
       userId: invitation.inviteeId,
       type: 'team_invitation',
-      title: `Team Invitation — ${invitation.teamName}`,
-      message: `${invitation.inviterName} invited you to join "${invitation.teamName}"`,
+      title: t('notifications.invitation.title', { teamName: invitation.teamName }),
+      message: t('notifications.invitation.message', { inviterName: invitation.inviterName, teamName: invitation.teamName }),
       teamId: invitation.teamId,
       invitationId: invitation.id,
-      status: 'pending'
+      status: 'pending',
+      teamName: invitation.teamName,
+      inviterName: invitation.inviterName
     }
     return await createNotification(notificationData)
   }
 
-  const createSurveyNotification = async (survey: { id: string; title: string; teamId: string }, userIds: string[]): Promise<void> => {
+  const createSurveyNotification = async (survey: { id: string; type: string; teamId: string }, userIds: string[]): Promise<void> => {
+    const surveyTypeLabel = t(`survey.type.${survey.type}`)
     const notifications = userIds.map(userId => ({
       userId,
       type: 'survey_created' as const,
-      title: 'New Survey',
-      message: `New survey "${survey.title}" has been created`,
+      title: t('notifications.survey.title'),
+      message: t('notifications.survey.message', { type: surveyTypeLabel }),
       surveyId: survey.id,
-      teamId: survey.teamId
+      teamId: survey.teamId,
+      surveyType: survey.type
     }))
 
     const promises = notifications.map(notification => createNotification(notification))
