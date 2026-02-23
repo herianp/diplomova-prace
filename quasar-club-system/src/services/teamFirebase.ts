@@ -13,11 +13,12 @@ import {
   arrayUnion,
   arrayRemove,
   writeBatch,
+  setDoc,
   Unsubscribe,
   DocumentReference,
   CollectionReference,
 } from 'firebase/firestore'
-import { ITeam, ITeamInvitation } from '@/interfaces/interfaces'
+import { ITeam, ITeamInvitation, ITeamSettings } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
@@ -302,6 +303,41 @@ export function useTeamFirebase() {
     }
   }
 
+  const DEFAULT_TEAM_SETTINGS: ITeamSettings = {
+    chatEnabled: true,
+    address: {
+      name: '',
+      latitude: 50.08,
+      longitude: 14.42,
+    },
+  }
+
+  const getTeamSettings = async (teamId: string): Promise<ITeamSettings> => {
+    try {
+      const settingsRef = doc(db, 'teams', teamId, 'settings', 'general')
+      const settingsDoc = await getDoc(settingsRef)
+      if (!settingsDoc.exists()) {
+        return { ...DEFAULT_TEAM_SETTINGS, address: { ...DEFAULT_TEAM_SETTINGS.address } }
+      }
+      return settingsDoc.data() as ITeamSettings
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('Failed to get team settings', { teamId, error: firestoreError.message })
+      throw firestoreError
+    }
+  }
+
+  const updateTeamSettings = async (teamId: string, settings: ITeamSettings): Promise<void> => {
+    try {
+      const settingsRef = doc(db, 'teams', teamId, 'settings', 'general')
+      await setDoc(settingsRef, settings, { merge: true })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to update team settings', { teamId, error: firestoreError.message })
+      throw firestoreError
+    }
+  }
+
   return {
     createTeam,
     deleteTeam,
@@ -314,5 +350,7 @@ export function useTeamFirebase() {
     cancelInvitation,
     removeMember,
     promoteToPowerUser,
+    getTeamSettings,
+    updateTeamSettings,
   }
 }

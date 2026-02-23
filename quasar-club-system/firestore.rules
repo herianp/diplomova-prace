@@ -157,6 +157,15 @@ service cloud.firestore {
         // App admin full access
         allow read, delete: if isAppAdmin();
       }
+
+      // Subcollection: settings - members read, power users write
+      match /settings/{settingId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+        allow read: if isAppAdmin();
+      }
     }
     
     // Secure access to the 'users' collection - users can only access their own data

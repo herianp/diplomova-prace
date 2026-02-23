@@ -169,6 +169,20 @@ export default {
         nameMismatch: "Název týmu se neshoduje",
         success: "Tým byl úspěšně smazán",
         error: "Nepodařilo se smazat tým"
+      },
+      settings: {
+        title: "Nastavení týmu",
+        chatEnabled: "Povolit chat",
+        chatEnabledHint: "Když je vypnuto, nikdo nemůže odesílat zprávy",
+        address: "Adresa týmu",
+        addressPlaceholder: "Zadejte adresu...",
+        searchAddress: "Vyhledat adresu",
+        latitude: "Zeměpisná šířka",
+        longitude: "Zeměpisná délka",
+        saveSuccess: "Nastavení týmu uloženo",
+        saveError: "Nepodařilo se uložit nastavení týmu",
+        loadError: "Nepodařilo se načíst nastavení týmu",
+        chatDisabled: "Chat je dočasně vypnut správcem týmu"
       }
     }
   },
@@ -325,6 +339,7 @@ export default {
     sendError: "Nepodařilo se odeslat zprávu",
     loadError: "Nepodařilo se načíst zprávy",
     powerUserOnly: "Pouze správci týmu mohou odesílat zprávy",
+    chatDisabled: "Chat je dočasně vypnut správcem týmu",
     messagesCount: "zpráv",
     today: "Dnes",
     yesterday: "Včera"

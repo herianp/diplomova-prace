@@ -169,6 +169,20 @@ export default {
         nameMismatch: "Team name does not match",
         success: "Team deleted successfully",
         error: "Failed to delete team"
+      },
+      settings: {
+        title: "Team Settings",
+        chatEnabled: "Enable Chat",
+        chatEnabledHint: "When disabled, no one can send messages",
+        address: "Team Address",
+        addressPlaceholder: "Enter address...",
+        searchAddress: "Search Address",
+        latitude: "Latitude",
+        longitude: "Longitude",
+        saveSuccess: "Team settings saved",
+        saveError: "Failed to save team settings",
+        loadError: "Failed to load team settings",
+        chatDisabled: "Chat is temporarily disabled by team admin"
       }
     }
   },
@@ -325,6 +339,7 @@ export default {
     sendError: "Failed to send message",
     loadError: "Failed to load messages",
     powerUserOnly: "Only team power users can send messages",
+    chatDisabled: "Chat is temporarily disabled by team admin",
     messagesCount: "messages",
     today: "Today",
     yesterday: "Yesterday"

@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { useJoinRequestFirebase } from '@/services/joinRequestFirebase'
-import { IJoinRequest, ITeam } from '@/interfaces/interfaces'
+import { IJoinRequest, ITeam, ITeamSettings } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
@@ -169,6 +169,25 @@ export function useTeamUseCases() {
     })
   }
 
+  const loadTeamSettings = async (teamId: string): Promise<void> => {
+    try {
+      const settings = await teamFirebase.getTeamSettings(teamId)
+      teamStore.setCurrentTeamSettings(settings)
+    } catch (error: unknown) {
+      notifyError('team.settings.loadError')
+    }
+  }
+
+  const saveTeamSettings = async (teamId: string, settings: ITeamSettings): Promise<void> => {
+    try {
+      await teamFirebase.updateTeamSettings(teamId, settings)
+      teamStore.setCurrentTeamSettings(settings)
+    } catch (error: unknown) {
+      notifyError('team.settings.saveError')
+      throw error
+    }
+  }
+
   return {
     setTeamListener,
     createTeam,
@@ -176,6 +195,8 @@ export function useTeamUseCases() {
     getTeamById,
     getTeamByIdAndSetCurrentTeam,
     clearTeamData,
-    setPendingJoinRequestsListener
+    setPendingJoinRequestsListener,
+    loadTeamSettings,
+    saveTeamSettings,
   }
 }

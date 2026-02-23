@@ -50,6 +50,15 @@ export interface ITeam {
   surveys: string[]
 }
 
+export interface ITeamSettings {
+  chatEnabled: boolean
+  address: {
+    name: string
+    latitude: number
+    longitude: number
+  }
+}
+
 export interface ITeamInvitation {
   id?: string
   teamId: string
