@@ -20,11 +20,8 @@ interface ForecastCache {
   fetchedAt: number
 }
 
-// Module-level cache shared across all composable instances
-const cache: ForecastCache = {
-  data: null,
-  fetchedAt: 0,
-}
+// Module-level cache map shared across all composable instances, keyed by "lat,lng"
+const cacheMap = new Map<string, ForecastCache>()
 
 const CACHE_TTL_MS = 30 * 60 * 1000 // 30 minutes
 
@@ -50,28 +47,28 @@ function weathercodeToCategory(code: number): string {
   return 'unknown'
 }
 
-async function fetchForecast(): Promise<ForecastCache['data']> {
+async function fetchForecast(latitude: number, longitude: number): Promise<ForecastCache['data']> {
+  const cacheKey = `${latitude},${longitude}`
+  const cached = cacheMap.get(cacheKey)
   const now = Date.now()
-  if (cache.data && now - cache.fetchedAt < CACHE_TTL_MS) {
-    return cache.data
+  if (cached?.data && now - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.data
   }
 
   try {
-    const url =
-      'https://api.open-meteo.com/v1/forecast?latitude=50.08&longitude=14.42&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Prague&forecast_days=16'
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Prague&forecast_days=16`
     const response = await fetch(url)
     if (!response.ok) return null
     const json = await response.json()
-    cache.data = json
-    cache.fetchedAt = now
-    return cache.data
+    cacheMap.set(cacheKey, { data: json, fetchedAt: now })
+    return json
   } catch {
     return null
   }
 }
 
 export function useWeatherService() {
-  function getWeatherForDate(dateString: string): Ref<WeatherData | null> {
+  function getWeatherForDate(dateString: string, latitude = 50.08, longitude = 14.42): Ref<WeatherData | null> {
     const result = ref<WeatherData | null>(null)
 
     const today = DateTime.now().startOf('day')
@@ -82,7 +79,7 @@ export function useWeatherService() {
       return result
     }
 
-    fetchForecast().then((forecast) => {
+    fetchForecast(latitude, longitude).then((forecast) => {
       if (!forecast) return
 
       const index = forecast.daily.time.indexOf(dateString)
