@@ -1,5 +1,5 @@
 <template>
-  <div class="notifications-dropdown">
+  <div class="notifications-dropdown" ref="dropdownRef">
     <q-btn
       flat
       round
@@ -73,8 +73,8 @@
                   />
                 </div>
                 <div class="col">
-                  <div class="text-body1 text-black q-mb-xs">{{ notification.title }}</div>
-                  <div class="text-body2 text-grey-7 q-mb-sm">{{ notification.message }}</div>
+                  <div class="text-body1 text-black q-mb-xs">{{ getNotificationTitle(notification) }}</div>
+                  <div class="text-body2 text-grey-7 q-mb-sm">{{ getNotificationMessage(notification) }}</div>
                   <div class="text-caption text-grey-5">
                     {{ formatTimeAgo(notification.createdAt) }}
                   </div>
@@ -120,7 +120,7 @@
               dense
               color="primary"
               :label="$t('notifications.viewAll')"
-              @click="$router.push('/notifications')"
+              @click="showDropdown = false; $router.push('/notifications')"
             />
           </div>
         </div>
@@ -152,6 +152,7 @@ const notificationFirebase = useNotificationFirebase()
 const notifications = ref([])
 const loading = ref(true)
 const showDropdown = ref(false)
+const dropdownRef = ref(null)
 
 // Computed
 const currentUser = computed(() => authStore.user)
@@ -288,6 +289,38 @@ const markAllAsRead = async () => {
   }
 }
 
+const getNotificationTitle = (notification) => {
+  switch (notification.type) {
+    case 'team_invitation':
+      if (notification.teamName) {
+        return t('notifications.invitation.title', { teamName: notification.teamName })
+      }
+      return notification.title
+    case 'survey_created':
+      return t('notifications.survey.title')
+    default:
+      return notification.title
+  }
+}
+
+const getNotificationMessage = (notification) => {
+  switch (notification.type) {
+    case 'team_invitation':
+      if (notification.teamName && notification.inviterName) {
+        return t('notifications.invitation.message', { inviterName: notification.inviterName, teamName: notification.teamName })
+      }
+      return notification.message
+    case 'survey_created':
+      if (notification.surveyType) {
+        const surveyTypeLabel = t(`survey.type.${notification.surveyType}`)
+        return t('notifications.survey.message', { type: surveyTypeLabel })
+      }
+      return notification.message
+    default:
+      return notification.message
+  }
+}
+
 const getNotificationIcon = (type) => {
   switch (type) {
     case 'team_invitation':
@@ -335,11 +368,20 @@ watch(currentUser, (newUser, oldUser) => {
   }
 })
 
+const handleClickOutside = (event) => {
+  const el = dropdownRef.value
+  if (el && !el.contains(event.target) && showDropdown.value) {
+    showDropdown.value = false
+  }
+}
+
 onMounted(() => {
+  document.addEventListener('click', handleClickOutside)
   loadNotifications()
 })
 
 onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
   listenerRegistry.unregister('notifications')
 })
 </script>

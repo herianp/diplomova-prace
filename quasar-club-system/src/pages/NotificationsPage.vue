@@ -98,7 +98,7 @@
             <template v-slot:title>
               <div class="notification-header row items-center no-wrap">
                 <div class="col">
-                  <div class="text-h6 text-black">{{ notification.title }}</div>
+                  <div class="text-h6 text-black">{{ getNotificationTitle(notification) }}</div>
                   <div class="text-caption text-grey-6">
                     {{ formatDateTime(notification.createdAt) }}
                   </div>
@@ -137,7 +137,7 @@
                 @click="handleNotificationClick(notification)"
               >
                 <q-card-section class="q-pa-md">
-                  <div class="text-body1 q-mb-md">{{ notification.message }}</div>
+                  <div class="text-body1 q-mb-md">{{ getNotificationMessage(notification) }}</div>
 
                   <!-- Team Invitation Actions -->
                   <div v-if="notification.type === 'team_invitation' && notification.status === 'pending'" class="invitation-actions" @click.stop>
@@ -426,6 +426,38 @@ const handleNotificationClick = async (notification) => {
       break
     default:
       break
+  }
+}
+
+const getNotificationTitle = (notification) => {
+  switch (notification.type) {
+    case 'team_invitation':
+      if (notification.teamName) {
+        return t('notifications.invitation.title', { teamName: notification.teamName })
+      }
+      return notification.title
+    case 'survey_created':
+      return t('notifications.survey.title')
+    default:
+      return notification.title
+  }
+}
+
+const getNotificationMessage = (notification) => {
+  switch (notification.type) {
+    case 'team_invitation':
+      if (notification.teamName && notification.inviterName) {
+        return t('notifications.invitation.message', { inviterName: notification.inviterName, teamName: notification.teamName })
+      }
+      return notification.message
+    case 'survey_created':
+      if (notification.surveyType) {
+        const surveyTypeLabel = t(`survey.type.${notification.surveyType}`)
+        return t('notifications.survey.message', { type: surveyTypeLabel })
+      }
+      return notification.message
+    default:
+      return notification.message
   }
 }
 

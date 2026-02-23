@@ -57,8 +57,7 @@ const handleSurveySubmit = async (payload) => {
     expanded.value = false
   } catch (error) {
     log.error('Failed to create survey', {
-      error: error instanceof Error ? error.message : String(error),
-      title: payload.title
+      error: error instanceof Error ? error.message : String(error)
     })
   } finally {
     isSubmitting.value = false

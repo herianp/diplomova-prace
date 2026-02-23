@@ -221,7 +221,7 @@ async function onCreateSubmit(payload) {
 async function handleSurveySubmit(payload) {
   try {
     await addSurvey({
-      title: payload.title,
+      title: '',
       description: payload.description,
       date: payload.date,
       time: payload.time,
@@ -232,8 +232,7 @@ async function handleSurveySubmit(payload) {
   } catch (err) {
     log.error('Failed to create survey', {
       error: err instanceof Error ? err.message : String(err),
-      teamId: currentTeam.value?.id,
-      title: payload.title
+      teamId: currentTeam.value?.id
     })
     throw err
   }

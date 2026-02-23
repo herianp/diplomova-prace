@@ -3,7 +3,23 @@ import errors from './errors'
 export default {
   errors,
   app: {
-    title: "Klubový manažer"
+    title: "Klubový manažer",
+    homePage: "Domovská stránka"
+  },
+  navigation: {
+    dashboard: "Nástěnka",
+    teams: "Týmy",
+    surveys: "Ankety",
+    reports: "Reporty",
+    players: "Hráči",
+    cashbox: "Pokladna",
+    messages: "Zprávy",
+    settings: "Nastavení",
+    logout: "Odhlásit se"
+  },
+  errorPage: {
+    message: "Jejda. Nic tu není...",
+    goHome: "Domů"
   },
   season: {
     selector: "Vybrat sezónu",
@@ -44,8 +60,8 @@ export default {
     },
     filters: {
       title: "Vyhledávání a filtry",
-      searchByName: "Hledat podle názvu",
-      searchPlaceholder: "Zadejte název ankety...",
+      searchByName: "Hledat anketu",
+      searchPlaceholder: "Hledat podle typu nebo popisu...",
       dateFrom: "Od data",
       dateTo: "Do data",
       customRange: "Vlastní rozsah dat",
@@ -169,6 +185,20 @@ export default {
         nameMismatch: "Název týmu se neshoduje",
         success: "Tým byl úspěšně smazán",
         error: "Nepodařilo se smazat tým"
+      },
+      settings: {
+        title: "Nastavení týmu",
+        chatEnabled: "Povolit chat",
+        chatEnabledHint: "Když je vypnuto, nikdo nemůže odesílat zprávy",
+        address: "Adresa týmu",
+        addressPlaceholder: "Zadejte adresu...",
+        searchAddress: "Vyhledat adresu",
+        latitude: "Zeměpisná šířka",
+        longitude: "Zeměpisná délka",
+        saveSuccess: "Nastavení týmu uloženo",
+        saveError: "Nepodařilo se uložit nastavení týmu",
+        loadError: "Nepodařilo se načíst nastavení týmu",
+        chatDisabled: "Chat je dočasně vypnut správcem týmu"
       }
     }
   },
@@ -196,6 +226,7 @@ export default {
     december: "prosinec"
   },
   dashboard: {
+    noTeamSelected: "Není vybrán tým",
     teamOverview: "Přehled týmu",
     powerUser: "Správce",
     member: "Člen",
@@ -308,7 +339,13 @@ export default {
       accepted: "Pozvánka přijata",
       declined: "Pozvánka odmítnuta",
       error: "Nepodařilo se odpovědět na pozvánku",
-      actionRequired: "Vyžadována akce"
+      actionRequired: "Vyžadována akce",
+      title: "Pozvánka do týmu — {teamName}",
+      message: "{inviterName} vás pozval do týmu \"{teamName}\""
+    },
+    survey: {
+      title: "Nová anketa",
+      message: "Byla vytvořena nová anketa typu \"{type}\""
     }
   },
   messages: {
@@ -325,6 +362,7 @@ export default {
     sendError: "Nepodařilo se odeslat zprávu",
     loadError: "Nepodařilo se načíst zprávy",
     powerUserOnly: "Pouze správci týmu mohou odesílat zprávy",
+    chatDisabled: "Chat je dočasně vypnut správcem týmu",
     messagesCount: "zpráv",
     today: "Dnes",
     yesterday: "Včera"

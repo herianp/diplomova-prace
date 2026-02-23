@@ -7,7 +7,7 @@
     <div v-else-if="survey && teamMembers.length" class="verification-content">
       <HeaderBanner
         :title="$t('survey.verification.title')"
-        :survey-title="survey.title"
+        :survey-title="$t('survey.type.' + survey.type)"
         :description="$t('survey.verification.reviewAttendance')"
         @go-back="handleGoBack"
         :goBackOption="true"
@@ -182,7 +182,7 @@
 
         <q-card-section class="q-pt-none">
           <div class="text-body1">
-            {{ $t('survey.verification.deleteMessage', { title: survey?.title }) }}
+            {{ $t('survey.verification.deleteMessage', { title: $t('survey.type.' + survey?.type) }) }}
           </div>
           <div class="text-body2 text-negative q-mt-md">
             <q-icon name="warning" class="q-mr-xs" />
@@ -359,7 +359,7 @@ const saveSurvey = async () => {
         const finesGenerated = await generateAutoFines(
           currentTeam.value.id,
           survey.value.id,
-          survey.value.title,
+          survey.value.title || survey.value.type,
           survey.value.type,
           originalVotes,
           updatedVotes,

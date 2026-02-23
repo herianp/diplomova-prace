@@ -44,7 +44,7 @@
         <q-item-section>
           <q-item-label>{{ team.name }}</q-item-label>
           <q-item-label caption>
-            {{ $t('onboarding.teamBrowse.memberCount', { count: team.members.length }) }}
+            {{ $t('onboarding.teamBrowse.memberCount', { count: team.members?.length || 0 }) }}
           </q-item-label>
         </q-item-section>
 

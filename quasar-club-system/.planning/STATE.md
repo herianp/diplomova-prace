@@ -13,7 +13,7 @@ Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 14 of 14 (Rate Limiting & User Quotas)
 Plan: 2 of 2 in current phase
 Status: Complete — Phase 14 fully done
-Last activity: 2026-02-22 — Completed quick task 3: Fix ReportsCharts spacing, PlayersComponent dialog, weather chip on SurveyCard
+Last activity: 2026-02-23 — Completed quick task 5: Fix weather to show hourly temperature at survey time
 
 Progress: [██████████] 100% (v1.1)
 
@@ -79,6 +79,8 @@ None.
 | 1 | Fix admin page styling and create PlayersPage with player cards and detail dialog | 2026-02-21 | 6f54409 | [1-fix-admin-page-styling-and-create-player](./quick/1-fix-admin-page-styling-and-create-player/) |
 | 2 | Fix TeamsPage UI — show Create Team button and JoinRequestManagement for all users | 2026-02-22 | 1bcf6fa | [2-fix-teamspage-ui-show-create-team-and-jo](./quick/2-fix-teamspage-ui-show-create-team-and-jo/) |
 | 3 | Fix ReportsCharts chart spacing, PlayersComponent dialog scroll, add weather chip to SurveyCard | 2026-02-22 | 70763f3 | [3-fix-reportspage-chart-overlap-playerspag](./quick/3-fix-reportspage-chart-overlap-playerspag/) |
+| 4 | Add team settings with chatEnabled toggle, Nominatim geocoding, and location-aware weather | 2026-02-23 | 696c222 | [4-add-team-settings-with-chatenabled-toggl](./quick/4-add-team-settings-with-chatenabled-toggl/) |
+| 5 | Fix weather to show hourly temperature at survey time instead of daily min/max | 2026-02-23 | 093812b | [5-fix-weather-to-show-hourly-temperature-a](./quick/5-fix-weather-to-show-hourly-temperature-a/) |
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
 | Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
 | Phase 14-rate-limiting-user-quotas P01 | 25 | 2 tasks | 9 files |
@@ -86,6 +88,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Quick task 3 complete)
-Stopped at: All 3 quick task items done — chart spacing, dialog scroll, weather composable
+Last session: 2026-02-23 (Quick task 5 complete)
+Stopped at: Quick task 5 — hourly weather at survey time done
 Resume file: None

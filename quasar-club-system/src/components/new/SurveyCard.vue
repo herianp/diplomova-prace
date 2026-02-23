@@ -16,7 +16,7 @@
             dense
             :size="isMobile ? 'sm' : undefined"
           >
-            {{ weather.tempMax }}° / {{ weather.tempMin }}°
+            {{ weather.temp }}°
           </q-chip>
           <!-- Status Chip -->
           <q-chip
@@ -32,7 +32,7 @@
       </div>
 
       <div class="row items-center no-wrap q-gutter-sm">
-        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ survey.title }}</div>
+        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ $t('survey.type.' + survey.type) }}</div>
       </div>
       <div class="text-grey-9" :class="isMobile ? 'q-pa-sm' : 'text-h6 q-pl-lg'">{{ survey.description }}</div>
 
@@ -173,7 +173,9 @@ const i18n = useI18n()
 const { getDisplayedDateTime } = useDateHelpers(i18n.locale.value)
 
 const { getWeatherForDate } = useWeatherService()
-const weather = getWeatherForDate(props.survey.date)
+const lat = teamStore.currentTeamSettings?.address?.latitude ?? 50.08
+const lng = teamStore.currentTeamSettings?.address?.longitude ?? 14.42
+const weather = getWeatherForDate(props.survey.date, props.survey.time, lat, lng)
 
 const showModal = ref(false)
 

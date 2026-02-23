@@ -184,7 +184,7 @@ const createParticipationChart = () => {
       return date.toFormat('MMM dd')
     })
 
-    surveyTitles = sortedSurveys.map(survey => survey.title)
+    surveyTitles = sortedSurveys.map(survey => t(`survey.type.${survey.type}`))
 
     const totalMembers = props.currentTeam?.members?.length || 1
 

@@ -3,30 +3,28 @@ import { DateTime } from 'luxon'
 
 interface WeatherData {
   icon: string
-  tempMax: number
-  tempMin: number
+  temp: number
   description: string
 }
 
-interface ForecastCache {
-  data: {
-    daily: {
-      time: string[]
-      temperature_2m_max: number[]
-      temperature_2m_min: number[]
-      weathercode: number[]
-    }
-  } | null
+interface HourlyForecast {
+  hourly: {
+    time: string[]
+    temperature_2m: number[]
+    weather_code: number[]
+  }
+}
+
+interface ForecastCacheEntry {
+  data: HourlyForecast | null
   fetchedAt: number
 }
 
-// Module-level cache shared across all composable instances
-const cache: ForecastCache = {
-  data: null,
-  fetchedAt: 0,
-}
+// Module-level in-memory cache keyed by "lat,lng"
+const cacheMap = new Map<string, ForecastCacheEntry>()
 
 const CACHE_TTL_MS = 30 * 60 * 1000 // 30 minutes
+const SESSION_STORAGE_KEY = 'weatherForecastCache'
 
 function weathercodeToIcon(code: number): string {
   if (code === 0) return 'wb_sunny'
@@ -50,28 +48,65 @@ function weathercodeToCategory(code: number): string {
   return 'unknown'
 }
 
-async function fetchForecast(): Promise<ForecastCache['data']> {
+// Restore cache from sessionStorage on module load
+function restoreFromSession(): void {
+  try {
+    const stored = sessionStorage.getItem(SESSION_STORAGE_KEY)
+    if (!stored) return
+    const entries: Record<string, ForecastCacheEntry> = JSON.parse(stored)
+    const now = Date.now()
+    for (const [key, entry] of Object.entries(entries)) {
+      if (entry.data && now - entry.fetchedAt < CACHE_TTL_MS) {
+        cacheMap.set(key, entry)
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+}
+
+function saveToSession(): void {
+  try {
+    const obj: Record<string, ForecastCacheEntry> = {}
+    cacheMap.forEach((value, key) => { obj[key] = value })
+    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(obj))
+  } catch {
+    // Ignore quota errors
+  }
+}
+
+restoreFromSession()
+
+async function fetchForecast(latitude: number, longitude: number): Promise<HourlyForecast | null> {
+  const cacheKey = `${latitude},${longitude}`
+  const cached = cacheMap.get(cacheKey)
   const now = Date.now()
-  if (cache.data && now - cache.fetchedAt < CACHE_TTL_MS) {
-    return cache.data
+  if (cached?.data && now - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.data
   }
 
   try {
-    const url =
-      'https://api.open-meteo.com/v1/forecast?latitude=50.08&longitude=14.42&daily=temperature_2m_max,temperature_2m_min,weathercode&timezone=Europe/Prague&forecast_days=16'
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,weather_code&timezone=Europe/Prague&forecast_days=16`
     const response = await fetch(url)
     if (!response.ok) return null
     const json = await response.json()
-    cache.data = json
-    cache.fetchedAt = now
-    return cache.data
+    cacheMap.set(cacheKey, { data: json, fetchedAt: now })
+    saveToSession()
+    return json
   } catch {
     return null
   }
 }
 
 export function useWeatherService() {
-  function getWeatherForDate(dateString: string): Ref<WeatherData | null> {
+  /**
+   * Get weather for a specific date and time.
+   * @param dateString - Survey date in YYYY-MM-DD format
+   * @param time - Survey time in HH:MM format (e.g. "18:00")
+   * @param latitude - Location latitude (defaults to Prague)
+   * @param longitude - Location longitude (defaults to Prague)
+   */
+  function getWeatherForDate(dateString: string, time = '12:00', latitude = 50.08, longitude = 14.42): Ref<WeatherData | null> {
     const result = ref<WeatherData | null>(null)
 
     const today = DateTime.now().startOf('day')
@@ -82,17 +117,20 @@ export function useWeatherService() {
       return result
     }
 
-    fetchForecast().then((forecast) => {
+    fetchForecast(latitude, longitude).then((forecast) => {
       if (!forecast) return
 
-      const index = forecast.daily.time.indexOf(dateString)
+      // Build the target hourly key: "YYYY-MM-DDTHH:00" (Open-Meteo uses full hours)
+      const hour = time.split(':')[0].padStart(2, '0')
+      const targetKey = `${dateString}T${hour}:00`
+
+      const index = forecast.hourly.time.indexOf(targetKey)
       if (index === -1) return
 
-      const code = forecast.daily.weathercode[index]
+      const code = forecast.hourly.weather_code[index]
       result.value = {
         icon: weathercodeToIcon(code),
-        tempMax: Math.round(forecast.daily.temperature_2m_max[index]),
-        tempMin: Math.round(forecast.daily.temperature_2m_min[index]),
+        temp: Math.round(forecast.hourly.temperature_2m[index]),
         description: `weather.code.${weathercodeToCategory(code)}`,
       }
     })
