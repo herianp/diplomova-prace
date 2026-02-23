@@ -89,8 +89,8 @@
         />
       </q-card>
 
-      <!-- Message Input (Power Users Only, and chat enabled) -->
-      <div v-if="isPowerUser && isChatEnabled" class="message-input q-mt-md">
+      <!-- Message Input (Team Members, when chat enabled) -->
+      <div v-if="isChatEnabled" class="message-input q-mt-md">
         <q-card flat bordered>
           <q-card-section class="q-pa-md">
             <div class="row q-gutter-md items-end">
@@ -124,13 +124,13 @@
         </q-card>
       </div>
 
-      <!-- Non-Power User or Chat Disabled Banner -->
-      <div v-if="!isPowerUser || !isChatEnabled" class="no-permission q-mt-md">
+      <!-- Chat Disabled Banner -->
+      <div v-if="!isChatEnabled" class="no-permission q-mt-md">
         <q-banner rounded class="bg-blue-1 text-blue-8">
           <template v-slot:avatar>
             <q-icon name="info" />
           </template>
-          {{ !isChatEnabled ? $t('messages.chatDisabled') : $t('messages.powerUserOnly') }}
+          {{ $t('messages.chatDisabled') }}
         </q-banner>
       </div>
     </template>
@@ -174,9 +174,6 @@ const showScrollButton = ref(false)
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
-const isPowerUser = computed(() =>
-  currentTeam.value?.powerusers?.includes(currentUser.value?.uid)
-)
 const isChatEnabled = computed(() => teamStore.currentTeamSettings?.chatEnabled !== false)
 
 // Messages with date separators injected
@@ -270,7 +267,7 @@ const loadMessages = () => {
 
 // Send message
 const sendNewMessage = async () => {
-  if (!newMessage.value.trim() || !currentTeam.value?.id || !isPowerUser.value) {
+  if (!newMessage.value.trim() || !currentTeam.value?.id || !isChatEnabled.value) {
     return
   }
 
