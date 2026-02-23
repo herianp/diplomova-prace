@@ -674,6 +674,19 @@ export default {
       viewDetails: "Zobrazit detaily"
     }
   },
+  weather: {
+    forecast: "Předpověď počasí",
+    code: {
+      clear: "Jasno",
+      partlyCloudy: "Polojasno",
+      fog: "Mlha",
+      rain: "Déšť",
+      snow: "Sníh",
+      showers: "Přeháňky",
+      thunderstorm: "Bouřka",
+      unknown: "Neznámé"
+    }
+  },
   rateLimits: {
     exceeded: "Limit dosažen",
     resetPermanent: "Tento limit je trvalý",

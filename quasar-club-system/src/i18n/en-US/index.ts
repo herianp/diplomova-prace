@@ -674,6 +674,19 @@ export default {
       viewDetails: "View Details"
     }
   },
+  weather: {
+    forecast: "Weather forecast",
+    code: {
+      clear: "Clear sky",
+      partlyCloudy: "Partly cloudy",
+      fog: "Foggy",
+      rain: "Rain",
+      snow: "Snow",
+      showers: "Showers",
+      thunderstorm: "Thunderstorm",
+      unknown: "Unknown"
+    }
+  },
   rateLimits: {
     exceeded: "Limit reached",
     resetPermanent: "This limit is permanent",
