@@ -1,5 +1,5 @@
 <template>
-  <q-form @submit.prevent="submitFormHandler" class="q-gutter-md">
+  <q-form ref="formRef" @submit.prevent="submitFormHandler" class="q-gutter-md">
     <q-select
       v-model="surveyType"
       :options="surveyTypeOptions"
@@ -13,19 +13,6 @@
         <q-icon name="category" />
       </template>
     </q-select>
-
-    <q-input
-      v-model="title"
-      :label="$t('survey.form.title')"
-      outlined
-      dense
-      lazy-rules
-      :rules="[(val) => !!val || $t('validation.required')]"
-    >
-      <template v-slot:prepend>
-        <q-icon name="title" />
-      </template>
-    </q-input>
 
     <q-input
       v-model="description"
@@ -86,7 +73,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { SurveyTypes } from '@/enums/SurveyTypes.js'
 import { useI18n } from 'vue-i18n'
 
@@ -94,7 +81,7 @@ const i18n = useI18n();
 
 const emit = defineEmits(['submit'])
 
-const title = ref('')
+const formRef = ref(null)
 const description = ref('')
 const date = ref(new Date().toISOString().slice(0, 10))
 const time = ref('19:00')
@@ -109,17 +96,19 @@ const surveyTypeOptions = computed(() => {
 
 function submitFormHandler() {
   emit('submit', {
-    title: title.value,
     description: description.value,
     date: date.value,
     time: time.value,
     surveyType: surveyType.value,
   })
 
-  // Reset inputs
-  title.value = ''
+  // Reset inputs to defaults
   description.value = ''
-  date.value = ''
-  time.value = ''
+  date.value = new Date().toISOString().slice(0, 10)
+  time.value = '19:00'
+  surveyType.value = SurveyTypes.Training
+
+  // Clear validation errors
+  nextTick(() => { formRef.value?.resetValidation() })
 }
 </script>

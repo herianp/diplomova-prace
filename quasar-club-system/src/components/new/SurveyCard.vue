@@ -32,7 +32,7 @@
       </div>
 
       <div class="row items-center no-wrap q-gutter-sm">
-        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ survey.title }}</div>
+        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ $t('survey.type.' + survey.type) }}</div>
       </div>
       <div class="text-grey-9" :class="isMobile ? 'q-pa-sm' : 'text-h6 q-pl-lg'">{{ survey.description }}</div>
 

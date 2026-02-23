@@ -85,7 +85,7 @@ export interface ISurvey {
   description: string
   teamId: string
   time: string // Time as string (HH:MM)
-  title: string
+  title?: string
   type: SurveyTypes
   votes: IVote[]
   status?: SurveyStatus
@@ -100,7 +100,7 @@ export interface IVote {
 
 export interface ISurveyNotificationData {
   id: string
-  title: string
+  type: string
   teamId: string
   teamMembers: string[]
 }
@@ -122,6 +122,9 @@ export interface INotification {
   surveyId?: string
   invitationId?: string
   status?: 'pending' | 'accepted' | 'declined'
+  teamName?: string
+  inviterName?: string
+  surveyType?: string
 }
 
 export interface IMessage {

@@ -108,12 +108,6 @@ export function useFormValidation() {
    * Survey-specific validation rules
    */
   const surveyRules = {
-    title: (): ValidationRules => [
-      rules.required('Survey title is required'),
-      rules.minLength(3, 'Title must be at least 3 characters'),
-      rules.maxLength(100, 'Title must be no more than 100 characters')
-    ],
-
     description: (): ValidationRules => [
       rules.maxLength(500, 'Description must be no more than 500 characters')
     ],

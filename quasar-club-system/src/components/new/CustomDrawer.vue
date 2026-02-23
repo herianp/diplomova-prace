@@ -92,14 +92,14 @@
         <q-item-section avatar>
           <q-icon name="settings" />
         </q-item-section>
-        <q-item-section>Settings</q-item-section>
+        <q-item-section>{{ $t('navigation.settings') }}</q-item-section>
       </q-item>
 
       <q-item clickable v-ripple class="logout" @click="logoutUser">
         <q-item-section avatar>
           <q-icon name="logout" color="red" />
         </q-item-section>
-        <q-item-section>Logout</q-item-section>
+        <q-item-section>{{ $t('navigation.logout') }}</q-item-section>
       </q-item>
     </q-list>
   </q-drawer>
@@ -108,6 +108,7 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useI18n } from 'vue-i18n'
 import { RouteEnum } from '@/enums/routesEnum.ts'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import { useSeasonStore } from '@/stores/seasonStore'
@@ -117,6 +118,7 @@ import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { listenerRegistry } from '@/services/listenerRegistry'
 
 const router = useRouter();
+const { t } = useI18n();
 const { logoutUser, isAdmin } = useAuthComposable();
 const seasonStore = useSeasonStore();
 const teamStore = useTeamStore();
@@ -138,18 +140,18 @@ const selectTeam = (team) => {
 const drawerOpen = ref(true);
 
 // Top navigation links
-const allLinks = [
-  { title: "Dashboard", icon: "dashboard", route: RouteEnum.DASHBOARD.path },
-  { title: "Teams", icon: "groups", route: RouteEnum.TEAM.path },
-  { title: "Surveys", icon: "poll", route: RouteEnum.SURVEY.path },
-  { title: "Reports", icon: "bar_chart", route: RouteEnum.REPORTS.path },
-  { title: "Players", icon: "person", route: RouteEnum.PLAYERS.path },
-  { title: "Cashbox", icon: "account_balance_wallet", route: RouteEnum.CASHBOX.path },
-  { title: "Messages", icon: "chat", route: RouteEnum.MESSAGES.path },
-];
+const allLinks = computed(() => [
+  { title: t('navigation.dashboard'), icon: "dashboard", route: RouteEnum.DASHBOARD.path },
+  { title: t('navigation.teams'), icon: "groups", route: RouteEnum.TEAM.path },
+  { title: t('navigation.surveys'), icon: "poll", route: RouteEnum.SURVEY.path },
+  { title: t('navigation.reports'), icon: "bar_chart", route: RouteEnum.REPORTS.path },
+  { title: t('navigation.players'), icon: "person", route: RouteEnum.PLAYERS.path },
+  { title: t('navigation.cashbox'), icon: "account_balance_wallet", route: RouteEnum.CASHBOX.path },
+  { title: t('navigation.messages'), icon: "chat", route: RouteEnum.MESSAGES.path },
+]);
 
 const topLinks = computed(() =>
-  hasTeam.value ? allLinks : allLinks.filter(l => l.route === RouteEnum.TEAM.path)
+  hasTeam.value ? allLinks.value : allLinks.value.filter(l => l.route === RouteEnum.TEAM.path)
 );
 
 // Navigation function

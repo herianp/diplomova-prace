@@ -50,7 +50,8 @@ export function useSurveyFilters() {
     if (activeFilters.searchName?.trim()) {
       const searchTerm = activeFilters.searchName.toLowerCase().trim()
       filtered = filtered.filter(survey =>
-        survey.title.toLowerCase().includes(searchTerm)
+        (survey.type || '').toLowerCase().includes(searchTerm) ||
+        (survey.description || '').toLowerCase().includes(searchTerm)
       )
     }
 

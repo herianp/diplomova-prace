@@ -16,7 +16,7 @@
         <q-card-section class="q-pa-md">
           <div class="row items-start justify-between no-wrap q-mb-xs">
             <div class="text-subtitle1 text-weight-medium ellipsis" style="flex: 1; min-width: 0;">
-              {{ survey.title }}
+              {{ $t('survey.type.' + survey.type) }}
             </div>
             <q-chip
               v-if="getUserVote(survey) !== null"

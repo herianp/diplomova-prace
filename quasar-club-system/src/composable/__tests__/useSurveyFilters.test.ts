@@ -43,11 +43,11 @@ describe('useSurveyFilters', () => {
 
   describe('filterSurveys', () => {
     const surveys: ISurvey[] = [
-      createMockSurvey({ id: '1', date: '2025-08-01', title: 'Training Monday' }),
-      createMockSurvey({ id: '2', date: '2025-09-15', title: 'Match vs FC' }),
-      createMockSurvey({ id: '3', date: '2025-11-20', title: 'Training Wednesday' }),
-      createMockSurvey({ id: '4', date: '2024-06-01', title: 'Old Survey' }),
-      createMockSurvey({ id: '5', date: '2026-05-01', title: 'Future Training' })
+      createMockSurvey({ id: '1', date: '2025-08-01', type: SurveyTypes.Training, description: 'Monday session' }),
+      createMockSurvey({ id: '2', date: '2025-09-15', type: SurveyTypes.Match, description: 'derby vs FC' }),
+      createMockSurvey({ id: '3', date: '2025-11-20', type: SurveyTypes.Training, description: 'Wednesday session' }),
+      createMockSurvey({ id: '4', date: '2024-06-01', type: SurveyTypes.Match, description: 'Old survey' }),
+      createMockSurvey({ id: '5', date: '2026-05-01', type: SurveyTypes.Training, description: 'Future session' })
     ]
 
     it('filters by search name (case-insensitive)', () => {
@@ -106,7 +106,7 @@ describe('useSurveyFilters', () => {
     it('trims search name whitespace', () => {
       const { filterSurveys } = useSurveyFilters()
       const result = filterSurveys(surveys, {
-        searchName: '  match  ',
+        searchName: '  derby  ',
         dateFrom: '',
         dateTo: ''
       })
@@ -170,9 +170,9 @@ describe('useSurveyFilters', () => {
 
     it('filters by searchName reactively', () => {
       const surveys = ref([
-        createMockSurvey({ id: '1', date: '2025-09-15', title: 'Training Monday' }),
-        createMockSurvey({ id: '2', date: '2025-08-01', title: 'Match vs FC' }),
-        createMockSurvey({ id: '3', date: '2025-10-20', title: 'Training Wednesday' }),
+        createMockSurvey({ id: '1', date: '2025-09-15', type: SurveyTypes.Training }),
+        createMockSurvey({ id: '2', date: '2025-08-01', type: SurveyTypes.Match }),
+        createMockSurvey({ id: '3', date: '2025-10-20', type: SurveyTypes.Training }),
       ])
       const { createFilteredSurveys, updateFilters } = useSurveyFilters()
       updateFilters({ searchName: 'training', dateFrom: '', dateTo: '' })
@@ -183,8 +183,8 @@ describe('useSurveyFilters', () => {
 
     it('uses custom filters ref when provided', () => {
       const surveys = ref([
-        createMockSurvey({ id: '1', date: '2025-09-15', title: 'Match' }),
-        createMockSurvey({ id: '2', date: '2025-08-01', title: 'Training' }),
+        createMockSurvey({ id: '1', date: '2025-09-15', type: SurveyTypes.Match }),
+        createMockSurvey({ id: '2', date: '2025-08-01', type: SurveyTypes.Training }),
       ])
       const customFilters = ref({ searchName: 'match', dateFrom: '', dateTo: '' })
       const { createFilteredSurveys } = useSurveyFilters()
@@ -240,18 +240,18 @@ describe('useSurveyFilters', () => {
 
     it('applies searchName filter before limiting', () => {
       const surveys = ref([
-        createMockSurvey({ id: '1', title: 'Training A', createdDate: '1700005000', date: '2025-10-15' }),
-        createMockSurvey({ id: '2', title: 'Match', createdDate: '1700004000', date: '2025-10-15' }),
-        createMockSurvey({ id: '3', title: 'Training B', createdDate: '1700003000', date: '2025-10-15' }),
-        createMockSurvey({ id: '4', title: 'Match 2', createdDate: '1700002000', date: '2025-10-15' }),
-        createMockSurvey({ id: '5', title: 'Training C', createdDate: '1700001000', date: '2025-10-15' }),
-        createMockSurvey({ id: '6', title: 'Training D', createdDate: '1700000000', date: '2025-10-15' }),
+        createMockSurvey({ id: '1', type: SurveyTypes.Training, description: 'Training A', createdDate: '1700005000', date: '2025-10-15' }),
+        createMockSurvey({ id: '2', type: SurveyTypes.Match, description: 'Match', createdDate: '1700004000', date: '2025-10-15' }),
+        createMockSurvey({ id: '3', type: SurveyTypes.Training, description: 'Training B', createdDate: '1700003000', date: '2025-10-15' }),
+        createMockSurvey({ id: '4', type: SurveyTypes.Match, description: 'Match 2', createdDate: '1700002000', date: '2025-10-15' }),
+        createMockSurvey({ id: '5', type: SurveyTypes.Training, description: 'Training C', createdDate: '1700001000', date: '2025-10-15' }),
+        createMockSurvey({ id: '6', type: SurveyTypes.Training, description: 'Training D', createdDate: '1700000000', date: '2025-10-15' }),
       ])
       const customFilters = ref({ searchName: 'training', dateFrom: '', dateTo: '' })
       const { createRecentFilteredSurveys } = useSurveyFilters()
       const result = createRecentFilteredSurveys(surveys, 5, customFilters)
       // Only Training surveys (4 total), all returned since limit=5
-      expect(result.value.every(s => s.title.toLowerCase().includes('training'))).toBe(true)
+      expect(result.value.every(s => s.type === SurveyTypes.Training)).toBe(true)
       expect(result.value).toHaveLength(4)
       // Newest first
       expect(result.value[0].id).toBe('1')
