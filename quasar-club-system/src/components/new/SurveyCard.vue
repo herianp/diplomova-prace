@@ -16,7 +16,7 @@
             dense
             :size="isMobile ? 'sm' : undefined"
           >
-            {{ weather.tempMax }}° / {{ weather.tempMin }}°
+            {{ weather.temp }}°
           </q-chip>
           <!-- Status Chip -->
           <q-chip
@@ -175,7 +175,7 @@ const { getDisplayedDateTime } = useDateHelpers(i18n.locale.value)
 const { getWeatherForDate } = useWeatherService()
 const lat = teamStore.currentTeamSettings?.address?.latitude ?? 50.08
 const lng = teamStore.currentTeamSettings?.address?.longitude ?? 14.42
-const weather = getWeatherForDate(props.survey.date, lat, lng)
+const weather = getWeatherForDate(props.survey.date, props.survey.time, lat, lng)
 
 const showModal = ref(false)
 
