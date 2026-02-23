@@ -70,6 +70,7 @@ const selectTeam = (team) => {
   listenerRegistry.unregisterByScope('team')
 
   teamStore.currentTeam = team
+  localStorage.setItem('selectedTeamId', team.id)
   setSurveysListener(team.id)
 }
 

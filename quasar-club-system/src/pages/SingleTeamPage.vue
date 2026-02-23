@@ -22,7 +22,7 @@
         />
 
         <!-- Team Management Section (Power Users Only) -->
-        <div v-if="isCurrentUserPowerUser" class="col-12 col-lg-4">
+        <div v-if="isPageUserPowerUser" class="col-12 col-lg-4">
           <TeamInvitationComponent
             :invite-form="inviteForm"
             :sending-invite="sendingInvite"
@@ -40,7 +40,7 @@
       </div>
 
       <!-- Team Settings (Power Users Only) -->
-      <div v-if="isCurrentUserPowerUser && teamSettings" class="col-12 q-mt-lg">
+      <div v-if="isPageUserPowerUser && teamSettings" class="q-mt-lg">
         <q-card flat bordered>
           <q-card-section>
             <div class="text-h6 q-mb-md">
@@ -232,7 +232,7 @@ const $q = useQuasar()
 const { t } = useI18n()
 const { createTeamInvitationNotification } = useNotifications()
 const teamFirebase = useTeamFirebase()
-const { deleteTeam, loadTeamSettings, saveTeamSettings } = useTeamUseCases()
+const { deleteTeam } = useTeamUseCases()
 const teamStore = useTeamStore()
 
 // State
@@ -259,8 +259,11 @@ const inviteForm = reactive({
 
 // Computed
 const teamId = computed(() => route.params.teamId)
-const { isCurrentUserPowerUser }  = useAuthComposable()
 const canDeleteTeam = computed(() => team.value?.creator === currentUser.value?.uid || isAdmin.value)
+const isPageUserPowerUser = computed(() => {
+  const uid = currentUser.value?.uid
+  return uid ? (team.value?.powerusers?.includes(uid) || false) : false
+})
 
 const loadTeam = async () => {
   try {
@@ -268,9 +271,12 @@ const loadTeam = async () => {
     if (teamData) {
       team.value = { id: teamId.value, ...teamData }
       await loadTeamMembers()
-      if (isCurrentUserPowerUser.value) {
+      await loadSettingsData()
+      // Check power user status against the loaded team (not teamStore.currentTeam)
+      const uid = currentUser.value?.uid
+      const isPowerUserForThisTeam = uid ? (teamData.powerusers?.includes(uid) || false) : false
+      if (isPowerUserForThisTeam) {
         await loadPendingInvitations()
-        await loadSettingsData()
       }
     }
   } catch (error) {

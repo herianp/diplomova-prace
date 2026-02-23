@@ -26,7 +26,9 @@ export function useTeamUseCases() {
 
         // Only auto-select on first load when no team is selected
         if (!teamStore.currentTeam && teamsList.length > 0) {
-          teamStore.setCurrentTeam(teamsList[0])
+          const savedTeamId = localStorage.getItem('selectedTeamId')
+          const savedTeam = savedTeamId ? teamsList.find(t => t.id === savedTeamId) : null
+          teamStore.setCurrentTeam(savedTeam || teamsList[0])
         }
 
         // Set up join request listeners for all power-user teams
@@ -126,6 +128,7 @@ export function useTeamUseCases() {
   }
 
   const clearTeamData = () => {
+    localStorage.removeItem('selectedTeamId')
     teamStore.clearData()
   }
 
