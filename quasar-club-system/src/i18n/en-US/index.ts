@@ -50,8 +50,7 @@ export default {
       label: "Type",
       training: "Training",
       match: "Match",
-      event: "Event",
-      other: "Other"
+      'friendly-match': "Friendly Match"
     },
     status: {
       active: "Active",

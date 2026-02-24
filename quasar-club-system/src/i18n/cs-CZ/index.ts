@@ -50,8 +50,7 @@ export default {
       label: "Typ",
       training: "Trénink",
       match: "Zápas",
-      event: "Událost",
-      other: "Jiné"
+      'friendly-match': "Přátelský zápas"
     },
     status: {
       active: "Aktivní",

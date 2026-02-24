@@ -143,8 +143,10 @@ const triggerOptions = computed(() => [
 
 const surveyTypeOptions = computed(() => [
   { label: t('cashbox.rules.allTypes'), value: null },
-  { label: t('survey.type.training'), value: SurveyTypes.Training },
-  { label: t('survey.type.match'), value: SurveyTypes.Match },
+  ...Object.values(SurveyTypes).map((type) => ({
+    label: t(`survey.type.${type}`),
+    value: type,
+  })),
 ])
 
 const isNewRuleValid = computed(() =>
@@ -177,8 +179,6 @@ const getTriggerLabel = (trigger) => {
 }
 
 const getSurveyTypeLabel = (type) => {
-  if (type === SurveyTypes.Training) return t('survey.type.training')
-  if (type === SurveyTypes.Match) return t('survey.type.match')
-  return type
+  return t(`survey.type.${type}`, type)
 }
 </script>

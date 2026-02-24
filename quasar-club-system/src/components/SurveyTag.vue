@@ -22,6 +22,7 @@ const props = defineProps({
 const tagColors = {
   training: 'bg-blue-3',
   match: 'bg-green-3',
+  'friendly-match': 'bg-orange-3',
   default: 'bg-grey-3',
 }
 

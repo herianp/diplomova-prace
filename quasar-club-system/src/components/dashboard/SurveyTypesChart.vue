@@ -65,11 +65,9 @@ const props = defineProps({
 })
 
 const typeColors = {
-  'TRAINING': '#2196f3',
-  'MATCH': '#4caf50',
-  'EVENT': '#9c27b0',
-  'MEETING': '#ff9800',
-  'OTHER': '#607d8b'
+  'training': '#2196f3',
+  'match': '#4caf50',
+  'friendly-match': '#ff9800',
 }
 
 const getTypeColor = (type) => {
@@ -81,7 +79,7 @@ const chartData = computed(() => {
   
   const typeCounts = {}
   props.surveys.forEach(survey => {
-    const type = survey.type || 'OTHER'
+    const type = survey.type || 'unknown'
     typeCounts[type] = (typeCounts[type] || 0) + 1
   })
   

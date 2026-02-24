@@ -53,12 +53,12 @@
       <DashboardMetrics :filtered-surveys="filteredSurveys" />
 
       <!-- Recent Surveys History -->
-      <RecentSurveysGraph
-        :surveys="filteredRecentSurveys"
-        :current-user-uid="currentUser?.uid"
-        :is-loading="isLoading"
-        @refresh="refreshData"
-      />
+<!--      <RecentSurveysGraph-->
+<!--        :surveys="filteredRecentSurveys"-->
+<!--        :current-user-uid="currentUser?.uid"-->
+<!--        :is-loading="isLoading"-->
+<!--        @refresh="refreshData"-->
+<!--      />-->
 
       <!-- Charts Section -->
       <div class="row q-col-gutter-md">
@@ -102,7 +102,6 @@ import { useTeamStore } from '@/stores/teamStore'
 import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useReadiness } from '@/composable/useReadiness'
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics.vue'
-import RecentSurveysGraph from '@/components/graphs/RecentSurveysGraph.vue'
 import VotingChart from '@/components/dashboard/VotingChart.vue'
 import SurveyTypesChart from '@/components/dashboard/SurveyTypesChart.vue'
 import SurveyFilterMenu from '@/components/survey/SurveyFilterMenu.vue'
