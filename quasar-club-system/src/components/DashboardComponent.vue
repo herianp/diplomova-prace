@@ -25,7 +25,7 @@
         <div class="row items-center justify-between">
           <div class="col">
             <div class="text-h5 text-weight-bold">
-              {{ currentTeam?.name || 'No Team Selected' }}
+              {{ currentTeam?.name || $t('dashboard.noTeamSelected') }}
             </div>
             <div class="text-body2 text-grey-7">
               {{ $t('dashboard.teamOverview') }}

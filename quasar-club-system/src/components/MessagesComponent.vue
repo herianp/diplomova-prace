@@ -89,8 +89,8 @@
         />
       </q-card>
 
-      <!-- Message Input (Power Users Only) -->
-      <div v-if="isPowerUser" class="message-input q-mt-md">
+      <!-- Message Input (Team Members, when chat enabled) -->
+      <div v-if="isChatEnabled" class="message-input q-mt-md">
         <q-card flat bordered>
           <q-card-section class="q-pa-md">
             <div class="row q-gutter-md items-end">
@@ -124,13 +124,13 @@
         </q-card>
       </div>
 
-      <!-- Non-Power User Banner -->
-      <div v-else class="no-permission q-mt-md">
+      <!-- Chat Disabled Banner -->
+      <div v-if="!isChatEnabled" class="no-permission q-mt-md">
         <q-banner rounded class="bg-blue-1 text-blue-8">
           <template v-slot:avatar>
             <q-icon name="info" />
           </template>
-          {{ $t('messages.powerUserOnly') }}
+          {{ $t('messages.chatDisabled') }}
         </q-banner>
       </div>
     </template>
@@ -144,6 +144,7 @@ import { useAuthComposable } from '@/composable/useAuthComposable'
 import { useReadiness } from '@/composable/useReadiness'
 import { useMessageFirebase } from '@/services/messageFirebase'
 import { useRateLimiter } from '@/composable/useRateLimiter'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
@@ -158,6 +159,7 @@ const { currentUser, isCurrentUserPowerUser } = useAuthComposable()
 const { waitForTeam } = useReadiness()
 const messageFirebase = useMessageFirebase()
 const { useActionLimitStatus } = useRateLimiter()
+const { loadTeamSettings } = useTeamUseCases()
 const { isLimited: isMessageLimited, limitInfo: messageLimitInfo } = useActionLimitStatus('messages')
 const $q = useQuasar()
 const { t } = useI18n()
@@ -172,9 +174,7 @@ const showScrollButton = ref(false)
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
-const isPowerUser = computed(() =>
-  currentTeam.value?.powerusers?.includes(currentUser.value?.uid)
-)
+const isChatEnabled = computed(() => teamStore.currentTeamSettings?.chatEnabled !== false)
 
 // Messages with date separators injected
 const messagesWithSeparators = computed(() => {
@@ -267,7 +267,7 @@ const loadMessages = () => {
 
 // Send message
 const sendNewMessage = async () => {
-  if (!newMessage.value.trim() || !currentTeam.value?.id || !isPowerUser.value) {
+  if (!newMessage.value.trim() || !currentTeam.value?.id || !isChatEnabled.value) {
     return
   }
 
@@ -321,6 +321,9 @@ watch(currentTeam, (newTeam) => {
 
 onMounted(async () => {
   await waitForTeam()
+  if (!teamStore.currentTeamSettings && currentTeam.value?.id) {
+    await loadTeamSettings(currentTeam.value.id)
+  }
   loadMessages()
 })
 

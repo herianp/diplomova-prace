@@ -41,7 +41,7 @@ export function useSurveyUseCases() {
         teamId: survey?.teamId || teamStore.currentTeam?.id || '',
         actorUid: authStore.user.uid,
         actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown',
-        surveyTitle: survey?.title
+        surveyTitle: survey?.title || survey?.type
       } : undefined
 
       return await surveyFirebase.deleteSurvey(surveyId, auditContext)
@@ -93,7 +93,7 @@ export function useSurveyUseCases() {
       log.error('Failed to add survey', {
         error: error instanceof Error ? error.message : String(error),
         teamId: newSurvey.teamId,
-        title: newSurvey.title
+        type: newSurvey.type
       })
       if (error instanceof FirestoreError) {
         // Retry for transient errors only

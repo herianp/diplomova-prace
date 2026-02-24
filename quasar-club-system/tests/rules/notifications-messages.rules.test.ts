@@ -195,13 +195,13 @@ describe('messages/{messageId} - create', () => {
     )
   })
 
-  it('denies regular member from creating message', async () => {
+  it('allows regular member to create message with authorId == auth.uid', async () => {
     const ctx = testEnv.authenticatedContext(MEMBER_UID)
-    await assertFails(
+    await assertSucceeds(
       setDoc(doc(ctx.firestore(), `messages/msg-member`), {
         teamId: TEAM_ID,
         authorId: MEMBER_UID,
-        text: 'Unauthorized message',
+        text: 'Member message',
         createdAt: new Date().toISOString(),
       })
     )

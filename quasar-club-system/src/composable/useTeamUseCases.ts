@@ -2,7 +2,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { useTeamStore } from '@/stores/teamStore'
 import { useTeamFirebase } from '@/services/teamFirebase'
 import { useJoinRequestFirebase } from '@/services/joinRequestFirebase'
-import { IJoinRequest, ITeam } from '@/interfaces/interfaces'
+import { IJoinRequest, ITeam, ITeamSettings } from '@/interfaces/interfaces'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
@@ -26,7 +26,9 @@ export function useTeamUseCases() {
 
         // Only auto-select on first load when no team is selected
         if (!teamStore.currentTeam && teamsList.length > 0) {
-          teamStore.setCurrentTeam(teamsList[0])
+          const savedTeamId = localStorage.getItem('selectedTeamId')
+          const savedTeam = savedTeamId ? teamsList.find(t => t.id === savedTeamId) : null
+          teamStore.setCurrentTeam(savedTeam || teamsList[0])
         }
 
         // Set up join request listeners for all power-user teams
@@ -126,6 +128,7 @@ export function useTeamUseCases() {
   }
 
   const clearTeamData = () => {
+    localStorage.removeItem('selectedTeamId')
     teamStore.clearData()
   }
 
@@ -169,6 +172,25 @@ export function useTeamUseCases() {
     })
   }
 
+  const loadTeamSettings = async (teamId: string): Promise<void> => {
+    try {
+      const settings = await teamFirebase.getTeamSettings(teamId)
+      teamStore.setCurrentTeamSettings(settings)
+    } catch (error: unknown) {
+      notifyError('team.settings.loadError')
+    }
+  }
+
+  const saveTeamSettings = async (teamId: string, settings: ITeamSettings): Promise<void> => {
+    try {
+      await teamFirebase.updateTeamSettings(teamId, settings)
+      teamStore.setCurrentTeamSettings(settings)
+    } catch (error: unknown) {
+      notifyError('team.settings.saveError')
+      throw error
+    }
+  }
+
   return {
     setTeamListener,
     createTeam,
@@ -176,6 +198,8 @@ export function useTeamUseCases() {
     getTeamById,
     getTeamByIdAndSetCurrentTeam,
     clearTeamData,
-    setPendingJoinRequestsListener
+    setPendingJoinRequestsListener,
+    loadTeamSettings,
+    saveTeamSettings,
   }
 }
