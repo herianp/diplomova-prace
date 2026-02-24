@@ -95,11 +95,9 @@ const getUserVote = (survey) => {
 
 const getSurveyTypeColor = (type) => {
   const colors = {
-    'TRAINING': 'blue',
-    'MATCH': 'green',
-    'EVENT': 'purple',
-    'MEETING': 'orange',
-    'OTHER': 'grey'
+    'training': 'blue',
+    'match': 'green',
+    'friendly-match': 'orange',
   }
   return colors[type] || 'grey'
 }

@@ -13,7 +13,7 @@ Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 14 of 14 (Rate Limiting & User Quotas)
 Plan: 2 of 2 in current phase
 Status: Complete — Phase 14 fully done
-Last activity: 2026-02-22 — Completed quick task 3: Fix ReportsCharts spacing, PlayersComponent dialog, weather chip on SurveyCard
+Last activity: 2026-02-24 — Completed quick task 4: Unify survey types to single source of truth
 
 Progress: [██████████] 100% (v1.1)
 
@@ -79,6 +79,7 @@ None.
 | 1 | Fix admin page styling and create PlayersPage with player cards and detail dialog | 2026-02-21 | 6f54409 | [1-fix-admin-page-styling-and-create-player](./quick/1-fix-admin-page-styling-and-create-player/) |
 | 2 | Fix TeamsPage UI — show Create Team button and JoinRequestManagement for all users | 2026-02-22 | 1bcf6fa | [2-fix-teamspage-ui-show-create-team-and-jo](./quick/2-fix-teamspage-ui-show-create-team-and-jo/) |
 | 3 | Fix ReportsCharts chart spacing, PlayersComponent dialog scroll, add weather chip to SurveyCard | 2026-02-22 | 70763f3 | [3-fix-reportspage-chart-overlap-playerspag](./quick/3-fix-reportspage-chart-overlap-playerspag/) |
+| 4 | Unify survey types to single source of truth (enum: match, training, friendly-match) | 2026-02-24 | pending | [4-unify-survey-types-single-source-of-tru](./quick/4-unify-survey-types-single-source-of-tru/) |
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
 | Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
 | Phase 14-rate-limiting-user-quotas P01 | 25 | 2 tasks | 9 files |
@@ -86,6 +87,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-22 (Quick task 3 complete)
-Stopped at: All 3 quick task items done — chart spacing, dialog scroll, weather composable
+Last session: 2026-02-24 (Quick task 4 complete)
+Stopped at: Survey types unified to single source of truth — enum, i18n, all components
 Resume file: None

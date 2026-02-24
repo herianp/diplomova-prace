@@ -128,6 +128,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { SurveyTypes } from '@/enums/SurveyTypes'
 import { createLogger } from 'src/utils/logger'
 
 const log = createLogger('SurveyEditModal')
@@ -151,7 +152,7 @@ const formData = ref({
   description: '',
   date: '',
   time: '',
-  type: 'match'
+  type: SurveyTypes.Match
 })
 
 const error = ref('')
@@ -159,13 +160,13 @@ const updating = ref(false)
 const deleting = ref(false)
 const showDeleteConfirm = ref(false)
 
-// Survey type options
-const typeOptions = computed(() => [
-  { label: t('survey.type.match'), value: 'match' },
-  { label: t('survey.type.training'), value: 'training' },
-  { label: t('survey.type.event'), value: 'event' },
-  { label: t('survey.type.other'), value: 'other' }
-])
+// Survey type options - derived from enum (single source of truth)
+const typeOptions = computed(() => {
+  return Object.values(SurveyTypes).map((type) => ({
+    label: t(`survey.type.${type}`),
+    value: type,
+  }))
+})
 
 // Initialize form with survey data
 const initializeForm = () => {
@@ -174,7 +175,7 @@ const initializeForm = () => {
     description: props.survey.description || '',
     date: props.survey.date || '',
     time: props.survey.time || '',
-    type: props.survey.type || 'match'
+    type: props.survey.type || SurveyTypes.Match
   }
 }
 
