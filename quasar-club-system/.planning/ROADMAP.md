@@ -2,13 +2,14 @@
 
 ## Milestones
 
-- ✅ **v1.0 Production Hardening** — Phases 1-9 (shipped 2026-02-19)
-- 🚧 **v1.1 New User Onboarding & No-Team UX** — Phases 10-14 (in progress)
+- **v1.0 Production Hardening** — Phases 1-9 (shipped 2026-02-19)
+- **v1.1 New User Onboarding & No-Team UX** — Phases 10-14 (shipped 2026-02-22)
+- **v1.2 Auth Pages** — Phase 15 (shipped 2026-02-26)
 
 ## Phases
 
 <details>
-<summary>✅ v1.0 Production Hardening (Phases 1-9) — SHIPPED 2026-02-19</summary>
+<summary>v1.0 Production Hardening (Phases 1-9) — SHIPPED 2026-02-19</summary>
 
 - [x] Phase 1: Error System Foundation (5/5 plans) — completed 2026-02-14
 - [x] Phase 2: Listener Registry System (3/3 plans) — completed 2026-02-15
@@ -22,93 +23,39 @@
 
 </details>
 
-### 🚧 v1.1 New User Onboarding & No-Team UX (In Progress)
+<details>
+<summary>v1.1 New User Onboarding & No-Team UX (Phases 10-14) — SHIPPED 2026-02-22</summary>
 
-**Milestone Goal:** New users see a guided onboarding wizard and all pages handle the "no team" state gracefully.
+- [x] Phase 10: Onboarding Wizard & Route Guarding (2/2 plans) — completed 2026-02-21
+- [x] Phase 11: Team Creation (1/1 plans) — completed 2026-02-22
+- [x] Phase 12: Team Discovery & Join Requests (4/4 plans) — completed 2026-02-22
+- [x] Phase 13: Empty States (1/1 plans) — completed 2026-02-22
+- [x] Phase 14: Rate Limiting & User Quotas (2/2 plans) — completed 2026-02-22
 
-- [x] **Phase 10: Onboarding Wizard & Route Guarding** — Intercept teamless users, collect display name, and branch to create or join a team (completed 2026-02-21)
-- [x] **Phase 11: Team Creation** — Any authenticated user can create a team and automatically become its power user (completed 2026-02-22)
-- [x] **Phase 12: Team Discovery & Join Requests** — Browse teams, send join requests, and let power users approve or decline them (completed 2026-02-22)
-- [x] **Phase 13: Empty States** — All main pages show contextual guidance with call-to-action when user has no team (completed 2026-02-22)
-- [x] **Phase 14: Rate Limiting & User Quotas** — Admin-configurable limits for user actions to prevent bot abuse and spam (completed 2026-02-22)
+</details>
+
+<details>
+<summary>v1.2 Auth Pages (Phase 15) — SHIPPED 2026-02-26</summary>
+
+- [x] Phase 15: Auth Page i18n & Language Switcher (1/1 plans) — completed 2026-02-26
+
+</details>
 
 ## Phase Details
 
-### Phase 10: Onboarding Wizard & Route Guarding
-**Goal**: Teamless users are intercepted by route guards and guided through a wizard that collects their display name and leads them to create or join a team
-**Depends on**: Phase 9 (v1.0 complete)
-**Requirements**: ONB-01, ONB-02, ONB-03, ONB-04, ROUTE-01, ROUTE-02
+### Phase 15: Auth Page i18n & Language Switcher
+**Goal**: Auth pages (login, register) display all text in the selected language and provide a language switcher so users can change language before authenticating
+**Depends on**: Phase 14 (v1.1 complete)
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04
 **Success Criteria** (what must be TRUE):
-  1. A newly registered user who has no team is automatically redirected to the onboarding wizard when navigating to any protected page
-  2. A user with a team who visits the onboarding URL is redirected directly to the dashboard without seeing the wizard
-  3. The wizard presents a field where the user can set or confirm their display name before proceeding
-  4. The wizard presents two clear paths: create a new team or browse existing teams
-  5. After the user gains team membership through the wizard, they land on the dashboard
-**Plans:** 2/2 plans complete
+  1. All hardcoded strings in LoginFormNew.vue and RegisterFormNew.vue use i18n `$t()` keys
+  2. A language switcher is visible in the AuthLayout (top-right corner) on both login and register pages
+  3. Switching language on the auth page immediately updates all visible text
+  4. The selected language persists to localStorage and is used after login
+**Plans:** 1/1
 
 Plans:
-- [ ] 10-01-PLAN.md — Route guard for teamless users, onboarding route, and clean layout
-- [ ] 10-02-PLAN.md — 3-step onboarding wizard (Welcome, Display Name, Team Choice)
-
-### Phase 11: Team Creation
-**Goal**: Any authenticated user can create a team from within the onboarding wizard or the app, and the creator is automatically granted power user status on that team
-**Depends on**: Phase 10
-**Requirements**: TEAM-01, TEAM-02
-**Success Criteria** (what must be TRUE):
-  1. A user who has never been a power user can create a new team and see it appear in the app immediately
-  2. The team creator appears in the team's power user list and has access to power user actions (survey management, join request approval)
-  3. No admin approval or pre-existing power user role is required to create a team
-**Plans:** 1/1 plans complete
-
-Plans:
-- [ ] 11-01-PLAN.md — Inline team creation form in onboarding wizard, wired to existing createTeam use case
-
-### Phase 12: Team Discovery & Join Requests
-**Goal**: Users can browse all existing teams and send join requests; team power users can approve or decline those requests; approved users become team members
-**Depends on**: Phase 11
-**Requirements**: DISC-01, DISC-02, DISC-03, DISC-04, DISC-05
-**Success Criteria** (what must be TRUE):
-  1. A teamless user can see a list of all teams in the system from within the onboarding wizard
-  2. A user can tap a team in the list and send a join request; confirmation is visible to the user
-  3. A team power user sees a badge or list of pending join requests for their team
-  4. A power user can approve a join request, after which the requesting user appears in the team's members list
-  5. A power user can decline a join request, after which the request disappears without adding the user to the team
-**Plans:** 4/4 plans complete
-
-Plans:
-- [ ] 12-01-PLAN.md — Data layer: IJoinRequest interface, joinRequestFirebase service, useJoinRequestUseCases, Firestore security rules
-- [ ] 12-02-PLAN.md — Team browse list UI in onboarding wizard with filtering, badges, and join request flow
-- [ ] 12-03-PLAN.md — Power user request management: sidebar badge, approve/decline UI, audit logging
-- [ ] 12-04-PLAN.md — Standalone /teams page integration, My Requests in Settings, end-to-end verification
-
-### Phase 13: Empty States
-**Goal**: Dashboard, Surveys, Reports, and Players pages each render meaningful guidance with a call-to-action when the authenticated user belongs to no team
-**Depends on**: Phase 10
-**Requirements**: EMPTY-01, EMPTY-02, EMPTY-03, EMPTY-04
-**Success Criteria** (what must be TRUE):
-  1. A teamless user who lands on the Dashboard sees a message explaining the situation and a button that navigates to onboarding
-  2. A teamless user who visits the Surveys page sees an empty state with a call-to-action rather than a blank or broken page
-  3. A teamless user who visits the Reports page sees an empty state with a call-to-action rather than broken charts
-  4. A teamless user who visits the Players page sees an empty state with a call-to-action rather than an empty list with no context
-**Plans:** 1/1 plans complete
-
-Plans:
-- [x] 13-01-SUMMARY.md — Route-guarding approach: teamless users restricted to /team, /settings, /about; sidebar filtered to show only Teams link
-
-### Phase 14: Rate Limiting & User Quotas
-**Goal**: Admin-configurable limits for user actions (team creation, messages per week, surveys per week, join requests, fines per day) to prevent abuse. Includes admin UI table for managing limits and client-side enforcement across the app.
-**Depends on**: Phase 13
-**Requirements**: RATE-01, RATE-02, RATE-03, RATE-04
-**Success Criteria** (what must be TRUE):
-  1. An admin can view and edit rate limit configurations in the admin UI
-  2. Users who exceed configured limits receive clear feedback and are blocked from the action
-  3. Rate limits are enforced client-side before allowing actions
-  4. Default limits exist out of the box without requiring admin configuration
-**Plans:** 1/0 plans complete
-
-Plans:
-- [ ] 14-01-PLAN.md — Data layer (interfaces, Firebase service, store, use cases) and admin Rate Limits tab
-- [ ] 14-02-PLAN.md — Enforcement composable, integration into 5 actions, UI feedback (disabled buttons, tooltips)
+- [x] 15-01-PLAN.md — Add auth i18n keys, internationalize forms, add language switcher to AuthLayout, fix LanguageSwitcher component
 
 ## Progress
 
@@ -123,8 +70,11 @@ Plans:
 | 7. Test Infrastructure | v1.0 | 2/2 | Complete | 2026-02-18 |
 | 8. Test Implementation | v1.0 | 5/5 | Complete | 2026-02-18 |
 | 9. CI/CD Pipeline | v1.0 | 2/2 | Complete | 2026-02-19 |
-| 10. Onboarding Wizard & Route Guarding | 2/2 | Complete    | 2026-02-21 | - |
-| 11. Team Creation | 1/1 | Complete    | 2026-02-22 | - |
-| 12. Team Discovery & Join Requests | 4/4 | Complete    | 2026-02-22 | - |
-| 13. Empty States | v1.1 | Complete    | 2026-02-22 | - |
-| 14. Rate Limiting & User Quotas | 2/2 | Complete    | 2026-02-22 | - |
+| 10. Onboarding Wizard & Route Guarding | v1.1 | 2/2 | Complete | 2026-02-21 |
+| 11. Team Creation | v1.1 | 1/1 | Complete | 2026-02-22 |
+| 12. Team Discovery & Join Requests | v1.1 | 4/4 | Complete | 2026-02-22 |
+| 13. Empty States | v1.1 | 1/1 | Complete | 2026-02-22 |
+| 14. Rate Limiting & User Quotas | v1.1 | 2/2 | Complete | 2026-02-22 |
+| 15. Auth Page i18n & Language Switcher | v1.2 | 1/1 | Complete | 2026-02-26 |
+
+**All milestones shipped. No active phases.**

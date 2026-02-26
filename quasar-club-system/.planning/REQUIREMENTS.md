@@ -3,7 +3,18 @@
 **Defined:** 2026-02-21
 **Core Value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
 
-## v1.1 Requirements
+## v1.2 Requirements
+
+Requirements for Auth Pages. Each maps to roadmap phases.
+
+### Auth Page i18n
+
+- [ ] **AUTH-01**: Login page displays all labels, buttons, and links in the user's selected language
+- [ ] **AUTH-02**: Register page displays all labels, buttons, and links in the user's selected language
+- [ ] **AUTH-03**: A language switcher is visible on auth pages (login, register) allowing users to switch between Czech and English before authenticating
+- [ ] **AUTH-04**: Language selection on auth pages persists to localStorage and carries over into the app after login
+
+## v1.1 Requirements (Shipped)
 
 Requirements for New User Onboarding & No-Team UX. Each maps to roadmap phases.
 
@@ -70,6 +81,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
+| AUTH-01 | Phase 15 | Pending |
+| AUTH-02 | Phase 15 | Pending |
+| AUTH-03 | Phase 15 | Pending |
+| AUTH-04 | Phase 15 | Pending |
 | ONB-01 | Phase 10 | Complete |
 | ONB-02 | Phase 10 | Complete |
 | ONB-03 | Phase 10 | Complete |
@@ -93,10 +108,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | RATE-04 | Phase 14 | Complete |
 
 **Coverage:**
-- v1.1 requirements: 21 total
-- Mapped to phases: 21
+- v1.2 requirements: 4 total
+- Mapped to phases: 4
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-21*
-*Last updated: 2026-02-22 — added RATE-01 through RATE-04 for Phase 14*
+*Last updated: 2026-02-26 — added AUTH-01 through AUTH-04 for Phase 15*

@@ -16,6 +16,8 @@
           <router-link to="/login" class="text-grey-6 cursor-pointer">
             {{ $t('auth.register.hasAccount') }}
           </router-link>
+          <q-separator class="q-mt-md q-mb-sm" />
+          <LanguageSwitcher />
         </q-card>
       </div>
     </div>
@@ -23,6 +25,7 @@
 
 <script setup>
 import { computed } from "vue";
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const props = defineProps({
   credentials: {

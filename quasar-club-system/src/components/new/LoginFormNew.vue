@@ -15,6 +15,8 @@
           <router-link :to="RouteEnum.REGISTER.path" class="text-grey-6 cursor-pointer">
             {{ $t('auth.login.noAccount') }}
           </router-link>
+          <q-separator class="q-mt-md q-mb-sm" />
+          <LanguageSwitcher />
         </q-card>
       </div>
     </div>
@@ -23,6 +25,7 @@
 <script setup>
 import { computed } from "vue";
 import { RouteEnum } from '@/enums/routesEnum.ts'
+import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 
 const props = defineProps({
   credentials: {
