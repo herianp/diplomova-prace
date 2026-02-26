@@ -58,6 +58,21 @@
       </template>
     </q-select>
 
+    <!-- Opponent (only for match/friendly-match) -->
+    <q-input
+      v-if="isMatchType"
+      v-model="formData.opponent"
+      :label="$t('survey.form.opponent')"
+      :placeholder="$t('survey.form.opponentPlaceholder')"
+      outlined
+      dense
+      type="text"
+    >
+      <template v-slot:prepend>
+        <q-icon name="groups" />
+      </template>
+    </q-input>
+
     <!-- Error Message -->
     <div v-if="error" class="text-negative q-mt-md">
       <q-icon name="error" class="q-mr-sm" />
@@ -138,8 +153,13 @@ const formData = ref({
   description: '',
   date: '',
   time: '',
-  type: SurveyTypes.Match
+  type: SurveyTypes.Match,
+  opponent: ''
 })
+
+const isMatchType = computed(() =>
+  formData.value.type === SurveyTypes.Match || formData.value.type === SurveyTypes.FriendlyMatch
+)
 
 const error = ref('')
 const updating = ref(false)
@@ -160,7 +180,8 @@ const initializeForm = () => {
     description: props.survey.description || '',
     date: props.survey.date || '',
     time: props.survey.time || '',
-    type: props.survey.type || SurveyTypes.Match
+    type: props.survey.type || SurveyTypes.Match,
+    opponent: props.survey.opponent || ''
   }
 }
 
@@ -176,14 +197,16 @@ const handleUpdate = async () => {
       description: formData.value.description,
       date: formData.value.date,
       time: formData.value.time,
-      type: formData.value.type
+      type: formData.value.type,
+      opponent: isMatchType.value ? (formData.value.opponent || '') : ''
     }, {
       teamId: props.survey.teamId,
       before: {
         description: props.survey.description,
         date: props.survey.date,
         time: props.survey.time,
-        type: props.survey.type
+        type: props.survey.type,
+        opponent: props.survey.opponent
       }
     })
     

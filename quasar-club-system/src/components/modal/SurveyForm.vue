@@ -15,6 +15,20 @@
     </q-select>
 
     <q-input
+      v-if="isMatchType"
+      v-model="opponent"
+      :label="$t('survey.form.opponent')"
+      :placeholder="$t('survey.form.opponentPlaceholder')"
+      outlined
+      dense
+      type="text"
+    >
+      <template v-slot:prepend>
+        <q-icon name="groups" />
+      </template>
+    </q-input>
+
+    <q-input
       v-model="description"
       :label="$t('survey.form.description')"
       outlined
@@ -83,9 +97,14 @@ const emit = defineEmits(['submit'])
 
 const formRef = ref(null)
 const description = ref('')
+const opponent = ref('')
 const date = ref(new Date().toISOString().slice(0, 10))
 const time = ref('19:00')
 const surveyType = ref(SurveyTypes.Training)
+
+const isMatchType = computed(() =>
+  surveyType.value === SurveyTypes.Match || surveyType.value === SurveyTypes.FriendlyMatch
+)
 
 const surveyTypeOptions = computed(() => {
   return Object.values(SurveyTypes).map((type) => ({
@@ -100,10 +119,12 @@ function submitFormHandler() {
     date: date.value,
     time: time.value,
     surveyType: surveyType.value,
+    ...(isMatchType.value && opponent.value ? { opponent: opponent.value } : {}),
   })
 
   // Reset inputs to defaults
   description.value = ''
+  opponent.value = ''
   date.value = new Date().toISOString().slice(0, 10)
   time.value = '19:00'
   surveyType.value = SurveyTypes.Training

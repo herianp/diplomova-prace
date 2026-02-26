@@ -126,3 +126,19 @@ export const getVerificationText = (survey: ISurvey): string => {
   
   return 'survey.verification.unknown'
 }
+
+/**
+ * Returns a display title for a survey.
+ * For match/friendly-match with opponent: "Zápas (Sparta)"
+ * For training or no opponent: just the translated type name
+ */
+export const getSurveyDisplayTitle = (
+  survey: { type: string; opponent?: string },
+  t: (key: string) => string
+): string => {
+  const typeLabel = t(`survey.type.${survey.type}`)
+  if ((survey.type === 'match' || survey.type === 'friendly-match') && survey.opponent) {
+    return `${typeLabel} (${survey.opponent})`
+  }
+  return typeLabel
+}

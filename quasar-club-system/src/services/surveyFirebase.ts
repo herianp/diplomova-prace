@@ -10,7 +10,6 @@ import {
   where,
   getDoc,
   getDocs,
-  setDoc,
   writeBatch,
   Unsubscribe,
 } from 'firebase/firestore'
@@ -169,7 +168,8 @@ export function useSurveyFirebase() {
         id: surveyRef.id,
         type: newSurvey.type,
         teamId: newSurvey.teamId,
-        teamMembers
+        teamMembers,
+        ...(newSurvey.opponent ? { opponent: newSurvey.opponent } : {})
       }
     } catch (error: unknown) {
       const firestoreError = mapFirestoreError(error, 'write')

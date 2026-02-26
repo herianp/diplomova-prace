@@ -39,7 +39,9 @@ export default {
       description: "Popis",
       date: "Datum",
       time: "Čas",
-      type: "Typ ankety"
+      type: "Typ ankety",
+      opponent: "Soupeř",
+      opponentPlaceholder: "Název soupeře"
     },
     updateSuccess: "Anketa byla úspěšně aktualizována",
     updateError: "Nepodařilo se aktualizovat anketu",
@@ -242,6 +244,10 @@ export default {
     noSurveys: "Žádné ankety nenalezeny",
     noVotingData: "Žádná data o hlasování",
     noSurveyTypes: "Žádná data o typech anket",
+    monthlyTrend: "Měsíční trend docházky",
+    activityTimeline: "Aktivita týmu v čase",
+    surveyCount: "Ankety",
+    attendanceRate: "Docházka %",
     surveys: "anket",
     voted: {
       yes: "Ano",
@@ -250,7 +256,15 @@ export default {
     },
     votedYes: "Hlasoval Ano",
     votedNo: "Hlasoval Ne",
-    didNotVote: "Nehlasoval"
+    didNotVote: "Nehlasoval",
+    nextTraining: "Další trénink",
+    nextMatch: "Další zápas",
+    noUpcomingTraining: "Žádný nadcházející trénink",
+    noUpcomingMatch: "Žádný nadcházející zápas",
+    at: "v",
+    yesVotes: "Ano",
+    noVotes: "Ne",
+    notVotedYet: "Nehlasováno"
   },
   settings: {
     title: "Nastavení",

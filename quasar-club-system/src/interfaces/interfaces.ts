@@ -87,6 +87,7 @@ export interface ISurvey {
   time: string // Time as string (HH:MM)
   title?: string
   type: SurveyTypes
+  opponent?: string // Opponent name for match/friendly-match types
   votes: IVote[]
   status?: SurveyStatus
   verifiedAt?: Date
@@ -103,6 +104,7 @@ export interface ISurveyNotificationData {
   type: string
   teamId: string
   teamMembers: string[]
+  opponent?: string
 }
 
 // ============================================================
