@@ -242,6 +242,10 @@ export default {
     noSurveys: "No surveys found",
     noVotingData: "No voting data available",
     noSurveyTypes: "No survey types data",
+    monthlyTrend: "Monthly Attendance Trend",
+    activityTimeline: "Team Activity Timeline",
+    surveyCount: "Surveys",
+    attendanceRate: "Attendance %",
     surveys: "surveys",
     voted: {
       yes: "Yes",

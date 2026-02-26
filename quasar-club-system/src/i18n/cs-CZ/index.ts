@@ -242,6 +242,10 @@ export default {
     noSurveys: "Žádné ankety nenalezeny",
     noVotingData: "Žádná data o hlasování",
     noSurveyTypes: "Žádná data o typech anket",
+    monthlyTrend: "Měsíční trend docházky",
+    activityTimeline: "Aktivita týmu v čase",
+    surveyCount: "Ankety",
+    attendanceRate: "Docházka %",
     surveys: "anket",
     voted: {
       yes: "Ano",
