@@ -63,16 +63,13 @@ Reliable real-time survey voting and team management that works correctly under 
 
 ### Active
 
-#### Current Milestone: v1.1 New User Onboarding & No-Team UX
+#### Current Milestone: v1.2 Auth Pages — SHIPPED 2026-02-26
 
-**Goal:** New users see a guided onboarding wizard and all pages handle the "no team" state gracefully.
+**Goal:** Login and registration pages support dynamic language switching (CZ/EN) so users can choose their language before authenticating.
 
-- [ ] Onboarding wizard for teamless users (display name + create/join team)
-- [ ] Any authenticated user can create a team (creator becomes team power user)
-- [ ] Team discovery — browse all teams, send join requests
-- [ ] Join request approval by team power users
-- [ ] Empty states on all pages for teamless users with CTA
-- [ ] Route guarding — redirect teamless users to onboarding
+- [x] Language switcher on auth pages (login, register)
+- [x] All auth form labels and text internationalized via i18n
+- [x] Fix broken LanguageSwitcher.vue component
 
 ### Out of Scope
 
@@ -118,8 +115,8 @@ Reliable real-time survey voting and team management that works correctly under 
 | fileParallelism: false for rules tests | Multiple test files sharing emulator cause clearFirestore() races | ✓ Good — sequential runs prevent data conflicts |
 | vi.hoisted() for mock functions | vitest hoists vi.mock() above const declarations | ✓ Good — prevents ReferenceError in test factories |
 
-| Allow any user to create teams | New users need to bootstrap without admin help | — Pending |
-| Join request system for team discovery | Invitation-only limits growth, browsing enables self-service | — Pending |
+| Allow any user to create teams | New users need to bootstrap without admin help | ✓ Good — v1.1 |
+| Join request system for team discovery | Invitation-only limits growth, browsing enables self-service | ✓ Good — v1.1 |
 
 ---
-*Last updated: 2026-02-21 after v1.1 milestone start*
+*Last updated: 2026-02-26 after v1.2 milestone shipped*

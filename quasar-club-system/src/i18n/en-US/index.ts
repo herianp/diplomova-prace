@@ -308,6 +308,23 @@ export default {
       signOutError: "Failed to sign out"
     }
   },
+  auth: {
+    login: {
+      title: "Login",
+      email: "Email",
+      password: "Password",
+      submit: "Log In",
+      noAccount: "Not registered? Create an Account"
+    },
+    register: {
+      title: "Register",
+      name: "Name",
+      email: "Email",
+      password: "Password",
+      submit: "Register",
+      hasAccount: "Already registered? Log in."
+    }
+  },
   common: {
     yes: "Yes",
     no: "No",
