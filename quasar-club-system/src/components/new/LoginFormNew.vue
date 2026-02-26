@@ -4,16 +4,16 @@
         <q-card square bordered class="q-pa-lg shadow-1">
           <q-card-section>
             <q-form class="q-gutter-md">
-              <h3>Login</h3>
-              <q-input square filled clearable v-model="credentials.email" type="email" label="email" />
-              <q-input square filled clearable v-model="credentials.password" type="password" label="password" />
+              <h3>{{ $t('auth.login.title') }}</h3>
+              <q-input square filled clearable v-model="credentials.email" type="email" :label="$t('auth.login.email')" />
+              <q-input square filled clearable v-model="credentials.password" type="password" :label="$t('auth.login.password')" />
             </q-form>
           </q-card-section>
           <q-card-actions class="q-px-md">
-            <q-btn @click="handleLogin" unelevated color="light-green-7" size="lg" class="full-width" label="Login" />
+            <q-btn @click="handleLogin" unelevated color="light-green-7" size="lg" class="full-width" :label="$t('auth.login.submit')" />
           </q-card-actions>
           <router-link :to="RouteEnum.REGISTER.path" class="text-grey-6 cursor-pointer">
-            Not registered? Create an Account
+            {{ $t('auth.login.noAccount') }}
           </router-link>
         </q-card>
       </div>

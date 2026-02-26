@@ -308,6 +308,23 @@ export default {
       signOutError: "Nepodařilo se odhlásit"
     }
   },
+  auth: {
+    login: {
+      title: "Přihlášení",
+      email: "E-mail",
+      password: "Heslo",
+      submit: "Přihlásit se",
+      noAccount: "Nemáte účet? Zaregistrujte se"
+    },
+    register: {
+      title: "Registrace",
+      name: "Jméno",
+      email: "E-mail",
+      password: "Heslo",
+      submit: "Zaregistrovat se",
+      hasAccount: "Máte již účet? Přihlaste se"
+    }
+  },
   common: {
     yes: "Ano",
     no: "Ne",
