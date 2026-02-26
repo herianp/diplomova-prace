@@ -13,7 +13,7 @@ Milestone: v1.1 New User Onboarding & No-Team UX
 Phase: 14 of 14 (Rate Limiting & User Quotas)
 Plan: 2 of 2 in current phase
 Status: Complete — Phase 14 fully done
-Last activity: 2026-02-23 — Completed quick task 5: Fix weather to show hourly temperature at survey time
+Last activity: 2026-02-24 — Completed quick task 6: Unify survey types to single source of truth
 
 Progress: [██████████] 100% (v1.1)
 
@@ -81,6 +81,7 @@ None.
 | 3 | Fix ReportsCharts chart spacing, PlayersComponent dialog scroll, add weather chip to SurveyCard | 2026-02-22 | 70763f3 | [3-fix-reportspage-chart-overlap-playerspag](./quick/3-fix-reportspage-chart-overlap-playerspag/) |
 | 4 | Add team settings with chatEnabled toggle, Nominatim geocoding, and location-aware weather | 2026-02-23 | 696c222 | [4-add-team-settings-with-chatenabled-toggl](./quick/4-add-team-settings-with-chatenabled-toggl/) |
 | 5 | Fix weather to show hourly temperature at survey time instead of daily min/max | 2026-02-23 | 093812b | [5-fix-weather-to-show-hourly-temperature-a](./quick/5-fix-weather-to-show-hourly-temperature-a/) |
+| 6 | Unify survey types to single source of truth (enum: match, training, friendly-match) | 2026-02-24 | pending | [6-unify-survey-types-single-source-of-tru](./quick/6-unify-survey-types-single-source-of-tru/) |
 | Phase 10 P02 | 2 | 1 tasks | 5 files |
 | Phase 12-team-discovery-join-requests P01 | 2 | 2 tasks | 4 files |
 | Phase 14-rate-limiting-user-quotas P01 | 25 | 2 tasks | 9 files |
@@ -88,6 +89,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-02-23 (Quick task 5 complete)
-Stopped at: Quick task 5 — hourly weather at survey time done
+Last session: 2026-02-24 (Quick task 6 complete)
+Stopped at: Survey types unified to single source of truth — enum, i18n, all components
 Resume file: None

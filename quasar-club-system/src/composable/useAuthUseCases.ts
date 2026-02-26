@@ -79,11 +79,7 @@ export function useAuthUseCases() {
         authStore.setUser(null)
         authStore.setAdmin(false)
         authStore.setTeamReady(false)
-        router.push(RouteEnum.HOME.path)
         teamStore.clearData()
-
-        // Cleanup all listeners on logout (addresses LST-05)
-        listenerRegistry.unregisterAll()
       }
     })
 
@@ -141,9 +137,12 @@ export function useAuthUseCases() {
 
   const signOut = async (): Promise<void> => {
     try {
+      // Unregister all Firestore listeners BEFORE signing out to prevent permission-denied errors
+      listenerRegistry.unregisterAll()
       await logoutUser()
       authStore.setUser(null)
       teamStore.clearData()
+      router.push(RouteEnum.HOME.path)
     } catch (error: unknown) {
       log.error('Failed to sign out', { error: error instanceof Error ? error.message : String(error) })
       if (error instanceof AuthError) {

@@ -16,7 +16,7 @@
         <q-card-section class="q-pa-md">
           <div class="row items-start justify-between no-wrap q-mb-xs">
             <div class="text-subtitle1 text-weight-medium ellipsis" style="flex: 1; min-width: 0;">
-              {{ $t('survey.type.' + survey.type) }}
+              {{ getSurveyTitle(survey) }}
             </div>
             <q-chip
               v-if="getUserVote(survey) !== null"
@@ -46,7 +46,7 @@
               text-color="white"
               size="xs"
               dense
-              :label="survey.type"
+              :label="$t('survey.type.' + survey.type)"
             />
             <span class="text-caption text-grey-6">{{ formatDate(survey.date, survey.time) }}</span>
           </div>
@@ -72,8 +72,10 @@
 </template>
 
 <script setup>
+import { useI18n } from 'vue-i18n'
 import { useDateHelpers } from '@/composable/useDateHelpers'
 import { countPositiveVotes, countNegativeVotes } from '@/utils/voteUtils'
+import { getSurveyDisplayTitle } from '@/utils/surveyStatusUtils'
 
 const props = defineProps({
   surveys: {
@@ -85,7 +87,10 @@ const props = defineProps({
     default: null
   }
 })
+const { t } = useI18n()
 const { getDisplayedDateTime } = useDateHelpers()
+
+const getSurveyTitle = (survey) => getSurveyDisplayTitle(survey, t)
 
 // Methods
 const getUserVote = (survey) => {
@@ -95,11 +100,9 @@ const getUserVote = (survey) => {
 
 const getSurveyTypeColor = (type) => {
   const colors = {
-    'TRAINING': 'blue',
-    'MATCH': 'green',
-    'EVENT': 'purple',
-    'MEETING': 'orange',
-    'OTHER': 'grey'
+    'training': 'blue',
+    'match': 'green',
+    'friendly-match': 'orange',
   }
   return colors[type] || 'grey'
 }

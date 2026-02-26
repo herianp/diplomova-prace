@@ -59,6 +59,7 @@
                   clearable
                   readonly
                   @click="showDateFromPicker = true"
+                  @clear="activePresetKey = ''; onFilterChange()"
                 >
                   <template v-slot:prepend>
                     <q-icon name="event" />
@@ -77,6 +78,7 @@
                   clearable
                   readonly
                   @click="showDateToPicker = true"
+                  @clear="activePresetKey = ''; onFilterChange()"
                 >
                   <template v-slot:prepend>
                     <q-icon name="event" />
@@ -206,11 +208,15 @@ const seasonNavMax = computed(() => {
 })
 const dateFromOptions = (date) => {
   const season = seasonStore.activeSeason
-  return date >= season.startDate && date <= season.endDate
+  const from = season.startDate.replaceAll('-', '/')
+  const to = season.endDate.replaceAll('-', '/')
+  return date >= from && date <= to
 }
 const dateToOptions = (date) => {
   const season = seasonStore.activeSeason
-  return date >= season.startDate && date <= season.endDate
+  const from = season.startDate.replaceAll('-', '/')
+  const to = season.endDate.replaceAll('-', '/')
+  return date >= from && date <= to
 }
 
 // Detect which preset matches the current date range

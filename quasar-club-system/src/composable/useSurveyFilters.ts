@@ -51,7 +51,8 @@ export function useSurveyFilters() {
       const searchTerm = activeFilters.searchName.toLowerCase().trim()
       filtered = filtered.filter(survey =>
         (survey.type || '').toLowerCase().includes(searchTerm) ||
-        (survey.description || '').toLowerCase().includes(searchTerm)
+        (survey.description || '').toLowerCase().includes(searchTerm) ||
+        (survey.opponent || '').toLowerCase().includes(searchTerm)
       )
     }
 

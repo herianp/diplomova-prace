@@ -245,7 +245,7 @@ describe('useAuthUseCases', () => {
   // ─── signOut ──────────────────────────────────────────────────────────────
 
   describe('signOut', () => {
-    it('success: logoutUser resolves → authStore.user null, teamStore cleared', async () => {
+    it('success: logoutUser resolves → listeners unregistered, authStore.user null, teamStore cleared, router.push called', async () => {
       mockLogoutUser.mockResolvedValue(undefined)
 
       const authStore = useAuthStore()
@@ -255,8 +255,10 @@ describe('useAuthUseCases', () => {
       const { signOut } = useAuthUseCases()
       await signOut()
 
+      expect(listenerRegistry.unregisterAll).toHaveBeenCalled()
       expect(authStore.user).toBeNull()
       expect(teamStore.teams).toHaveLength(0)
+      expect(mockPush).toHaveBeenCalled()
     })
 
     it('failure: logoutUser rejects with AuthError → notifyError called, error re-thrown', async () => {
@@ -400,7 +402,7 @@ describe('useAuthUseCases', () => {
       expect(mockSetTeamListener).toHaveBeenCalledWith('test-uid')
     })
 
-    it('auth listener callback fires with null → user cleared, router.push called', async () => {
+    it('auth listener callback fires with null → user cleared, state reset', async () => {
       mockAuthStateReady.mockResolvedValue(null)
 
       let capturedCallback: ((user: any) => Promise<void>) | null = null
@@ -417,24 +419,8 @@ describe('useAuthUseCases', () => {
       await capturedCallback!(null)
 
       expect(authStore.user).toBeNull()
-      expect(mockPush).toHaveBeenCalled()
-    })
-
-    it('auth listener callback with null → listenerRegistry.unregisterAll called', async () => {
-      mockAuthStateReady.mockResolvedValue(null)
-
-      let capturedCallback: ((user: any) => Promise<void>) | null = null
-      mockAuthStateListener.mockImplementation((callback: (user: any) => Promise<void>) => {
-        capturedCallback = callback
-        return vi.fn()
-      })
-
-      const { initializeAuth } = useAuthUseCases()
-
-      await initializeAuth()
-      await capturedCallback!(null)
-
-      expect(listenerRegistry.unregisterAll).toHaveBeenCalled()
+      expect(authStore.isAdmin).toBe(false)
+      expect(authStore.isTeamReady).toBe(false)
     })
   })
 

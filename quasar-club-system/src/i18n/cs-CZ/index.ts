@@ -39,7 +39,9 @@ export default {
       description: "Popis",
       date: "Datum",
       time: "Čas",
-      type: "Typ ankety"
+      type: "Typ ankety",
+      opponent: "Soupeř",
+      opponentPlaceholder: "Název soupeře"
     },
     updateSuccess: "Anketa byla úspěšně aktualizována",
     updateError: "Nepodařilo se aktualizovat anketu",
@@ -50,8 +52,7 @@ export default {
       label: "Typ",
       training: "Trénink",
       match: "Zápas",
-      event: "Událost",
-      other: "Jiné"
+      'friendly-match': "Přátelský zápas"
     },
     status: {
       active: "Aktivní",
@@ -243,6 +244,10 @@ export default {
     noSurveys: "Žádné ankety nenalezeny",
     noVotingData: "Žádná data o hlasování",
     noSurveyTypes: "Žádná data o typech anket",
+    monthlyTrend: "Měsíční trend docházky",
+    activityTimeline: "Aktivita týmu v čase",
+    surveyCount: "Ankety",
+    attendanceRate: "Docházka %",
     surveys: "anket",
     voted: {
       yes: "Ano",
@@ -251,7 +256,15 @@ export default {
     },
     votedYes: "Hlasoval Ano",
     votedNo: "Hlasoval Ne",
-    didNotVote: "Nehlasoval"
+    didNotVote: "Nehlasoval",
+    nextTraining: "Další trénink",
+    nextMatch: "Další zápas",
+    noUpcomingTraining: "Žádný nadcházející trénink",
+    noUpcomingMatch: "Žádný nadcházející zápas",
+    at: "v",
+    yesVotes: "Ano",
+    noVotes: "Ne",
+    notVotedYet: "Nehlasováno"
   },
   settings: {
     title: "Nastavení",
@@ -293,6 +306,23 @@ export default {
       signOutMessage: "Opravdu se chcete odhlásit? Budete se muset znovu přihlásit pro přístup ke svému účtu.",
       signOutSuccess: "Úspěšně odhlášen",
       signOutError: "Nepodařilo se odhlásit"
+    }
+  },
+  auth: {
+    login: {
+      title: "Přihlášení",
+      email: "E-mail",
+      password: "Heslo",
+      submit: "Přihlásit se",
+      noAccount: "Nemáte účet? Zaregistrujte se"
+    },
+    register: {
+      title: "Registrace",
+      name: "Jméno",
+      email: "E-mail",
+      password: "Heslo",
+      submit: "Zaregistrovat se",
+      hasAccount: "Máte již účet? Přihlaste se"
     }
   },
   common: {

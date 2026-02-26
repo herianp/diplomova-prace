@@ -39,7 +39,9 @@ export default {
       description: "Description",
       date: "Date",
       time: "Time",
-      type: "Survey Type"
+      type: "Survey Type",
+      opponent: "Opponent",
+      opponentPlaceholder: "Opponent name"
     },
     updateSuccess: "Survey updated successfully",
     updateError: "Failed to update survey",
@@ -50,8 +52,7 @@ export default {
       label: "Type",
       training: "Training",
       match: "Match",
-      event: "Event",
-      other: "Other"
+      'friendly-match': "Friendly Match"
     },
     status: {
       active: "Active",
@@ -243,6 +244,10 @@ export default {
     noSurveys: "No surveys found",
     noVotingData: "No voting data available",
     noSurveyTypes: "No survey types data",
+    monthlyTrend: "Monthly Attendance Trend",
+    activityTimeline: "Team Activity Timeline",
+    surveyCount: "Surveys",
+    attendanceRate: "Attendance %",
     surveys: "surveys",
     voted: {
       yes: "Yes",
@@ -251,7 +256,15 @@ export default {
     },
     votedYes: "Voted Yes",
     votedNo: "Voted No",
-    didNotVote: "Did Not Vote"
+    didNotVote: "Did Not Vote",
+    nextTraining: "Next Training",
+    nextMatch: "Next Match",
+    noUpcomingTraining: "No upcoming training",
+    noUpcomingMatch: "No upcoming match",
+    at: "at",
+    yesVotes: "Yes",
+    noVotes: "No",
+    notVotedYet: "Not voted yet"
   },
   settings: {
     title: "Settings",
@@ -293,6 +306,23 @@ export default {
       signOutMessage: "Are you sure you want to sign out? You will need to log in again to access your account.",
       signOutSuccess: "Successfully signed out",
       signOutError: "Failed to sign out"
+    }
+  },
+  auth: {
+    login: {
+      title: "Login",
+      email: "Email",
+      password: "Password",
+      submit: "Log In",
+      noAccount: "Not registered? Create an Account"
+    },
+    register: {
+      title: "Register",
+      name: "Name",
+      email: "Email",
+      password: "Password",
+      submit: "Register",
+      hasAccount: "Already registered? Log in."
     }
   },
   common: {

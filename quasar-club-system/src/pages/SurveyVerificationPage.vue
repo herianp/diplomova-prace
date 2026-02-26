@@ -7,7 +7,7 @@
     <div v-else-if="survey && teamMembers.length" class="verification-content">
       <HeaderBanner
         :title="$t('survey.verification.title')"
-        :survey-title="$t('survey.type.' + survey.type)"
+        :survey-title="surveyDisplayTitle"
         :description="$t('survey.verification.reviewAttendance')"
         @go-back="handleGoBack"
         :goBackOption="true"
@@ -30,7 +30,7 @@
             </div>
             <div class="col-12 col-md-6">
               <div class="text-caption text-grey-6">{{ $t('survey.type.label') }}</div>
-              <div class="text-body1">{{ $t(`survey.type.${survey.type}`) }}</div>
+              <div class="text-body1">{{ surveyDisplayTitle }}</div>
             </div>
             <div class="col-12">
               <div class="text-caption text-grey-6">{{ $t('survey.description') }}</div>
@@ -223,6 +223,7 @@ import { DateTime } from 'luxon'
 import { queryByIdsInChunks } from '@/utils/firestoreUtils'
 import HeaderBanner from '@/components/HeaderBanner.vue'
 import { createLogger } from 'src/utils/logger'
+import { getSurveyDisplayTitle } from '@/utils/surveyStatusUtils'
 
 const log = createLogger('SurveyVerificationPage')
 const route = useRoute()
@@ -245,6 +246,7 @@ const memberVotes = ref({})
 
 // Computed
 const currentTeam = computed(() => teamStore.currentTeam)
+const surveyDisplayTitle = computed(() => survey.value ? getSurveyDisplayTitle(survey.value, t) : '')
 
 const attendanceOptions = computed(() => [
   { label: t('common.yes'), value: true },

@@ -1,4 +1,5 @@
 export enum SurveyTypes {
   Training = "training",
-  Match = "match"
+  Match = "match",
+  FriendlyMatch = "friendly-match"
 }

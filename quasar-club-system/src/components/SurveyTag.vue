@@ -1,6 +1,6 @@
 <template>
   <div :class="tagClass">
-    {{ t(`survey.type.${type}`) }}
+    {{ displayLabel }}
   </div>
 </template>
 
@@ -15,13 +15,26 @@ const props = defineProps({
   type: {
     type: String,
     required: true
+  },
+  opponent: {
+    type: String,
+    default: ''
   }
 });
+
+const displayLabel = computed(() => {
+  const typeLabel = t(`survey.type.${props.type}`)
+  if ((props.type === 'match' || props.type === 'friendly-match') && props.opponent) {
+    return `${typeLabel} (${props.opponent})`
+  }
+  return typeLabel
+})
 
 // Color mapping by type (using lowercase keys to match enum values)
 const tagColors = {
   training: 'bg-blue-3',
   match: 'bg-green-3',
+  'friendly-match': 'bg-orange-3',
   default: 'bg-grey-3',
 }
 
