@@ -32,7 +32,7 @@
       </div>
 
       <div class="row items-center no-wrap q-gutter-sm">
-        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ $t('survey.type.' + survey.type) }}</div>
+        <div class="text-h5" :class="isMobile ? 'q-ma-sm' : 'q-ma-none q-ml-sm'">{{ surveyDisplayTitle }}</div>
       </div>
       <div class="text-grey-9" :class="isMobile ? 'q-pa-sm' : 'text-h6 q-pl-lg'">{{ survey.description }}</div>
 
@@ -117,7 +117,7 @@
 
     <template #actions>
       <VoteStats :survey="survey" :team-member-count="teamMemberCount" />
-      <SurveyTag :type="survey.type" :class="isMobile ? 'q-ma-none' : 'q-ml-lg q-ma-none'" />
+      <SurveyTag :type="survey.type" :opponent="survey.opponent" :class="isMobile ? 'q-ma-none' : 'q-ml-lg q-ma-none'" />
     </template>
   </BaseCard>
 
@@ -149,7 +149,7 @@ import SurveyEditModal from '@/components/survey/SurveyEditModal.vue'
 import { useI18n } from 'vue-i18n'
 import SurveyTag from '@/components/SurveyTag.vue'
 import { useRouter } from 'vue-router'
-import { getSurveyStatus, getSurveyStatusDisplay, canModifyVotes } from '@/utils/surveyStatusUtils'
+import { getSurveyStatus, getSurveyStatusDisplay, canModifyVotes, getSurveyDisplayTitle } from '@/utils/surveyStatusUtils'
 import { SurveyStatus } from '@/interfaces/interfaces'
 import { useWeatherService } from '@/composable/useWeatherService'
 
@@ -170,7 +170,10 @@ const { voteOnSurvey } = useSurveyUseCases()
 const { isMobile } = useScreenComposable()
 const router = useRouter()
 const i18n = useI18n()
+const { t } = i18n
 const { getDisplayedDateTime } = useDateHelpers(i18n.locale.value)
+
+const surveyDisplayTitle = computed(() => getSurveyDisplayTitle(props.survey, t))
 
 const { getWeatherForDate } = useWeatherService()
 const lat = teamStore.currentTeamSettings?.address?.latitude ?? 50.08

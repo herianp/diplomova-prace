@@ -39,7 +39,9 @@ export default {
       description: "Description",
       date: "Date",
       time: "Time",
-      type: "Survey Type"
+      type: "Survey Type",
+      opponent: "Opponent",
+      opponentPlaceholder: "Opponent name"
     },
     updateSuccess: "Survey updated successfully",
     updateError: "Failed to update survey",
@@ -254,7 +256,15 @@ export default {
     },
     votedYes: "Voted Yes",
     votedNo: "Voted No",
-    didNotVote: "Did Not Vote"
+    didNotVote: "Did Not Vote",
+    nextTraining: "Next Training",
+    nextMatch: "Next Match",
+    noUpcomingTraining: "No upcoming training",
+    noUpcomingMatch: "No upcoming match",
+    at: "at",
+    yesVotes: "Yes",
+    noVotes: "No",
+    notVotedYet: "Not voted yet"
   },
   settings: {
     title: "Settings",

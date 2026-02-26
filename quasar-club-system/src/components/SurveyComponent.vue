@@ -228,6 +228,7 @@ async function handleSurveySubmit(payload) {
       dateTime: getDateByDateAndTime(payload.date, payload.time),
       teamId: currentTeam.value?.id,
       type: payload.surveyType,
+      ...(payload.opponent ? { opponent: payload.opponent } : {}),
     })
   } catch (err) {
     log.error('Failed to create survey', {

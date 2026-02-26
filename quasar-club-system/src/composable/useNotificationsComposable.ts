@@ -31,8 +31,11 @@ export const useNotifications = () => {
     return await createNotification(notificationData)
   }
 
-  const createSurveyNotification = async (survey: { id: string; type: string; teamId: string }, userIds: string[]): Promise<void> => {
-    const surveyTypeLabel = t(`survey.type.${survey.type}`)
+  const createSurveyNotification = async (survey: { id: string; type: string; teamId: string; opponent?: string }, userIds: string[]): Promise<void> => {
+    const typeLabel = t(`survey.type.${survey.type}`)
+    const surveyTypeLabel = (survey.type === 'match' || survey.type === 'friendly-match') && survey.opponent
+      ? `${typeLabel} (${survey.opponent})`
+      : typeLabel
     const notifications = userIds.map(userId => ({
       userId,
       type: 'survey_created' as const,
