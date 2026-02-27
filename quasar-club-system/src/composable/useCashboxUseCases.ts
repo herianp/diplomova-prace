@@ -233,16 +233,13 @@ export function useCashboxUseCases() {
       const verifiedVote = verifiedVotes.find((v) => v.userUid === memberId)
 
       for (const rule of activeRules) {
-        if (rule.surveyType && rule.surveyType !== surveyType) continue
+        if (rule.surveyTypes && rule.surveyTypes.length > 0 && !rule.surveyTypes.includes(surveyType)) continue
 
         let shouldFine = false
 
         switch (rule.triggerType) {
           case FineRuleTrigger.NO_ATTENDANCE:
             shouldFine = verifiedVote?.vote === false
-            break
-          case FineRuleTrigger.VOTED_YES_BUT_ABSENT:
-            shouldFine = originalVote?.vote === true && (!verifiedVote || verifiedVote.vote === false)
             break
           case FineRuleTrigger.UNVOTED:
             shouldFine = !verifiedVote
@@ -290,40 +287,9 @@ export function useCashboxUseCases() {
       await batch.commit()
     }
 
-    // 5. Audit logging (non-blocking, fire-and-forget)
-    const actorDisplayName = authStore.user?.displayName || authStore.user?.email || 'Unknown'
-
-    // Per-fine delete audit entries
-    for (const docSnap of existingAutoFines) {
-      const data = docSnap.data()
-      void writeAuditLog({
-        teamId,
-        operation: 'fine.delete',
-        actorUid: createdBy,
-        actorDisplayName,
-        timestamp: new Date(),
-        entityId: docSnap.id,
-        entityType: 'fine',
-        before: { amount: data.amount, reason: data.reason, source: 'auto', surveyId },
-      })
-    }
-
-    // Per-fine create audit entries
-    for (const fine of finesToCreate) {
-      void writeAuditLog({
-        teamId,
-        operation: 'fine.create',
-        actorUid: createdBy,
-        actorDisplayName,
-        timestamp: new Date(),
-        entityId: fine.playerId,
-        entityType: 'fine',
-        after: { amount: fine.amount, reason: fine.reason, source: 'auto', surveyId },
-      })
-    }
-
-    // Summary audit entry for the batch operation
+    // 5. Audit logging — ONE summary entry (non-blocking)
     if (deletedCount > 0 || finesToCreate.length > 0) {
+      const actorDisplayName = authStore.user?.displayName || authStore.user?.email || 'Unknown'
       void writeAuditLog({
         teamId,
         operation: 'fine.create',
@@ -332,7 +298,7 @@ export function useCashboxUseCases() {
         timestamp: new Date(),
         entityId: surveyId,
         entityType: 'fine',
-        after: { type: 'auto-recalculation', surveyId, surveyTitle, deleted: deletedCount, created: finesToCreate.length },
+        after: { surveyTitle, created: finesToCreate.length, deleted: deletedCount },
       })
 
       log.info('Auto-fines recalculated', { teamId, surveyId, deleted: deletedCount, created: finesToCreate.length })

@@ -12,7 +12,6 @@ export enum SurveyStatus {
 
 export enum FineRuleTrigger {
   NO_ATTENDANCE = 'no_attendance',
-  VOTED_YES_BUT_ABSENT = 'voted_yes_but_absent',
   UNVOTED = 'unvoted'
 }
 
@@ -226,7 +225,7 @@ export interface IFineRule {
   name: string
   amount: number
   triggerType: FineRuleTrigger
-  surveyType?: SurveyTypes | null
+  surveyTypes?: SurveyTypes[] | null
   active: boolean
   createdBy: string
   createdAt: Date

@@ -310,7 +310,14 @@ const setupListeners = (teamId) => {
   const unsubPayments = cashbox.listenToPayments(teamId, (data) => { payments.value = data })
   listenerRegistry.register('cashbox-payments', unsubPayments, { teamId })
 
-  const unsubRules = cashbox.listenToFineRules(teamId, (data) => { fineRules.value = data })
+  const unsubRules = cashbox.listenToFineRules(teamId, (data) => {
+    // Auto-cleanup orphaned VOTED_YES_BUT_ABSENT rules (removed in Phase 17)
+    const orphaned = data.filter((r) => r.triggerType === 'voted_yes_but_absent')
+    for (const rule of orphaned) {
+      cashbox.deleteFineRule(teamId, rule.id).catch(() => {})
+    }
+    fineRules.value = data.filter((r) => r.triggerType !== 'voted_yes_but_absent')
+  })
   listenerRegistry.register('cashbox-rules', unsubRules, { teamId })
 
   const unsubHistory = cashbox.listenToCashboxHistory(teamId, (data) => { cashboxHistory.value = data })

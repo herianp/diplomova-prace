@@ -108,7 +108,7 @@ const createRule = (overrides: Record<string, unknown> = {}) => ({
   amount: 50,
   triggerType: FineRuleTrigger.NO_ATTENDANCE,
   active: true,
-  surveyType: undefined,
+  surveyTypes: undefined,
   createdBy: 'admin-uid',
   createdAt: new Date(),
   ...overrides
@@ -756,7 +756,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
   describe('survey type filtering', () => {
     it('skips rule when rule surveyType does not match survey type', async () => {
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: SurveyTypes.Match, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: [SurveyTypes.Match], triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
@@ -774,7 +774,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
 
     it('applies rule when rule surveyType matches survey type', async () => {
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: SurveyTypes.Training, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: [SurveyTypes.Training], triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
@@ -790,7 +790,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
 
     it('applies rule to all survey types when rule has no surveyType filter (undefined)', async () => {
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
@@ -806,7 +806,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
       vi.clearAllMocks()
       mockGetAutoFinesForSurvey.mockResolvedValue([])
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       // Works for Match too
@@ -873,69 +873,6 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
     })
   })
 
-  // ===========================================================
-  // FineRuleTrigger.VOTED_YES_BUT_ABSENT
-  // ===========================================================
-
-  describe('FineRuleTrigger.VOTED_YES_BUT_ABSENT', () => {
-    beforeEach(() => {
-      mockLoadFineRules.mockResolvedValue([
-        createRule({ triggerType: FineRuleTrigger.VOTED_YES_BUT_ABSENT })
-      ])
-    })
-
-    it('creates fine when original vote=true but verified vote=false (absent despite yes)', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const result = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
-        [{ userUid: 'player-1', vote: false }],
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(result).toEqual({ created: 1, deleted: 0 })
-    })
-
-    it('creates fine when original vote=true but no verified vote entry', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const result = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
-        [], // no verified vote for player-1
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(result).toEqual({ created: 1, deleted: 0 })
-    })
-
-    it('does not create fine when original vote=false (player never voted yes)', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const result = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: false }],
-        [{ userUid: 'player-1', vote: false }],
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(result).toEqual({ created: 0, deleted: 0 })
-    })
-
-    it('does not create fine when original vote=true and verified vote=true (attended)', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const result = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
-        [{ userUid: 'player-1', vote: true }],
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(result).toEqual({ created: 0, deleted: 0 })
-    })
-  })
 
   // ===========================================================
   // FineRuleTrigger.UNVOTED
@@ -1097,20 +1034,21 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
     })
 
     it('generates fines for each rule-member combination that matches', async () => {
-      // Both NO_ATTENDANCE and VOTED_YES_BUT_ABSENT active
+      // Both NO_ATTENDANCE and UNVOTED active
       mockLoadFineRules.mockResolvedValue([
         createRule({ id: 'rule-1', triggerType: FineRuleTrigger.NO_ATTENDANCE }),
-        createRule({ id: 'rule-2', triggerType: FineRuleTrigger.VOTED_YES_BUT_ABSENT })
+        createRule({ id: 'rule-2', triggerType: FineRuleTrigger.UNVOTED })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
-      // player-1: originally yes, verified no → VOTED_YES_BUT_ABSENT fires + NO_ATTENDANCE fires (2 fines)
+      // player-1: verified vote=false → NO_ATTENDANCE fires (1 fine), has verified vote so UNVOTED doesn't fire
+      // player-2: no verified vote → UNVOTED fires (1 fine)
       const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
+        [],
         [{ userUid: 'player-1', vote: false }],
-        ['player-1'], BASE_ARGS.createdBy
+        ['player-1', 'player-2'], BASE_ARGS.createdBy
       )
 
       expect(result).toEqual({ created: 2, deleted: 0 })

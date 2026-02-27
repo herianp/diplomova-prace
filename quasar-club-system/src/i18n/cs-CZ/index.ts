@@ -702,7 +702,7 @@ export default {
       active: "Aktivní",
       inactive: "Neaktivní",
       noAttendance: "Neúčast",
-      votedYesButAbsent: "Potvrdil ale nepřišel",
+
       unvoted: "Nehlasoval",
       addSuccess: "Pravidlo bylo přidáno",
       addError: "Nepodařilo se přidat pravidlo",

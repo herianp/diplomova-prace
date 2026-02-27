@@ -702,7 +702,7 @@ export default {
       active: "Active",
       inactive: "Inactive",
       noAttendance: "No Attendance",
-      votedYesButAbsent: "Confirmed but absent",
+
       unvoted: "Did not vote",
       addSuccess: "Rule added successfully",
       addError: "Failed to add rule",
