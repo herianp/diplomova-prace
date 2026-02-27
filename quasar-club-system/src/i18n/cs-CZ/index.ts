@@ -337,7 +337,9 @@ export default {
     fillAllFields: "Prosím vyplňte všechna pole",
     retry: "Zkusit znovu",
     retrySuccess: "Operace proběhla úspěšně",
-    dismiss: "Zavřít"
+    dismiss: "Zavřít",
+    selectAll: "Vybrat vše",
+    deselectAll: "Zrušit výběr"
   },
   notifications: {
     title: "Oznámení",
@@ -672,7 +674,9 @@ export default {
       selectPlayer: "Vyberte hráče",
       amountRequired: "Částka je povinná",
       reasonRequired: "Důvod je povinný",
-      playerRequired: "Hráč je povinný"
+      playerRequired: "Hráč je povinný",
+      selectPlayers: "Vyberte hráče",
+      batchAddSuccess: "{count} pokut úspěšně přidáno"
     },
     payments: {
       title: "Platby",
@@ -741,6 +745,19 @@ export default {
       clearedBy: "Vyčistil",
       noHistory: "Zatím žádná historie",
       viewDetails: "Zobrazit detaily"
+    },
+    templates: {
+      predefined: "Předdefinované",
+      custom: "Vlastní",
+      manage: "Spravovat šablony",
+      noTemplates: "Zatím žádné předdefinované pokuty. Přidejte níže.",
+      name: "Název pokuty",
+      amount: "Částka",
+      category: "Kategorie",
+      addSuccess: "Šablona přidána",
+      addError: "Nepodařilo se přidat šablonu",
+      deleteSuccess: "Šablona smazána",
+      deleteError: "Nepodařilo se smazat šablonu"
     }
   },
   weather: {

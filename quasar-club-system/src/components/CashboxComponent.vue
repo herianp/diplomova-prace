@@ -113,7 +113,10 @@
         :team-members="teamMembers"
         :preselected-player="preselectedPlayer"
         :get-player-name="getPlayerNameBound"
+        :fine-templates="fineTemplates"
         @submit="onSubmitFine"
+        @addTemplate="onAddFineTemplate"
+        @deleteTemplate="onDeleteFineTemplate"
       />
 
       <!-- Record Payment Dialog -->
@@ -278,6 +281,7 @@ const showClearDialog = ref(false)
 const showHistoryDialog = ref(false)
 const clearing = ref(false)
 const cashboxHistory = ref([])
+const fineTemplates = ref([])
 const preselectedPlayer = ref(null)
 
 // Computed
@@ -322,6 +326,9 @@ const setupListeners = (teamId) => {
 
   const unsubHistory = cashbox.listenToCashboxHistory(teamId, (data) => { cashboxHistory.value = data })
   listenerRegistry.register('cashbox-history', unsubHistory, { teamId })
+
+  const unsubTemplates = cashbox.listenToFineTemplates(teamId, (data) => { fineTemplates.value = data })
+  listenerRegistry.register('cashbox-templates', unsubTemplates, { teamId })
 }
 
 const cleanupListeners = () => {
@@ -329,6 +336,7 @@ const cleanupListeners = () => {
   listenerRegistry.unregister('cashbox-payments')
   listenerRegistry.unregister('cashbox-rules')
   listenerRegistry.unregister('cashbox-history')
+  listenerRegistry.unregister('cashbox-templates')
 }
 
 // Load team members
@@ -349,10 +357,19 @@ const onRecordPaymentForPlayer = (playerId) => {
   showAddPaymentDialog.value = true
 }
 
-const onSubmitFine = async ({ playerId, amount, reason }) => {
+const onSubmitFine = async ({ playerIds, amount, reason }) => {
   try {
-    await cashbox.addManualFine(currentTeam.value.id, playerId, amount, reason, currentUser.value.uid)
-    $q.notify({ type: 'positive', message: t('cashbox.fines.addSuccess') })
+    if (playerIds.length === 1) {
+      await cashbox.addManualFine(currentTeam.value.id, playerIds[0], amount, reason, currentUser.value.uid)
+    } else {
+      await cashbox.addBatchFines(currentTeam.value.id, playerIds, amount, reason, currentUser.value.uid)
+    }
+    $q.notify({
+      type: 'positive',
+      message: playerIds.length === 1
+        ? t('cashbox.fines.addSuccess')
+        : t('cashbox.fines.batchAddSuccess', { count: playerIds.length })
+    })
     showAddFineDialog.value = false
     preselectedPlayer.value = null
   } catch {
@@ -414,6 +431,24 @@ const onDeleteFineRule = async (ruleId) => {
     $q.notify({ type: 'positive', message: t('cashbox.rules.deleteSuccess') })
   } catch {
     $q.notify({ type: 'negative', message: t('cashbox.rules.deleteError') })
+  }
+}
+
+const onAddFineTemplate = async (template) => {
+  try {
+    await cashbox.addFineTemplate(currentTeam.value.id, { ...template, createdBy: currentUser.value.uid, createdAt: new Date() })
+    $q.notify({ type: 'positive', message: t('cashbox.templates.addSuccess') })
+  } catch {
+    $q.notify({ type: 'negative', message: t('cashbox.templates.addError') })
+  }
+}
+
+const onDeleteFineTemplate = async (templateId) => {
+  try {
+    await cashbox.deleteFineTemplate(currentTeam.value.id, templateId)
+    $q.notify({ type: 'positive', message: t('cashbox.templates.deleteSuccess') })
+  } catch {
+    $q.notify({ type: 'negative', message: t('cashbox.templates.deleteError') })
   }
 }
 

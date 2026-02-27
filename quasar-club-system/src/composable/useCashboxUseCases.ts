@@ -1,5 +1,5 @@
 import { useCashboxFirebase } from '@/services/cashboxFirebase'
-import { IFine, IFineRule, IPayment, IPlayerBalance, IVote, ICashboxHistoryEntry, FineRuleTrigger } from '@/interfaces/interfaces'
+import { IFine, IFineRule, IFineTemplate, IPayment, IPlayerBalance, IVote, ICashboxHistoryEntry, FineRuleTrigger } from '@/interfaces/interfaces'
 import { SurveyTypes } from '@/enums/SurveyTypes'
 import { Unsubscribe, writeBatch, doc as firestoreDoc, collection } from 'firebase/firestore'
 import { db } from '@/firebase/config'
@@ -322,6 +322,73 @@ export function useCashboxUseCases() {
   }
 
   // ============================================================
+  // Fine Templates
+  // ============================================================
+
+  const listenToFineTemplates = (teamId: string, callback: (templates: IFineTemplate[]) => void): Unsubscribe => {
+    return cashboxFirebase.listenToFineTemplates(teamId, callback)
+  }
+
+  const addFineTemplate = async (teamId: string, template: Omit<IFineTemplate, 'id'>): Promise<void> => {
+    try {
+      return await cashboxFirebase.addFineTemplate(teamId, template)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
+  }
+
+  const deleteFineTemplate = async (teamId: string, templateId: string): Promise<void> => {
+    try {
+      return await cashboxFirebase.deleteFineTemplate(teamId, templateId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
+  }
+
+  const addBatchFines = async (
+    teamId: string,
+    playerIds: string[],
+    amount: number,
+    reason: string,
+    createdBy: string
+  ): Promise<void> => {
+    const fines: Omit<IFine, 'id'>[] = playerIds.map((playerId) => ({
+      playerId,
+      amount,
+      reason,
+      source: 'manual' as const,
+      createdBy,
+      createdAt: new Date(),
+    }))
+    await cashboxFirebase.bulkAddFines(teamId, fines)
+
+    // Audit log — one summary entry for the batch (non-blocking)
+    if (authStore.user) {
+      const { writeAuditLog } = useAuditLogFirebase()
+      void writeAuditLog({
+        teamId,
+        operation: 'fine.create',
+        actorUid: createdBy,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown',
+        timestamp: new Date(),
+        entityId: teamId,
+        entityType: 'fine',
+        after: { type: 'manual-batch', count: playerIds.length, amount, reason },
+      })
+    }
+  }
+
+  // ============================================================
   // Balance Calculations (pure functions, computed at read-time)
   // ============================================================
 
@@ -494,6 +561,11 @@ export function useCashboxUseCases() {
     // Payments
     recordPayment,
     deletePayment,
+    // Fine Templates
+    listenToFineTemplates,
+    addFineTemplate,
+    deleteFineTemplate,
+    addBatchFines,
     // Auto-fines
     generateAutoFines,
     // Calculations

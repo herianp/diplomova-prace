@@ -337,7 +337,9 @@ export default {
     fillAllFields: "Please fill in all fields",
     retry: "Retry",
     retrySuccess: "Operation completed successfully",
-    dismiss: "Dismiss"
+    dismiss: "Dismiss",
+    selectAll: "Select all",
+    deselectAll: "Deselect all"
   },
   notifications: {
     title: "Notifications",
@@ -672,7 +674,9 @@ export default {
       selectPlayer: "Select a player",
       amountRequired: "Amount is required",
       reasonRequired: "Reason is required",
-      playerRequired: "Player is required"
+      playerRequired: "Player is required",
+      selectPlayers: "Select players",
+      batchAddSuccess: "{count} fines added successfully"
     },
     payments: {
       title: "Payments",
@@ -741,6 +745,19 @@ export default {
       clearedBy: "Cleared by",
       noHistory: "No history yet",
       viewDetails: "View Details"
+    },
+    templates: {
+      predefined: "Predefined",
+      custom: "Custom",
+      manage: "Manage templates",
+      noTemplates: "No predefined fines yet. Add some below.",
+      name: "Fine name",
+      amount: "Amount",
+      category: "Category",
+      addSuccess: "Template added",
+      addError: "Failed to add template",
+      deleteSuccess: "Template deleted",
+      deleteError: "Failed to delete template"
     }
   },
   weather: {

@@ -244,6 +244,15 @@ export interface IFine {
   createdAt: Date
 }
 
+export interface IFineTemplate {
+  id?: string
+  name: string
+  amount: number
+  category: string
+  createdBy: string
+  createdAt: Date
+}
+
 export interface IPayment {
   id?: string
   playerId: string
