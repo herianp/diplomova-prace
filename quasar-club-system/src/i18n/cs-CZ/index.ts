@@ -722,7 +722,8 @@ export default {
     },
     currency: "Kč",
     autoFines: {
-      generated: "{count} automatických pokut vygenerováno"
+      generated: "{count} automatických pokut vygenerováno",
+      replaced: "{count} automatických pokut vygenerováno (nahrazeno {previous} předchozích)"
     },
     clear: {
       button: "Vyčistit pokladnu",

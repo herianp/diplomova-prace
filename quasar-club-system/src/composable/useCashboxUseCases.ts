@@ -1,11 +1,16 @@
 import { useCashboxFirebase } from '@/services/cashboxFirebase'
 import { IFine, IFineRule, IPayment, IPlayerBalance, IVote, ICashboxHistoryEntry, FineRuleTrigger } from '@/interfaces/interfaces'
 import { SurveyTypes } from '@/enums/SurveyTypes'
-import { Unsubscribe } from 'firebase/firestore'
+import { Unsubscribe, writeBatch, doc as firestoreDoc, collection } from 'firebase/firestore'
+import { db } from '@/firebase/config'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { useAuthStore } from '@/stores/authStore'
 import { useRateLimiter } from '@/composable/useRateLimiter'
+import { useAuditLogFirebase } from '@/services/auditLogFirebase'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('cashboxUseCases')
 
 export function useCashboxUseCases() {
   const cashboxFirebase = useCashboxFirebase()
@@ -192,15 +197,9 @@ export function useCashboxUseCases() {
 
   /**
    * Generate auto-fines based on active fine rules after survey verification.
+   * Idempotent: deletes existing auto-fines for the survey, then creates fresh ones in a single batch.
    *
-   * @param teamId - The team ID
-   * @param surveyId - The survey being verified
-   * @param surveyTitle - Survey title for fine description
-   * @param surveyType - Survey type (training/match) for rule filtering
-   * @param originalVotes - Votes BEFORE verification (from the survey)
-   * @param verifiedVotes - Votes AFTER verification (modified by power user)
-   * @param teamMemberIds - All team member UIDs
-   * @param createdBy - UID of the power user verifying
+   * @returns { created: number, deleted: number } — counts for notification
    */
   const generateAutoFines = async (
     teamId: string,
@@ -211,13 +210,22 @@ export function useCashboxUseCases() {
     verifiedVotes: IVote[],
     teamMemberIds: string[],
     createdBy: string
-  ): Promise<number> => {
-    // Load active fine rules
+  ): Promise<{ created: number; deleted: number }> => {
+    const { writeAuditLog } = useAuditLogFirebase()
+
+    // 1. Query existing auto-fines for this survey
+    const existingAutoFines = await cashboxFirebase.getAutoFinesForSurvey(teamId, surveyId)
+    const deletedCount = existingAutoFines.length
+
+    // 2. Load active fine rules
     const allRules = await cashboxFirebase.loadFineRules(teamId)
     const activeRules = allRules.filter((r) => r.active)
 
-    if (activeRules.length === 0) return 0
+    if (activeRules.length === 0 && deletedCount === 0) {
+      return { created: 0, deleted: 0 }
+    }
 
+    // 3. Calculate which fines should exist
     const finesToCreate: Omit<IFine, 'id'>[] = []
 
     for (const memberId of teamMemberIds) {
@@ -225,24 +233,18 @@ export function useCashboxUseCases() {
       const verifiedVote = verifiedVotes.find((v) => v.userUid === memberId)
 
       for (const rule of activeRules) {
-        // Check if rule applies to this survey type
         if (rule.surveyType && rule.surveyType !== surveyType) continue
 
         let shouldFine = false
 
         switch (rule.triggerType) {
           case FineRuleTrigger.NO_ATTENDANCE:
-            // Player voted No or was marked No after verification
             shouldFine = verifiedVote?.vote === false
             break
-
           case FineRuleTrigger.VOTED_YES_BUT_ABSENT:
-            // Player originally voted Yes but power user changed to No/removed
             shouldFine = originalVote?.vote === true && (!verifiedVote || verifiedVote.vote === false)
             break
-
           case FineRuleTrigger.UNVOTED:
-            // Player didn't vote at all (no verified vote entry)
             shouldFine = !verifiedVote
             break
         }
@@ -263,11 +265,80 @@ export function useCashboxUseCases() {
       }
     }
 
-    if (finesToCreate.length > 0) {
-      await cashboxFirebase.bulkAddFines(teamId, finesToCreate)
+    // 4. Atomic batch: delete old + create new in single commit
+    const totalOps = deletedCount + finesToCreate.length
+    if (totalOps > 500) {
+      log.error('Auto-fine batch exceeds 500 operations', { teamId, surveyId, deletedCount, createCount: finesToCreate.length })
+      throw new Error(`Auto-fine batch too large: ${totalOps} operations (max 500)`)
     }
 
-    return finesToCreate.length
+    if (totalOps > 0) {
+      const batch = writeBatch(db)
+      const finesRef = collection(firestoreDoc(db, 'teams', teamId), 'fines')
+
+      // Delete old auto-fines
+      for (const docSnap of existingAutoFines) {
+        batch.delete(docSnap.ref)
+      }
+
+      // Create new auto-fines
+      for (const fine of finesToCreate) {
+        const newDocRef = firestoreDoc(finesRef)
+        batch.set(newDocRef, fine)
+      }
+
+      await batch.commit()
+    }
+
+    // 5. Audit logging (non-blocking, fire-and-forget)
+    const actorDisplayName = authStore.user?.displayName || authStore.user?.email || 'Unknown'
+
+    // Per-fine delete audit entries
+    for (const docSnap of existingAutoFines) {
+      const data = docSnap.data()
+      void writeAuditLog({
+        teamId,
+        operation: 'fine.delete',
+        actorUid: createdBy,
+        actorDisplayName,
+        timestamp: new Date(),
+        entityId: docSnap.id,
+        entityType: 'fine',
+        before: { amount: data.amount, reason: data.reason, source: 'auto', surveyId },
+      })
+    }
+
+    // Per-fine create audit entries
+    for (const fine of finesToCreate) {
+      void writeAuditLog({
+        teamId,
+        operation: 'fine.create',
+        actorUid: createdBy,
+        actorDisplayName,
+        timestamp: new Date(),
+        entityId: fine.playerId,
+        entityType: 'fine',
+        after: { amount: fine.amount, reason: fine.reason, source: 'auto', surveyId },
+      })
+    }
+
+    // Summary audit entry for the batch operation
+    if (deletedCount > 0 || finesToCreate.length > 0) {
+      void writeAuditLog({
+        teamId,
+        operation: 'fine.create',
+        actorUid: createdBy,
+        actorDisplayName,
+        timestamp: new Date(),
+        entityId: surveyId,
+        entityType: 'fine',
+        after: { type: 'auto-recalculation', surveyId, surveyTitle, deleted: deletedCount, created: finesToCreate.length },
+      })
+
+      log.info('Auto-fines recalculated', { teamId, surveyId, deleted: deletedCount, created: finesToCreate.length })
+    }
+
+    return { created: finesToCreate.length, deleted: deletedCount }
   }
 
   const deletePayment = async (teamId: string, paymentId: string): Promise<void> => {

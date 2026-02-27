@@ -188,6 +188,19 @@ export function useCashboxFirebase() {
     }
   }
 
+  /**
+   * Query and return auto-fines for a specific survey.
+   * Returns DocumentReference[] for use in batch operations.
+   */
+  const getAutoFinesForSurvey = async (teamId: string, surveyId: string) => {
+    const finesRef = collection(doc(db, 'teams', teamId), 'fines')
+    const snapshot = await getDocs(finesRef)
+    return snapshot.docs.filter((d) => {
+      const data = d.data()
+      return data.surveyId === surveyId && data.source === 'auto'
+    })
+  }
+
   // ============================================================
   // Payments
   // ============================================================
@@ -337,6 +350,7 @@ export function useCashboxFirebase() {
     addFine,
     deleteFine,
     bulkAddFines,
+    getAutoFinesForSurvey,
     listenToPayments,
     addPayment,
     deletePayment,

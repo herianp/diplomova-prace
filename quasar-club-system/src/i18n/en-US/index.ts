@@ -722,7 +722,8 @@ export default {
     },
     currency: "CZK",
     autoFines: {
-      generated: "{count} auto-fine(s) generated"
+      generated: "{count} auto-fine(s) generated",
+      replaced: "{count} auto-fine(s) generated (replaced {previous} previous)"
     },
     clear: {
       button: "Clear Cashbox",
