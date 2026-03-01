@@ -1,145 +1,175 @@
 <template>
-  <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)" maximized>
-    <q-card>
-      <q-card-section class="row items-center q-pb-none">
+  <q-dialog
+    :model-value="modelValue"
+    @update:model-value="$emit('update:modelValue', $event)"
+    transition-show="scale"
+    transition-hide="scale"
+  >
+    <q-card class="add-fine-card">
+      <!-- Header -->
+      <q-card-section class="add-fine-header row items-center q-py-sm">
+        <q-icon name="gavel" size="sm" class="q-mr-sm" />
         <div class="text-h6">{{ $t('cashbox.fines.addManualFine') }}</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn icon="close" flat round dense color="white" v-close-popup />
       </q-card-section>
 
-      <q-card-section class="q-pt-sm" style="max-height: calc(100vh - 120px); overflow-y: auto">
-        <!-- Tabs: Predefined / Custom -->
-        <q-tabs v-model="activeTab" dense align="left" class="q-mb-md" active-color="primary" indicator-color="primary">
-          <q-tab name="predefined" :label="$t('cashbox.templates.predefined')" no-caps />
-          <q-tab name="custom" :label="$t('cashbox.templates.custom')" no-caps />
-        </q-tabs>
+      <!-- Body -->
+      <q-card-section class="add-fine-body">
+        <div class="row q-col-gutter-md" style="height: 100%">
+          <!-- Left: Fine selection -->
+          <div class="col-12 col-md-7">
+            <q-tabs v-model="activeTab" dense align="left" class="q-mb-md" active-color="primary" indicator-color="primary">
+              <q-tab name="predefined" :label="$t('cashbox.templates.predefined')" no-caps />
+              <q-tab name="custom" :label="$t('cashbox.templates.custom')" no-caps />
+            </q-tabs>
 
-        <q-tab-panels v-model="activeTab" animated>
-          <!-- Predefined Tab -->
-          <q-tab-panel name="predefined" class="q-px-none">
-            <div v-for="category in templateCategories" :key="category" class="q-mb-md">
-              <div class="text-caption text-grey-7 q-mb-xs">{{ category }}</div>
-              <div class="row q-gutter-sm">
-                <q-chip
-                  v-for="tmpl in templatesByCategory(category)"
-                  :key="tmpl.id"
-                  :selected="selectedTemplate?.id === tmpl.id"
-                  clickable
-                  color="primary"
-                  :text-color="selectedTemplate?.id === tmpl.id ? 'white' : 'dark'"
-                  :outline="selectedTemplate?.id !== tmpl.id"
-                  @click="selectTemplate(tmpl)"
+            <q-tab-panels v-model="activeTab" animated>
+              <!-- Predefined Tab -->
+              <q-tab-panel name="predefined" class="q-px-none q-py-sm">
+                <div v-for="category in templateCategories" :key="category" class="q-mb-md">
+                  <div class="text-caption text-weight-medium text-grey-7 q-mb-xs">{{ category }}</div>
+                  <div class="row q-gutter-sm">
+                    <q-chip
+                      v-for="tmpl in templatesByCategory(category)"
+                      :key="tmpl.id"
+                      :selected="selectedTemplate?.id === tmpl.id"
+                      clickable
+                      color="primary"
+                      :text-color="selectedTemplate?.id === tmpl.id ? 'white' : 'dark'"
+                      :outline="selectedTemplate?.id !== tmpl.id"
+                      @click="selectTemplate(tmpl)"
+                    >
+                      {{ tmpl.name }} — {{ tmpl.amount }} {{ $t('cashbox.currency') }}
+                    </q-chip>
+                  </div>
+                </div>
+
+                <div v-if="!fineTemplates?.length" class="text-center text-grey-6 q-py-lg">
+                  <q-icon name="receipt_long" size="48px" class="q-mb-sm" color="grey-4" />
+                  <div>{{ $t('cashbox.templates.noTemplates') }}</div>
+                </div>
+
+                <q-separator class="q-my-md" />
+                <q-expansion-item
+                  :label="$t('cashbox.templates.manage')"
+                  icon="settings"
+                  dense
+                  header-class="text-caption"
                 >
-                  {{ tmpl.name }} — {{ tmpl.amount }} {{ $t('cashbox.currency') }}
-                </q-chip>
-              </div>
+                  <q-card flat bordered class="q-pa-sm q-mb-sm">
+                    <div class="row q-col-gutter-sm q-mb-sm">
+                      <div class="col-12 col-sm-4">
+                        <q-input v-model="newTemplate.name" :label="$t('cashbox.templates.name')" outlined dense />
+                      </div>
+                      <div class="col-6 col-sm-3">
+                        <q-input v-model.number="newTemplate.amount" type="number" :label="$t('cashbox.templates.amount')" :suffix="$t('cashbox.currency')" outlined dense />
+                      </div>
+                      <div class="col-6 col-sm-3">
+                        <q-input v-model="newTemplate.category" :label="$t('cashbox.templates.category')" outlined dense />
+                      </div>
+                      <div class="col-12 col-sm-2 flex items-center">
+                        <q-btn icon="add" dense unelevated color="primary" :disable="!isNewTemplateValid" @click="addTemplate" class="full-width" />
+                      </div>
+                    </div>
+                    <q-chip
+                      v-for="tmpl in fineTemplates"
+                      :key="tmpl.id"
+                      removable
+                      @remove="$emit('deleteTemplate', tmpl.id)"
+                      class="q-mr-xs q-mb-xs"
+                    >
+                      {{ tmpl.name }} ({{ tmpl.amount }} {{ $t('cashbox.currency') }}) — {{ tmpl.category }}
+                    </q-chip>
+                  </q-card>
+                </q-expansion-item>
+              </q-tab-panel>
+
+              <!-- Custom Tab -->
+              <q-tab-panel name="custom" class="q-px-none q-py-sm">
+                <q-input
+                  v-model.number="form.amount"
+                  type="number"
+                  :label="$t('cashbox.fines.amount')"
+                  :suffix="$t('cashbox.currency')"
+                  outlined
+                  dense
+                  class="q-mb-md"
+                />
+                <q-input
+                  v-model="form.reason"
+                  :label="$t('cashbox.fines.reason')"
+                  :placeholder="$t('cashbox.fines.reasonPlaceholder')"
+                  outlined
+                  dense
+                />
+              </q-tab-panel>
+            </q-tab-panels>
+          </div>
+
+          <!-- Right: Player selection -->
+          <div class="col-12 col-md-5">
+            <div class="text-subtitle2 q-mb-sm row items-center">
+              {{ $t('cashbox.fines.selectPlayers') }}
+              <q-badge v-if="selectedPlayers.length" color="primary" class="q-ml-sm">
+                {{ selectedPlayers.length }}
+              </q-badge>
+              <q-space />
+              <q-btn flat dense size="sm" no-caps :label="$t('common.selectAll')" @click="selectAllPlayers" class="q-mr-xs" />
+              <q-btn flat dense size="sm" no-caps :label="$t('common.deselectAll')" @click="deselectAllPlayers" />
             </div>
-
-            <div v-if="!fineTemplates?.length" class="text-center text-grey-6 q-py-md">
-              {{ $t('cashbox.templates.noTemplates') }}
+            <q-input v-model="playerSearch" :placeholder="$t('cashbox.fines.selectPlayer')" outlined dense clearable class="q-mb-sm">
+              <template v-slot:prepend><q-icon name="search" /></template>
+            </q-input>
+            <div class="player-list-scroll">
+              <q-list dense>
+                <q-item
+                  v-for="(member, idx) in filteredMembers"
+                  :key="member.uid"
+                  tag="label"
+                  clickable
+                  :class="idx % 2 === 0 ? 'bg-grey-1' : ''"
+                >
+                  <q-item-section side>
+                    <q-checkbox v-model="selectedPlayers" :val="member.uid" color="primary" />
+                  </q-item-section>
+                  <q-item-section>{{ getPlayerName(member.uid) }}</q-item-section>
+                </q-item>
+              </q-list>
             </div>
-
-            <q-separator class="q-my-md" />
-            <q-expansion-item
-              :label="$t('cashbox.templates.manage')"
-              icon="settings"
-              dense
-              header-class="text-caption"
-            >
-              <div class="row q-col-gutter-sm q-mb-sm">
-                <div class="col-5">
-                  <q-input v-model="newTemplate.name" :label="$t('cashbox.templates.name')" outlined dense />
-                </div>
-                <div class="col-3">
-                  <q-input v-model.number="newTemplate.amount" type="number" :label="$t('cashbox.templates.amount')" :suffix="$t('cashbox.currency')" outlined dense />
-                </div>
-                <div class="col-3">
-                  <q-input v-model="newTemplate.category" :label="$t('cashbox.templates.category')" outlined dense />
-                </div>
-                <div class="col-1 flex items-center">
-                  <q-btn icon="add" dense unelevated color="primary" :disable="!isNewTemplateValid" @click="addTemplate" />
-                </div>
-              </div>
-              <q-chip
-                v-for="tmpl in fineTemplates"
-                :key="tmpl.id"
-                removable
-                @remove="$emit('deleteTemplate', tmpl.id)"
-                class="q-mr-xs q-mb-xs"
-              >
-                {{ tmpl.name }} ({{ tmpl.amount }} {{ $t('cashbox.currency') }}) — {{ tmpl.category }}
-              </q-chip>
-            </q-expansion-item>
-          </q-tab-panel>
-
-          <!-- Custom Tab -->
-          <q-tab-panel name="custom" class="q-px-none">
-            <q-input
-              v-model.number="form.amount"
-              type="number"
-              :label="$t('cashbox.fines.amount')"
-              :suffix="$t('cashbox.currency')"
-              outlined
-              dense
-              class="q-mb-md"
-            />
-            <q-input
-              v-model="form.reason"
-              :label="$t('cashbox.fines.reason')"
-              :placeholder="$t('cashbox.fines.reasonPlaceholder')"
-              outlined
-              dense
-            />
-          </q-tab-panel>
-        </q-tab-panels>
-
-        <!-- Player Selection -->
-        <q-separator class="q-my-md" />
-        <div class="text-subtitle2 q-mb-sm">
-          {{ $t('cashbox.fines.selectPlayers') }}
-          <q-badge v-if="selectedPlayers.length" color="primary" class="q-ml-sm">
-            {{ selectedPlayers.length }}
-          </q-badge>
-        </div>
-        <div class="row q-gutter-xs q-mb-sm">
-          <q-btn flat dense size="sm" no-caps :label="$t('common.selectAll')" @click="selectAllPlayers" />
-          <q-btn flat dense size="sm" no-caps :label="$t('common.deselectAll')" @click="deselectAllPlayers" />
-        </div>
-        <q-input v-model="playerSearch" :placeholder="$t('cashbox.fines.selectPlayer')" outlined dense clearable class="q-mb-sm">
-          <template v-slot:prepend><q-icon name="search" /></template>
-        </q-input>
-        <div style="max-height: 250px; overflow-y: auto">
-          <q-list dense>
-            <q-item v-for="member in filteredMembers" :key="member.uid" tag="label" clickable>
-              <q-item-section side>
-                <q-checkbox v-model="selectedPlayers" :val="member.uid" />
-              </q-item-section>
-              <q-item-section>{{ getPlayerName(member.uid) }}</q-item-section>
-            </q-item>
-          </q-list>
+          </div>
         </div>
       </q-card-section>
 
-      <q-card-actions align="right" class="q-px-md q-pb-md">
-        <q-btn flat :label="$t('common.cancel')" v-close-popup no-caps />
-        <q-btn
-          color="negative"
-          :label="$t('cashbox.fines.addFine')"
-          no-caps
-          unelevated
-          :disable="!isValid"
-          @click="submit"
-        />
-      </q-card-actions>
+      <!-- Footer -->
+      <q-card-section class="add-fine-footer row items-center q-py-sm">
+        <div class="col">
+          <div class="text-caption text-grey-7" v-if="form.amount > 0 || selectedPlayers.length">
+            <span v-if="form.amount > 0" class="text-weight-medium">
+              {{ form.amount }} {{ $t('cashbox.currency') }}
+            </span>
+            <span v-if="form.amount > 0 && form.reason"> · {{ form.reason }}</span>
+            <span v-if="selectedPlayers.length"> · {{ selectedPlayers.length }} {{ $t('cashbox.fines.selectPlayers').toLowerCase() }}</span>
+          </div>
+        </div>
+        <div class="col-auto row q-gutter-sm">
+          <q-btn flat :label="$t('common.cancel')" v-close-popup no-caps />
+          <q-btn
+            color="negative"
+            :label="$t('cashbox.fines.addFine')"
+            no-caps
+            unelevated
+            :disable="!isValid"
+            @click="submit"
+          />
+        </div>
+      </q-card-section>
     </q-card>
   </q-dialog>
 </template>
 
 <script setup>
 import { ref, computed, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
-
-const { t } = useI18n()
 
 const props = defineProps({
   modelValue: { type: Boolean, required: true },
@@ -240,3 +270,56 @@ watch(() => props.modelValue, (val) => {
   if (!val) resetForm()
 })
 </script>
+
+<style scoped>
+.add-fine-card {
+  border-radius: var(--card-radius);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: calc(100vw - 100px);
+  height: calc(100vh - 100px);
+  max-width: 900px;
+  max-height: 800px;
+}
+
+.add-fine-header {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 12px 16px;
+  flex-shrink: 0;
+}
+
+.add-fine-body {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--app-bg);
+}
+
+.add-fine-footer {
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  flex-shrink: 0;
+}
+
+.player-list-scroll {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: white;
+}
+
+@media (max-width: 700px) {
+  .add-fine-card {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 32px);
+    max-width: none;
+    max-height: none;
+  }
+
+  .player-list-scroll {
+    max-height: 200px;
+  }
+}
+</style>
