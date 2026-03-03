@@ -425,15 +425,18 @@ onUnmounted(() => {
   .notification-popup {
     position: fixed;
     top: 50px;
-    left: 4px;
-    right: 4px;
+    left: 0;
+    right: 0;
     min-width: unset;
-    width: auto;
-    border-radius: 8px;
+    width: 100%;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
   }
 
   .notifications-panel {
     width: 100%;
+    max-width: 100%;
   }
 }
 </style>

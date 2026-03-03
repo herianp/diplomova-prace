@@ -63,6 +63,7 @@ v1.1 decisions:
 
 - Phase 14 added: Rate Limiting & User Quotas — Admin-configurable limits for user actions to prevent bot abuse and spam
 - Phase 20 added: Fix Notification Dropdown Mobile — Fix notification dropdown rendering outside viewport on mobile view
+- Phase 21 added: Notifications Page Mobile UX — Improve /notifications page UI/UX for mobile view
 
 ### Pending Todos
 
