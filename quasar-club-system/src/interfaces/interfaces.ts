@@ -12,7 +12,6 @@ export enum SurveyStatus {
 
 export enum FineRuleTrigger {
   NO_ATTENDANCE = 'no_attendance',
-  VOTED_YES_BUT_ABSENT = 'voted_yes_but_absent',
   UNVOTED = 'unvoted'
 }
 
@@ -52,6 +51,7 @@ export interface ITeam {
 
 export interface ITeamSettings {
   chatEnabled: boolean
+  votingCutoffHours: number | null
   address: {
     name: string
     latitude: number
@@ -226,7 +226,7 @@ export interface IFineRule {
   name: string
   amount: number
   triggerType: FineRuleTrigger
-  surveyType?: SurveyTypes | null
+  surveyTypes?: SurveyTypes[] | null
   active: boolean
   createdBy: string
   createdAt: Date
@@ -241,6 +241,15 @@ export interface IFine {
   ruleId?: string
   surveyId?: string
   surveyTitle?: string
+  createdBy: string
+  createdAt: Date
+}
+
+export interface IFineTemplate {
+  id?: string
+  name: string
+  amount: number
+  category: string
   createdBy: string
   createdAt: Date
 }

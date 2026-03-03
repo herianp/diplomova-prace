@@ -1,17 +1,36 @@
 <template>
   <div class="row items-center justify-center q-gutter-sm q-mt-sm">
+    <!-- Show voting closed chip (replaces buttons for non-power-users) -->
+    <q-chip
+      v-if="votingClosed && votingBlocked"
+      color="warning"
+      text-color="dark"
+      :label="$t('survey.votingClosed')"
+      icon="lock_clock"
+    />
+
     <!-- Show expired message if disabled -->
     <q-chip
-      v-if="disabled"
+      v-else-if="disabled"
       color="grey-6"
       text-color="white"
       :label="$t('survey.expired')"
       icon="schedule"
     />
-    
+
     <!-- Normal action buttons when not disabled -->
     <template v-else>
-      <!-- ⚙️ Settings button -->
+      <!-- Voting closed info for power users (shown alongside buttons) -->
+      <q-chip
+        v-if="votingClosed && !votingBlocked"
+        color="warning"
+        text-color="dark"
+        :label="$t('survey.votingClosed')"
+        icon="lock_clock"
+        size="sm"
+      />
+
+      <!-- Settings button -->
       <q-btn
         v-if="isPowerUser"
         round
@@ -26,7 +45,7 @@
         <q-tooltip>{{ $t('survey.actions.settings') }}</q-tooltip>
       </q-btn>
 
-      <!-- 👍 Yes -->
+      <!-- Yes -->
       <q-btn
         unelevated
         rounded
@@ -40,7 +59,7 @@
         <q-tooltip>{{ $t('survey.actions.voteYes') }}</q-tooltip>
       </q-btn>
 
-      <!-- 👎 No -->
+      <!-- No -->
       <q-btn
         unelevated
         rounded
@@ -54,6 +73,12 @@
         <q-tooltip>{{ $t('survey.actions.voteNo') }}</q-tooltip>
       </q-btn>
     </template>
+
+    <!-- Voting closes soon warning -->
+    <div v-if="votingClosesIn && !disabled && !votingClosed" class="text-caption text-warning q-mt-xs">
+      <q-icon name="schedule" size="xs" class="q-mr-xs" />
+      {{ $t('survey.votingClosesIn', { hours: votingClosesIn }) }}
+    </div>
   </div>
 </template>
 
@@ -65,6 +90,18 @@ defineProps({
   disabled: {
     type: Boolean,
     default: false
+  },
+  votingClosed: {
+    type: Boolean,
+    default: false
+  },
+  votingBlocked: {
+    type: Boolean,
+    default: false
+  },
+  votingClosesIn: {
+    type: Number,
+    default: null
   }
 })
 defineEmits(['vote', 'open-settings'])

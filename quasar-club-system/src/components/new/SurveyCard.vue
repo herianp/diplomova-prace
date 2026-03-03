@@ -44,7 +44,10 @@
             :no-active="isSurveyActive() && !isPositiveVote()"
             :is-power-user="isPowerUser && !isExpired"
             :disabled="isExpired && surveyStatus !== 'awaiting_verification'"
-            @vote="(val) => !isExpired && addSurveyVote(survey.id, val)"
+            :voting-closed="votingClosed"
+            :voting-blocked="votingBlocked"
+            :voting-closes-in="votingClosesIn"
+            @vote="(val) => !isExpired && !votingBlocked && addSurveyVote(survey.id, val)"
             @open-settings="showModal = true"
           />
         </div>
@@ -83,7 +86,10 @@
             :no-active="isSurveyActive() && !isPositiveVote()"
             :is-power-user="isPowerUser && !isExpired"
             :disabled="isExpired && surveyStatus !== 'awaiting_verification'"
-            @vote="(val) => !isExpired && addSurveyVote(survey.id, val)"
+            :voting-closed="votingClosed"
+            :voting-blocked="votingBlocked"
+            :voting-closes-in="votingClosesIn"
+            @vote="(val) => !isExpired && !votingBlocked && addSurveyVote(survey.id, val)"
             @open-settings="showModal = true"
           />
         </div>
@@ -149,7 +155,7 @@ import SurveyEditModal from '@/components/survey/SurveyEditModal.vue'
 import { useI18n } from 'vue-i18n'
 import SurveyTag from '@/components/SurveyTag.vue'
 import { useRouter } from 'vue-router'
-import { getSurveyStatus, getSurveyStatusDisplay, canModifyVotes, getSurveyDisplayTitle } from '@/utils/surveyStatusUtils'
+import { getSurveyStatus, getSurveyStatusDisplay, canModifyVotes, getSurveyDisplayTitle, isVotingClosed as checkVotingClosed, getTimeUntilVotingCloses } from '@/utils/surveyStatusUtils'
 import { SurveyStatus } from '@/interfaces/interfaces'
 import { useWeatherService } from '@/composable/useWeatherService'
 
@@ -191,6 +197,14 @@ const surveyStatus = computed(() => getSurveyStatus(props.survey, isPowerUser.va
 const surveyStatusDisplay = computed(() => getSurveyStatusDisplay(props.survey, isPowerUser.value))
 const canModify = computed(() => canModifyVotes(props.survey, isPowerUser.value))
 
+// Check if voting cutoff has passed (based on team settings)
+const votingCutoffHours = computed(() => teamStore.currentTeamSettings?.votingCutoffHours ?? null)
+// Display state — visible to everyone (including power users)
+const votingClosed = computed(() => checkVotingClosed(props.survey, votingCutoffHours.value))
+const votingClosesIn = computed(() => getTimeUntilVotingCloses(props.survey, votingCutoffHours.value))
+// Voting block — power users can still vote after cutoff
+const votingBlocked = computed(() => !isPowerUser.value && votingClosed.value)
+
 // Check if survey is expired (older than current time)
 const isExpired = computed(() => {
   const now = DateTime.now()
@@ -200,6 +214,7 @@ const isExpired = computed(() => {
 
 // Dynamic background class for survey status
 const surveyBackgroundClass = computed(() => {
+  if (votingClosed.value) return 'survey-closed' // Grey background when voting is closed
   switch (surveyStatus.value) {
     case SurveyStatus.AWAITING_VERIFICATION:
       return 'survey-awaiting-verification'
@@ -220,7 +235,7 @@ function isPositiveVote() {
 }
 
 function addSurveyVote(surveyId, vote) {
-  if (isExpired.value || !user.value?.uid) {
+  if (isExpired.value || votingBlocked.value || !user.value?.uid) {
     return
   }
   voteOnSurvey(surveyId, user.value.uid, vote)
@@ -239,19 +254,19 @@ const handleSurveyDeleted = () => {
 }
 </script>
 
-<style scoped>
-:deep(.survey-active) {
+<style>
+.survey-active {
   background-color: #e8f5e8 !important;
   border-left: 4px solid #4caf50 !important;
 }
 
-:deep(.survey-awaiting-verification) {
+.survey-awaiting-verification {
   background-color: #fff3e0 !important;
   border-left: 6px solid #ff6f00 !important;
   box-shadow: 0 2px 8px rgba(255, 111, 0, 0.2) !important;
 }
 
-:deep(.survey-closed) {
+.survey-closed {
   background-color: #f5f5f5 !important;
   border-left: 4px solid #9e9e9e !important;
 }

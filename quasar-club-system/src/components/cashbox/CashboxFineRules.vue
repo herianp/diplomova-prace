@@ -44,13 +44,16 @@
             </div>
             <div class="col-6 col-sm-2">
               <q-select
-                v-model="newRule.surveyType"
+                v-model="newRule.surveyTypes"
                 :options="surveyTypeOptions"
                 :label="$t('cashbox.rules.surveyType')"
                 emit-value
                 map-options
+                multiple
+                use-chips
                 outlined
                 dense
+                :display-value="newRule.surveyTypes?.length ? undefined : $t('cashbox.rules.allTypes')"
               />
             </div>
             <div class="col-6 col-sm-1 flex items-center">
@@ -82,8 +85,8 @@
               </q-item-label>
               <q-item-label caption>
                 {{ getTriggerLabel(rule.triggerType) }}
-                <template v-if="rule.surveyType">
-                   &middot; {{ getSurveyTypeLabel(rule.surveyType) }}
+                <template v-if="rule.surveyTypes?.length">
+                   &middot; {{ rule.surveyTypes.map(t => getSurveyTypeLabel(t)).join(', ') }}
                 </template>
               </q-item-label>
             </q-item-section>
@@ -132,22 +135,21 @@ const newRule = ref({
   name: '',
   amount: null,
   triggerType: FineRuleTrigger.NO_ATTENDANCE,
-  surveyType: null,
+  surveyTypes: [],
 })
 
 const triggerOptions = computed(() => [
   { label: t('cashbox.rules.noAttendance'), value: FineRuleTrigger.NO_ATTENDANCE },
-  { label: t('cashbox.rules.votedYesButAbsent'), value: FineRuleTrigger.VOTED_YES_BUT_ABSENT },
+
   { label: t('cashbox.rules.unvoted'), value: FineRuleTrigger.UNVOTED },
 ])
 
-const surveyTypeOptions = computed(() => [
-  { label: t('cashbox.rules.allTypes'), value: null },
-  ...Object.values(SurveyTypes).map((type) => ({
+const surveyTypeOptions = computed(() =>
+  Object.values(SurveyTypes).map((type) => ({
     label: t(`survey.type.${type}`),
     value: type,
-  })),
-])
+  }))
+)
 
 const isNewRuleValid = computed(() =>
   newRule.value.name.trim() && newRule.value.amount > 0 && newRule.value.triggerType
@@ -159,10 +161,10 @@ const addRule = () => {
     name: newRule.value.name.trim(),
     amount: newRule.value.amount,
     triggerType: newRule.value.triggerType,
-    surveyType: newRule.value.surveyType,
+    surveyTypes: newRule.value.surveyTypes.length > 0 ? newRule.value.surveyTypes : null,
     active: true,
   })
-  newRule.value = { name: '', amount: null, triggerType: FineRuleTrigger.NO_ATTENDANCE, surveyType: null }
+  newRule.value = { name: '', amount: null, triggerType: FineRuleTrigger.NO_ATTENDANCE, surveyTypes: [] }
 }
 
 const toggleRule = (rule) => {

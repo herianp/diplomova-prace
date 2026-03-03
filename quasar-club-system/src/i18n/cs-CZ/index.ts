@@ -31,6 +31,8 @@ export default {
     create: "Vytvořit anketu",
     update: "Upravit anketu",
     expired: "Ukončeno",
+    votingClosed: "Hlasování uzavřeno",
+    votingClosesIn: "Hlasování se uzavře za {hours}h",
     date: "Datum",
     description: "Popis",
     noDescription: "Nebyl zadán žádný popis",
@@ -191,6 +193,10 @@ export default {
         title: "Nastavení týmu",
         chatEnabled: "Povolit chat",
         chatEnabledHint: "Když je vypnuto, nikdo nemůže odesílat zprávy",
+        votingCutoff: "Uzávěrka hlasování",
+        votingCutoffHint: "Automaticky uzavřít hlasování X hodin před začátkem ankety. Hráči nebudou moci hlasovat po uzávěrce.",
+        cutoffDisabled: "Vypnuto (hlasovat do začátku)",
+        cutoffHours: "{count} hodin před",
         address: "Adresa týmu",
         addressPlaceholder: "Zadejte adresu...",
         searchAddress: "Vyhledat adresu",
@@ -337,7 +343,9 @@ export default {
     fillAllFields: "Prosím vyplňte všechna pole",
     retry: "Zkusit znovu",
     retrySuccess: "Operace proběhla úspěšně",
-    dismiss: "Zavřít"
+    dismiss: "Zavřít",
+    selectAll: "Vybrat vše",
+    deselectAll: "Zrušit výběr"
   },
   notifications: {
     title: "Oznámení",
@@ -672,7 +680,9 @@ export default {
       selectPlayer: "Vyberte hráče",
       amountRequired: "Částka je povinná",
       reasonRequired: "Důvod je povinný",
-      playerRequired: "Hráč je povinný"
+      playerRequired: "Hráč je povinný",
+      selectPlayers: "Vyberte hráče",
+      batchAddSuccess: "{count} pokut úspěšně přidáno"
     },
     payments: {
       title: "Platby",
@@ -702,7 +712,7 @@ export default {
       active: "Aktivní",
       inactive: "Neaktivní",
       noAttendance: "Neúčast",
-      votedYesButAbsent: "Potvrdil ale nepřišel",
+
       unvoted: "Nehlasoval",
       addSuccess: "Pravidlo bylo přidáno",
       addError: "Nepodařilo se přidat pravidlo",
@@ -722,7 +732,8 @@ export default {
     },
     currency: "Kč",
     autoFines: {
-      generated: "{count} automatických pokut vygenerováno"
+      generated: "{count} automatických pokut vygenerováno",
+      replaced: "{count} automatických pokut vygenerováno (nahrazeno {previous} předchozích)"
     },
     clear: {
       button: "Vyčistit pokladnu",
@@ -740,6 +751,19 @@ export default {
       clearedBy: "Vyčistil",
       noHistory: "Zatím žádná historie",
       viewDetails: "Zobrazit detaily"
+    },
+    templates: {
+      predefined: "Předdefinované",
+      custom: "Vlastní",
+      manage: "Spravovat šablony",
+      noTemplates: "Zatím žádné předdefinované pokuty. Přidejte níže.",
+      name: "Název pokuty",
+      amount: "Částka",
+      category: "Kategorie",
+      addSuccess: "Šablona přidána",
+      addError: "Nepodařilo se přidat šablonu",
+      deleteSuccess: "Šablona smazána",
+      deleteError: "Nepodařilo se smazat šablonu"
     }
   },
   weather: {

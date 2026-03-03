@@ -1,11 +1,16 @@
 import { useCashboxFirebase } from '@/services/cashboxFirebase'
-import { IFine, IFineRule, IPayment, IPlayerBalance, IVote, ICashboxHistoryEntry, FineRuleTrigger } from '@/interfaces/interfaces'
+import { IFine, IFineRule, IFineTemplate, IPayment, IPlayerBalance, IVote, ICashboxHistoryEntry, FineRuleTrigger } from '@/interfaces/interfaces'
 import { SurveyTypes } from '@/enums/SurveyTypes'
-import { Unsubscribe } from 'firebase/firestore'
+import { Unsubscribe, writeBatch, doc as firestoreDoc, collection } from 'firebase/firestore'
+import { db } from '@/firebase/config'
 import { notifyError } from '@/services/notificationService'
 import { FirestoreError } from '@/errors'
 import { useAuthStore } from '@/stores/authStore'
 import { useRateLimiter } from '@/composable/useRateLimiter'
+import { useAuditLogFirebase } from '@/services/auditLogFirebase'
+import { createLogger } from 'src/utils/logger'
+
+const log = createLogger('cashboxUseCases')
 
 export function useCashboxUseCases() {
   const cashboxFirebase = useCashboxFirebase()
@@ -192,15 +197,9 @@ export function useCashboxUseCases() {
 
   /**
    * Generate auto-fines based on active fine rules after survey verification.
+   * Idempotent: deletes existing auto-fines for the survey, then creates fresh ones in a single batch.
    *
-   * @param teamId - The team ID
-   * @param surveyId - The survey being verified
-   * @param surveyTitle - Survey title for fine description
-   * @param surveyType - Survey type (training/match) for rule filtering
-   * @param originalVotes - Votes BEFORE verification (from the survey)
-   * @param verifiedVotes - Votes AFTER verification (modified by power user)
-   * @param teamMemberIds - All team member UIDs
-   * @param createdBy - UID of the power user verifying
+   * @returns { created: number, deleted: number } — counts for notification
    */
   const generateAutoFines = async (
     teamId: string,
@@ -211,13 +210,22 @@ export function useCashboxUseCases() {
     verifiedVotes: IVote[],
     teamMemberIds: string[],
     createdBy: string
-  ): Promise<number> => {
-    // Load active fine rules
+  ): Promise<{ created: number; deleted: number }> => {
+    const { writeAuditLog } = useAuditLogFirebase()
+
+    // 1. Query existing auto-fines for this survey
+    const existingAutoFines = await cashboxFirebase.getAutoFinesForSurvey(teamId, surveyId)
+    const deletedCount = existingAutoFines.length
+
+    // 2. Load active fine rules
     const allRules = await cashboxFirebase.loadFineRules(teamId)
     const activeRules = allRules.filter((r) => r.active)
 
-    if (activeRules.length === 0) return 0
+    if (activeRules.length === 0 && deletedCount === 0) {
+      return { created: 0, deleted: 0 }
+    }
 
+    // 3. Calculate which fines should exist
     const finesToCreate: Omit<IFine, 'id'>[] = []
 
     for (const memberId of teamMemberIds) {
@@ -225,24 +233,15 @@ export function useCashboxUseCases() {
       const verifiedVote = verifiedVotes.find((v) => v.userUid === memberId)
 
       for (const rule of activeRules) {
-        // Check if rule applies to this survey type
-        if (rule.surveyType && rule.surveyType !== surveyType) continue
+        if (rule.surveyTypes && rule.surveyTypes.length > 0 && !rule.surveyTypes.includes(surveyType)) continue
 
         let shouldFine = false
 
         switch (rule.triggerType) {
           case FineRuleTrigger.NO_ATTENDANCE:
-            // Player voted No or was marked No after verification
             shouldFine = verifiedVote?.vote === false
             break
-
-          case FineRuleTrigger.VOTED_YES_BUT_ABSENT:
-            // Player originally voted Yes but power user changed to No/removed
-            shouldFine = originalVote?.vote === true && (!verifiedVote || verifiedVote.vote === false)
-            break
-
           case FineRuleTrigger.UNVOTED:
-            // Player didn't vote at all (no verified vote entry)
             shouldFine = !verifiedVote
             break
         }
@@ -263,11 +262,49 @@ export function useCashboxUseCases() {
       }
     }
 
-    if (finesToCreate.length > 0) {
-      await cashboxFirebase.bulkAddFines(teamId, finesToCreate)
+    // 4. Atomic batch: delete old + create new in single commit
+    const totalOps = deletedCount + finesToCreate.length
+    if (totalOps > 500) {
+      log.error('Auto-fine batch exceeds 500 operations', { teamId, surveyId, deletedCount, createCount: finesToCreate.length })
+      throw new Error(`Auto-fine batch too large: ${totalOps} operations (max 500)`)
     }
 
-    return finesToCreate.length
+    if (totalOps > 0) {
+      const batch = writeBatch(db)
+      const finesRef = collection(firestoreDoc(db, 'teams', teamId), 'fines')
+
+      // Delete old auto-fines
+      for (const docSnap of existingAutoFines) {
+        batch.delete(docSnap.ref)
+      }
+
+      // Create new auto-fines
+      for (const fine of finesToCreate) {
+        const newDocRef = firestoreDoc(finesRef)
+        batch.set(newDocRef, fine)
+      }
+
+      await batch.commit()
+    }
+
+    // 5. Audit logging — ONE summary entry (non-blocking)
+    if (deletedCount > 0 || finesToCreate.length > 0) {
+      const actorDisplayName = authStore.user?.displayName || authStore.user?.email || 'Unknown'
+      void writeAuditLog({
+        teamId,
+        operation: 'fine.create',
+        actorUid: createdBy,
+        actorDisplayName,
+        timestamp: new Date(),
+        entityId: surveyId,
+        entityType: 'fine',
+        after: { surveyTitle, created: finesToCreate.length, deleted: deletedCount },
+      })
+
+      log.info('Auto-fines recalculated', { teamId, surveyId, deleted: deletedCount, created: finesToCreate.length })
+    }
+
+    return { created: finesToCreate.length, deleted: deletedCount }
   }
 
   const deletePayment = async (teamId: string, paymentId: string): Promise<void> => {
@@ -281,6 +318,73 @@ export function useCashboxUseCases() {
         notifyError('errors.unexpected')
       }
       throw error
+    }
+  }
+
+  // ============================================================
+  // Fine Templates
+  // ============================================================
+
+  const listenToFineTemplates = (teamId: string, callback: (templates: IFineTemplate[]) => void): Unsubscribe => {
+    return cashboxFirebase.listenToFineTemplates(teamId, callback)
+  }
+
+  const addFineTemplate = async (teamId: string, template: Omit<IFineTemplate, 'id'>): Promise<void> => {
+    try {
+      return await cashboxFirebase.addFineTemplate(teamId, template)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
+  }
+
+  const deleteFineTemplate = async (teamId: string, templateId: string): Promise<void> => {
+    try {
+      return await cashboxFirebase.deleteFineTemplate(teamId, templateId)
+    } catch (error: unknown) {
+      if (error instanceof FirestoreError) {
+        notifyError(error.message)
+      } else {
+        notifyError('errors.unexpected')
+      }
+      throw error
+    }
+  }
+
+  const addBatchFines = async (
+    teamId: string,
+    playerIds: string[],
+    amount: number,
+    reason: string,
+    createdBy: string
+  ): Promise<void> => {
+    const fines: Omit<IFine, 'id'>[] = playerIds.map((playerId) => ({
+      playerId,
+      amount,
+      reason,
+      source: 'manual' as const,
+      createdBy,
+      createdAt: new Date(),
+    }))
+    await cashboxFirebase.bulkAddFines(teamId, fines)
+
+    // Audit log — one summary entry for the batch (non-blocking)
+    if (authStore.user) {
+      const { writeAuditLog } = useAuditLogFirebase()
+      void writeAuditLog({
+        teamId,
+        operation: 'fine.create',
+        actorUid: createdBy,
+        actorDisplayName: authStore.user.displayName || authStore.user.email || 'Unknown',
+        timestamp: new Date(),
+        entityId: teamId,
+        entityType: 'fine',
+        after: { type: 'manual-batch', count: playerIds.length, amount, reason },
+      })
     }
   }
 
@@ -457,6 +561,11 @@ export function useCashboxUseCases() {
     // Payments
     recordPayment,
     deletePayment,
+    // Fine Templates
+    listenToFineTemplates,
+    addFineTemplate,
+    deleteFineTemplate,
+    addBatchFines,
     // Auto-fines
     generateAutoFines,
     // Calculations

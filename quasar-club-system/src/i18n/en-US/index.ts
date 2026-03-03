@@ -31,6 +31,8 @@ export default {
     create: "Create Survey",
     update: "Edit survey",
     expired: "Expired",
+    votingClosed: "Voting closed",
+    votingClosesIn: "Voting closes in {hours}h",
     date: "Date",
     description: "Description",
     noDescription: "No description provided",
@@ -191,6 +193,10 @@ export default {
         title: "Team Settings",
         chatEnabled: "Enable Chat",
         chatEnabledHint: "When disabled, no one can send messages",
+        votingCutoff: "Voting cutoff",
+        votingCutoffHint: "Automatically close voting X hours before the survey time. Players won't be able to vote after the cutoff.",
+        cutoffDisabled: "Disabled (vote until survey time)",
+        cutoffHours: "{count} hours before",
         address: "Team Address",
         addressPlaceholder: "Enter address...",
         searchAddress: "Search Address",
@@ -337,7 +343,9 @@ export default {
     fillAllFields: "Please fill in all fields",
     retry: "Retry",
     retrySuccess: "Operation completed successfully",
-    dismiss: "Dismiss"
+    dismiss: "Dismiss",
+    selectAll: "Select all",
+    deselectAll: "Deselect all"
   },
   notifications: {
     title: "Notifications",
@@ -672,7 +680,9 @@ export default {
       selectPlayer: "Select a player",
       amountRequired: "Amount is required",
       reasonRequired: "Reason is required",
-      playerRequired: "Player is required"
+      playerRequired: "Player is required",
+      selectPlayers: "Select players",
+      batchAddSuccess: "{count} fines added successfully"
     },
     payments: {
       title: "Payments",
@@ -702,7 +712,7 @@ export default {
       active: "Active",
       inactive: "Inactive",
       noAttendance: "No Attendance",
-      votedYesButAbsent: "Confirmed but absent",
+
       unvoted: "Did not vote",
       addSuccess: "Rule added successfully",
       addError: "Failed to add rule",
@@ -722,7 +732,8 @@ export default {
     },
     currency: "CZK",
     autoFines: {
-      generated: "{count} auto-fine(s) generated"
+      generated: "{count} auto-fine(s) generated",
+      replaced: "{count} auto-fine(s) generated (replaced {previous} previous)"
     },
     clear: {
       button: "Clear Cashbox",
@@ -740,6 +751,19 @@ export default {
       clearedBy: "Cleared by",
       noHistory: "No history yet",
       viewDetails: "View Details"
+    },
+    templates: {
+      predefined: "Predefined",
+      custom: "Custom",
+      manage: "Manage templates",
+      noTemplates: "No predefined fines yet. Add some below.",
+      name: "Fine name",
+      amount: "Amount",
+      category: "Category",
+      addSuccess: "Template added",
+      addError: "Failed to add template",
+      deleteSuccess: "Template deleted",
+      deleteError: "Failed to delete template"
     }
   },
   weather: {

@@ -305,6 +305,7 @@ export function useTeamFirebase() {
 
   const DEFAULT_TEAM_SETTINGS: ITeamSettings = {
     chatEnabled: true,
+    votingCutoffHours: null,
     address: {
       name: '',
       latitude: 50.08,

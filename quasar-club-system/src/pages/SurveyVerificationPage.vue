@@ -358,7 +358,7 @@ const saveSurvey = async () => {
     // Generate auto-fines based on fine rules
     if (currentTeam.value?.id) {
       try {
-        const finesGenerated = await generateAutoFines(
+        const result = await generateAutoFines(
           currentTeam.value.id,
           survey.value.id,
           survey.value.title || survey.value.type,
@@ -368,10 +368,13 @@ const saveSurvey = async () => {
           currentTeam.value.members,
           currentUser.value.uid
         )
-        if (finesGenerated > 0) {
+        if (result.created > 0) {
+          const message = result.deleted > 0
+            ? t('cashbox.autoFines.replaced', { count: result.created, previous: result.deleted })
+            : t('cashbox.autoFines.generated', { count: result.created })
           $q.notify({
             type: 'info',
-            message: t('cashbox.autoFines.generated', { count: finesGenerated }),
+            message,
             icon: 'gavel'
           })
         }

@@ -28,6 +28,31 @@ vi.mock('@/composable/useRateLimiter', () => ({
   })
 }))
 
+const mockBatchCommit = vi.fn().mockResolvedValue(undefined)
+const mockBatchSet = vi.fn()
+const mockBatchDelete = vi.fn()
+
+vi.mock('firebase/firestore', async () => {
+  const actual = await vi.importActual('firebase/firestore')
+  return {
+    ...actual,
+    writeBatch: vi.fn(() => ({
+      set: mockBatchSet,
+      delete: mockBatchDelete,
+      commit: mockBatchCommit,
+    })),
+    doc: vi.fn(() => ({ id: 'mock-doc-id' })),
+    collection: vi.fn(() => 'mock-collection-ref'),
+  }
+})
+
+vi.mock('@/services/auditLogFirebase', () => ({
+  useAuditLogFirebase: () => ({
+    writeAuditLog: vi.fn().mockResolvedValue(undefined),
+  })
+}))
+
+const mockGetAutoFinesForSurvey = vi.fn()
 const mockLoadFineRules = vi.fn()
 const mockBulkAddFines = vi.fn()
 const mockAddFineRule = vi.fn()
@@ -46,6 +71,7 @@ vi.mock('@/services/cashboxFirebase', () => ({
   useCashboxFirebase: () => ({
     loadFineRules: mockLoadFineRules,
     bulkAddFines: mockBulkAddFines,
+    getAutoFinesForSurvey: mockGetAutoFinesForSurvey,
     listenToFineRules: mockListenToFineRules,
     listenToFines: mockListenToFines,
     listenToPayments: mockListenToPayments,
@@ -82,7 +108,7 @@ const createRule = (overrides: Record<string, unknown> = {}) => ({
   amount: 50,
   triggerType: FineRuleTrigger.NO_ATTENDANCE,
   active: true,
-  surveyType: undefined,
+  surveyTypes: undefined,
   createdBy: 'admin-uid',
   createdAt: new Date(),
   ...overrides
@@ -688,7 +714,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
     vi.clearAllMocks()
-    mockBulkAddFines.mockResolvedValue(undefined)
+    mockGetAutoFinesForSurvey.mockResolvedValue([]) // no existing auto-fines (first verification)
   })
 
   // ===========================================================
@@ -696,30 +722,30 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
   // ===========================================================
 
   describe('edge cases — no active rules', () => {
-    it('returns 0 and does not call bulkAddFines when no rules exist', async () => {
+    it('returns 0 and does not call batch commit when no rules exist', async () => {
       mockLoadFineRules.mockResolvedValue([])
 
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType, [], [], ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(0)
-      expect(mockBulkAddFines).not.toHaveBeenCalled()
+      expect(result).toEqual({ created: 0, deleted: 0 })
+      expect(mockBatchCommit).not.toHaveBeenCalled()
     })
 
     it('filters out inactive rules and returns 0 when all rules are inactive', async () => {
       mockLoadFineRules.mockResolvedValue([createRule({ active: false })])
 
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType, [], [], ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(0)
-      expect(mockBulkAddFines).not.toHaveBeenCalled()
+      expect(result).toEqual({ created: 0, deleted: 0 })
+      expect(mockBatchCommit).not.toHaveBeenCalled()
     })
   })
 
@@ -730,67 +756,67 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
   describe('survey type filtering', () => {
     it('skips rule when rule surveyType does not match survey type', async () => {
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: SurveyTypes.Match, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: [SurveyTypes.Match], triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
       // Survey is Training, rule targets Match → should skip
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         SurveyTypes.Training,
         [], [{ userUid: 'player-1', vote: false }],
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(0)
-      expect(mockBulkAddFines).not.toHaveBeenCalled()
+      expect(result).toEqual({ created: 0, deleted: 0 })
+      expect(mockBatchCommit).not.toHaveBeenCalled()
     })
 
     it('applies rule when rule surveyType matches survey type', async () => {
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: SurveyTypes.Training, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: [SurveyTypes.Training], triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         SurveyTypes.Training,
         [], [{ userUid: 'player-1', vote: false }],
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(1)
+      expect(result).toEqual({ created: 1, deleted: 0 })
     })
 
     it('applies rule to all survey types when rule has no surveyType filter (undefined)', async () => {
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
       // Works for Training
-      const count1 = await generateAutoFines(
+      const result1 = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         SurveyTypes.Training,
         [], [{ userUid: 'player-1', vote: false }],
         ['player-1'], BASE_ARGS.createdBy
       )
-      expect(count1).toBe(1)
+      expect(result1).toEqual({ created: 1, deleted: 0 })
 
       vi.clearAllMocks()
-      mockBulkAddFines.mockResolvedValue(undefined)
+      mockGetAutoFinesForSurvey.mockResolvedValue([])
       mockLoadFineRules.mockResolvedValue([
-        createRule({ surveyType: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
+        createRule({ surveyTypes: undefined, triggerType: FineRuleTrigger.NO_ATTENDANCE })
       ])
 
       // Works for Match too
-      const count2 = await generateAutoFines(
+      const result2 = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         SurveyTypes.Match,
         [], [{ userUid: 'player-1', vote: false }],
         ['player-1'], BASE_ARGS.createdBy
       )
-      expect(count2).toBe(1)
+      expect(result2).toEqual({ created: 1, deleted: 0 })
     })
   })
 
@@ -807,31 +833,31 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
 
     it('creates a fine when verified vote is false (player did not attend)', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType, [], [{ userUid: 'player-1', vote: false }],
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(1)
-      expect(mockBulkAddFines).toHaveBeenCalledOnce()
+      expect(result).toEqual({ created: 1, deleted: 0 })
+      expect(mockBatchCommit).toHaveBeenCalledOnce()
     })
 
     it('does not create a fine when verified vote is true (player attended)', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType, [], [{ userUid: 'player-1', vote: true }],
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(0)
-      expect(mockBulkAddFines).not.toHaveBeenCalled()
+      expect(result).toEqual({ created: 0, deleted: 0 })
+      expect(mockBatchCommit).not.toHaveBeenCalled()
     })
 
     it('creates exactly 1 fine when only 1 of 3 players has vote=false', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [],
@@ -843,73 +869,10 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1', 'player-2', 'player-3'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(1)
+      expect(result).toEqual({ created: 1, deleted: 0 })
     })
   })
 
-  // ===========================================================
-  // FineRuleTrigger.VOTED_YES_BUT_ABSENT
-  // ===========================================================
-
-  describe('FineRuleTrigger.VOTED_YES_BUT_ABSENT', () => {
-    beforeEach(() => {
-      mockLoadFineRules.mockResolvedValue([
-        createRule({ triggerType: FineRuleTrigger.VOTED_YES_BUT_ABSENT })
-      ])
-    })
-
-    it('creates fine when original vote=true but verified vote=false (absent despite yes)', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
-        [{ userUid: 'player-1', vote: false }],
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(count).toBe(1)
-    })
-
-    it('creates fine when original vote=true but no verified vote entry', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
-        [], // no verified vote for player-1
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(count).toBe(1)
-    })
-
-    it('does not create fine when original vote=false (player never voted yes)', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: false }],
-        [{ userUid: 'player-1', vote: false }],
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(count).toBe(0)
-    })
-
-    it('does not create fine when original vote=true and verified vote=true (attended)', async () => {
-      const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
-        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
-        BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
-        [{ userUid: 'player-1', vote: true }],
-        ['player-1'], BASE_ARGS.createdBy
-      )
-
-      expect(count).toBe(0)
-    })
-  })
 
   // ===========================================================
   // FineRuleTrigger.UNVOTED
@@ -924,7 +887,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
 
     it('creates fine when member has no verified vote entry (did not vote)', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [], // no original votes
@@ -932,12 +895,12 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(1)
+      expect(result).toEqual({ created: 1, deleted: 0 })
     })
 
     it('does not create fine when member has a verified vote (true)', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [],
@@ -945,12 +908,12 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(0)
+      expect(result).toEqual({ created: 0, deleted: 0 })
     })
 
     it('does not create fine when member has a verified vote (false)', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [],
@@ -958,12 +921,12 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(0)
+      expect(result).toEqual({ created: 0, deleted: 0 })
     })
 
     it('creates fines for all members when verifiedVotes is empty', async () => {
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [], // empty original votes
@@ -971,7 +934,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1', 'player-2', 'player-3'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(3)
+      expect(result).toEqual({ created: 3, deleted: 0 })
     })
   })
 
@@ -993,8 +956,8 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      const fines = mockBulkAddFines.mock.calls[0][1]
-      expect(fines[0].reason).toBe('Absence Fine — Training Wed')
+      const fine = mockBatchSet.mock.calls[0][1]
+      expect(fine.reason).toBe('Absence Fine — Training Wed')
     })
 
     it('creates fine with source: "auto"', async () => {
@@ -1010,8 +973,8 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1'], BASE_ARGS.createdBy
       )
 
-      const fines = mockBulkAddFines.mock.calls[0][1]
-      expect(fines[0].source).toBe('auto')
+      const fine = mockBatchSet.mock.calls[0][1]
+      expect(fine.source).toBe('auto')
     })
 
     it('returns the correct count of created fines', async () => {
@@ -1020,7 +983,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [],
@@ -1033,7 +996,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
 
       // player-3 has no verified vote → UNVOTED not triggered, NO_ATTENDANCE needs vote=false
       // player-1 and player-2 voted false → fined
-      expect(count).toBe(2)
+      expect(result).toEqual({ created: 2, deleted: 0 })
     })
   })
 
@@ -1054,7 +1017,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
       // player-1: verified vote=false → NO_ATTENDANCE fires (1 fine)
       // player-2: no verified vote → UNVOTED fires (1 fine)
       // player-3: verified vote=true → neither rule fires
-      const count = await generateAutoFines(
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
         [],
@@ -1065,30 +1028,30 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
         ['player-1', 'player-2', 'player-3'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(2)
-      expect(mockBulkAddFines).toHaveBeenCalledOnce()
-      const fines = mockBulkAddFines.mock.calls[0][1]
-      expect(fines).toHaveLength(2)
+      expect(result).toEqual({ created: 2, deleted: 0 })
+      expect(mockBatchCommit).toHaveBeenCalledOnce()
+      expect(mockBatchSet).toHaveBeenCalledTimes(2)
     })
 
     it('generates fines for each rule-member combination that matches', async () => {
-      // Both NO_ATTENDANCE and VOTED_YES_BUT_ABSENT active
+      // Both NO_ATTENDANCE and UNVOTED active
       mockLoadFineRules.mockResolvedValue([
         createRule({ id: 'rule-1', triggerType: FineRuleTrigger.NO_ATTENDANCE }),
-        createRule({ id: 'rule-2', triggerType: FineRuleTrigger.VOTED_YES_BUT_ABSENT })
+        createRule({ id: 'rule-2', triggerType: FineRuleTrigger.UNVOTED })
       ])
 
       const { generateAutoFines } = useCashboxUseCases()
-      // player-1: originally yes, verified no → VOTED_YES_BUT_ABSENT fires + NO_ATTENDANCE fires (2 fines)
-      const count = await generateAutoFines(
+      // player-1: verified vote=false → NO_ATTENDANCE fires (1 fine), has verified vote so UNVOTED doesn't fire
+      // player-2: no verified vote → UNVOTED fires (1 fine)
+      const result = await generateAutoFines(
         BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
         BASE_ARGS.surveyType,
-        [{ userUid: 'player-1', vote: true }],
+        [],
         [{ userUid: 'player-1', vote: false }],
-        ['player-1'], BASE_ARGS.createdBy
+        ['player-1', 'player-2'], BASE_ARGS.createdBy
       )
 
-      expect(count).toBe(2)
+      expect(result).toEqual({ created: 2, deleted: 0 })
     })
   })
 
@@ -1096,7 +1059,7 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
   // bulkAddFines not called when no fines generated
   // ===========================================================
 
-  it('does not call bulkAddFines when no fines are generated', async () => {
+  it('does not call batch commit when no fines are generated', async () => {
     mockLoadFineRules.mockResolvedValue([
       createRule({ triggerType: FineRuleTrigger.NO_ATTENDANCE })
     ])
@@ -1110,6 +1073,54 @@ describe('useCashboxUseCases - generateAutoFines (TST-05)', () => {
       ['player-1'], BASE_ARGS.createdBy
     )
 
-    expect(mockBulkAddFines).not.toHaveBeenCalled()
+    expect(mockBatchCommit).not.toHaveBeenCalled()
+  })
+
+  // ===========================================================
+  // Idempotent re-verification
+  // ===========================================================
+
+  describe('idempotent re-verification', () => {
+    it('deletes existing auto-fines before creating new ones', async () => {
+      const existingFines = [
+        { ref: { id: 'fine-1' }, id: 'fine-1', data: () => ({ amount: 100, reason: 'Old fine', surveyId: BASE_ARGS.surveyId, source: 'auto' }) },
+      ]
+      mockGetAutoFinesForSurvey.mockResolvedValue(existingFines)
+      mockLoadFineRules.mockResolvedValue([
+        createRule({ triggerType: FineRuleTrigger.NO_ATTENDANCE })
+      ])
+
+      const { generateAutoFines } = useCashboxUseCases()
+      const result = await generateAutoFines(
+        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
+        BASE_ARGS.surveyType,
+        [], [{ userUid: 'player-1', vote: false }],
+        ['player-1'], BASE_ARGS.createdBy
+      )
+
+      expect(result).toEqual({ created: 1, deleted: 1 })
+      expect(mockBatchDelete).toHaveBeenCalledOnce()
+      expect(mockBatchSet).toHaveBeenCalledOnce()
+      expect(mockBatchCommit).toHaveBeenCalledOnce()
+    })
+
+    it('returns deleted count when existing fines are removed', async () => {
+      const existingFines = [
+        { ref: { id: 'fine-1' }, id: 'fine-1', data: () => ({ amount: 100, reason: 'Old', surveyId: BASE_ARGS.surveyId, source: 'auto' }) },
+        { ref: { id: 'fine-2' }, id: 'fine-2', data: () => ({ amount: 50, reason: 'Old', surveyId: BASE_ARGS.surveyId, source: 'auto' }) },
+      ]
+      mockGetAutoFinesForSurvey.mockResolvedValue(existingFines)
+      mockLoadFineRules.mockResolvedValue([]) // no active rules → 0 created
+
+      const { generateAutoFines } = useCashboxUseCases()
+      const result = await generateAutoFines(
+        BASE_ARGS.teamId, BASE_ARGS.surveyId, BASE_ARGS.surveyTitle,
+        BASE_ARGS.surveyType, [], [], ['player-1'], BASE_ARGS.createdBy
+      )
+
+      expect(result).toEqual({ created: 0, deleted: 2 })
+      expect(mockBatchDelete).toHaveBeenCalledTimes(2)
+      expect(mockBatchSet).not.toHaveBeenCalled()
+    })
   })
 })
