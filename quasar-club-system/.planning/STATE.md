@@ -62,6 +62,7 @@ v1.1 decisions:
 ### Roadmap Evolution
 
 - Phase 14 added: Rate Limiting & User Quotas — Admin-configurable limits for user actions to prevent bot abuse and spam
+- Phase 20 added: Fix Notification Dropdown Mobile — Fix notification dropdown rendering outside viewport on mobile view
 
 ### Pending Todos
 

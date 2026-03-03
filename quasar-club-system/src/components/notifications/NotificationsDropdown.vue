@@ -22,7 +22,6 @@
     <div
       v-if="showDropdown"
       class="notification-popup"
-      style="position: absolute; top: 100%; right: 0; z-index: 9999; background: white; border: 1px solid #ccc; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); min-width: 400px;"
     >
       <div class="notifications-panel">
         <!-- Header -->
@@ -410,9 +409,31 @@ onUnmounted(() => {
   border-bottom: none;
 }
 
+.notification-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 9999;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 400px;
+}
+
 @media (max-width: 600px) {
+  .notification-popup {
+    position: fixed;
+    top: 50px;
+    left: 4px;
+    right: 4px;
+    min-width: unset;
+    width: auto;
+    border-radius: 8px;
+  }
+
   .notifications-panel {
-    width: 350px;
+    width: 100%;
   }
 }
 </style>
