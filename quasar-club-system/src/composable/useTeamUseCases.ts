@@ -28,7 +28,12 @@ export function useTeamUseCases() {
         if (!teamStore.currentTeam && teamsList.length > 0) {
           const savedTeamId = localStorage.getItem('selectedTeamId')
           const savedTeam = savedTeamId ? teamsList.find(t => t.id === savedTeamId) : null
-          teamStore.setCurrentTeam(savedTeam || teamsList[0])
+          const selectedTeam = savedTeam || teamsList[0]
+          teamStore.setCurrentTeam(selectedTeam)
+          // Load team settings so voting cutoff etc. are available immediately
+          if (selectedTeam.id) {
+            loadTeamSettings(selectedTeam.id)
+          }
         }
 
         // Set up join request listeners for all power-user teams

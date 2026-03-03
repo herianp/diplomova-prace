@@ -51,6 +51,7 @@ export interface ITeam {
 
 export interface ITeamSettings {
   chatEnabled: boolean
+  votingCutoffHours: number | null
   address: {
     name: string
     latitude: number

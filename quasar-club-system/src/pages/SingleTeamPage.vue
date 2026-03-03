@@ -58,6 +58,22 @@
               {{ $t('team.single.settings.chatEnabledHint') }}
             </div>
 
+            <!-- Voting Cutoff -->
+            <q-select
+              v-model="teamSettings.votingCutoffHours"
+              :options="votingCutoffOptions"
+              :label="$t('team.single.settings.votingCutoff')"
+              emit-value
+              map-options
+              outlined
+              dense
+              class="q-mb-xs"
+              style="max-width: 300px"
+            />
+            <div class="text-caption text-grey-6 q-ml-sm q-mb-md">
+              {{ $t('team.single.settings.votingCutoffHint') }}
+            </div>
+
             <!-- Address Section -->
             <div class="text-subtitle2 q-mb-sm">{{ $t('team.single.settings.address') }}</div>
             <div class="row q-gutter-sm q-mb-md">
@@ -256,6 +272,18 @@ const inviteForm = reactive({
   email: '',
   message: ''
 })
+
+// Voting cutoff options
+const votingCutoffOptions = computed(() => [
+  { label: t('team.single.settings.cutoffDisabled'), value: null },
+  { label: t('team.single.settings.cutoffHours', { count: 1 }), value: 1 },
+  { label: t('team.single.settings.cutoffHours', { count: 2 }), value: 2 },
+  { label: t('team.single.settings.cutoffHours', { count: 3 }), value: 3 },
+  { label: t('team.single.settings.cutoffHours', { count: 5 }), value: 5 },
+  { label: t('team.single.settings.cutoffHours', { count: 8 }), value: 8 },
+  { label: t('team.single.settings.cutoffHours', { count: 12 }), value: 12 },
+  { label: t('team.single.settings.cutoffHours', { count: 24 }), value: 24 },
+])
 
 // Computed
 const teamId = computed(() => route.params.teamId)

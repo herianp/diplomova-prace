@@ -53,6 +53,7 @@ import { useRouter } from 'vue-router'
 import { computed } from 'vue'
 import { useAuthComposable } from '@/composable/useAuthComposable.js'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { listenerRegistry } from '@/services/listenerRegistry'
 
 const teamStore = useTeamStore()
@@ -62,6 +63,7 @@ const userTeams = computed(() => teamStore.teams)
 const currentTeam = computed(() => teamStore.currentTeam)
 const { isCurrentUserPowerUser } = useAuthComposable()
 const { setSurveysListener } = useSurveyUseCases()
+const { loadTeamSettings } = useTeamUseCases()
 
 const selectTeam = (team) => {
   // Clean up all team-scoped listeners before switching
@@ -72,6 +74,10 @@ const selectTeam = (team) => {
   teamStore.currentTeam = team
   localStorage.setItem('selectedTeamId', team.id)
   setSurveysListener(team.id)
+  // Load team settings so voting cutoff etc. are available immediately
+  if (team.id) {
+    loadTeamSettings(team.id)
+  }
 }
 
 const manageCurrentTeam = () => {

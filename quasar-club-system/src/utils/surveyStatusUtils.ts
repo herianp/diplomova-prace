@@ -18,6 +18,47 @@ export const isSurveyExpired = (survey: ISurvey): boolean => {
 }
 
 /**
+ * Check if voting is closed for a survey based on the team's cutoff setting.
+ * Voting closes X hours before the survey time.
+ * Returns false if cutoff is not configured (null) or survey is already expired.
+ */
+export const isVotingClosed = (survey: ISurvey, cutoffHours: number | null): boolean => {
+  if (!cutoffHours || !survey.date || !survey.time) return false
+
+  const surveyDateTime = DateTime.fromISO(`${survey.date}T${survey.time}`)
+  const cutoffTime = surveyDateTime.minus({ hours: cutoffHours })
+  const now = DateTime.now()
+
+  // Only applies when cutoff has passed but survey hasn't started yet
+  return now >= cutoffTime && now < surveyDateTime
+}
+
+/**
+ * Get hours remaining until voting closes. Returns null if:
+ * - No cutoff configured
+ * - Voting already closed
+ * - Survey expired
+ * Only returns a value when voting is still open AND within the cutoff window
+ * (i.e. the survey is less than 2*cutoffHours away).
+ */
+export const getTimeUntilVotingCloses = (survey: ISurvey, cutoffHours: number | null): number | null => {
+  if (!cutoffHours || !survey.date || !survey.time) return null
+
+  const surveyDateTime = DateTime.fromISO(`${survey.date}T${survey.time}`)
+  const cutoffTime = surveyDateTime.minus({ hours: cutoffHours })
+  const now = DateTime.now()
+
+  // Only show warning when voting is still open but approaching cutoff
+  if (now < cutoffTime) {
+    const hoursLeft = cutoffTime.diff(now, 'hours').hours
+    if (hoursLeft <= cutoffHours) {
+      return Math.ceil(hoursLeft)
+    }
+  }
+  return null
+}
+
+/**
  * Get the current status of a survey based on expiration and user role
  */
 export const getSurveyStatus = (survey: ISurvey, isPowerUser: boolean): SurveyStatus => {

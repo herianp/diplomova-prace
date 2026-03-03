@@ -87,6 +87,20 @@
                         {{ getVoteSummary(nextTraining) }}
                       </q-badge>
                     </div>
+                    <q-chip
+                      v-if="nextTrainingVotingClosed"
+                      color="warning"
+                      text-color="dark"
+                      :label="$t('survey.votingClosed')"
+                      icon="lock_clock"
+                      size="sm"
+                      dense
+                      class="q-mt-xs"
+                    />
+                    <div v-else-if="nextTrainingClosesIn" class="text-caption text-warning q-mt-xs">
+                      <q-icon name="schedule" size="xs" class="q-mr-xs" />
+                      {{ $t('survey.votingClosesIn', { hours: nextTrainingClosesIn }) }}
+                    </div>
                   </div>
                 </div>
               </template>
@@ -131,6 +145,20 @@
                         {{ getVoteSummary(nextMatch) }}
                       </q-badge>
                     </div>
+                    <q-chip
+                      v-if="nextMatchVotingClosed"
+                      color="warning"
+                      text-color="dark"
+                      :label="$t('survey.votingClosed')"
+                      icon="lock_clock"
+                      size="sm"
+                      dense
+                      class="q-mt-xs"
+                    />
+                    <div v-else-if="nextMatchClosesIn" class="text-caption text-warning q-mt-xs">
+                      <q-icon name="schedule" size="xs" class="q-mr-xs" />
+                      {{ $t('survey.votingClosesIn', { hours: nextMatchClosesIn }) }}
+                    </div>
                   </div>
                 </div>
               </template>
@@ -159,7 +187,7 @@ import { useSurveyUseCases } from '@/composable/useSurveyUseCases.ts'
 import { useAuthStore } from '@/stores/authStore.js'
 import { useSurveyFilters } from '@/composable/useSurveyFilters'
 import { createLogger } from 'src/utils/logger'
-import { getSurveyDisplayTitle } from '@/utils/surveyStatusUtils'
+import { getSurveyDisplayTitle, isVotingClosed, getTimeUntilVotingCloses } from '@/utils/surveyStatusUtils'
 
 const { t } = useI18n()
 const log = createLogger('DashboardComponent')
@@ -180,14 +208,17 @@ const currentUserUid = computed(() => authStore.user?.uid)
 // Filtered surveys for metrics
 const filteredSurveys = createFilteredSurveys(surveys, filters)
 
-// Today's date string for comparisons
-const today = computed(() => DateTime.now().toFormat('yyyy-MM-dd'))
+// Check if a survey is in the future (using both date and time)
+const isFutureSurvey = (s) => {
+  const surveyDateTime = DateTime.fromISO(`${s.date}T${s.time}`)
+  return surveyDateTime > DateTime.now()
+}
 
 // Next training: nearest future survey with type 'training'
 const nextTraining = computed(() => {
   if (!surveys.value?.length) return null
   return surveys.value
-    .filter(s => s.type === 'training' && s.date >= today.value)
+    .filter(s => s.type === 'training' && isFutureSurvey(s))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))[0] || null
 })
 
@@ -195,7 +226,7 @@ const nextTraining = computed(() => {
 const nextMatch = computed(() => {
   if (!surveys.value?.length) return null
   return surveys.value
-    .filter(s => (s.type === 'match' || s.type === 'friendly-match') && s.date >= today.value)
+    .filter(s => (s.type === 'match' || s.type === 'friendly-match') && isFutureSurvey(s))
     .sort((a, b) => a.date.localeCompare(b.date) || (a.time || '').localeCompare(b.time || ''))[0] || null
 })
 
@@ -223,6 +254,13 @@ const getVoteSummary = (survey) => {
   const yesCount = survey.votes?.filter(v => v.vote === true).length || 0
   return `${yesCount}/${totalMembers}`
 }
+
+// Voting cutoff computeds for next event widgets
+const cutoffHours = computed(() => teamStore.currentTeamSettings?.votingCutoffHours ?? null)
+const nextTrainingVotingClosed = computed(() => nextTraining.value ? isVotingClosed(nextTraining.value, cutoffHours.value) : false)
+const nextTrainingClosesIn = computed(() => nextTraining.value ? getTimeUntilVotingCloses(nextTraining.value, cutoffHours.value) : null)
+const nextMatchVotingClosed = computed(() => nextMatch.value ? isVotingClosed(nextMatch.value, cutoffHours.value) : false)
+const nextMatchClosesIn = computed(() => nextMatch.value ? getTimeUntilVotingCloses(nextMatch.value, cutoffHours.value) : null)
 
 // Methods
 const onFiltersChanged = (newFilters) => {
