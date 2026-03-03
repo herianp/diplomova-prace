@@ -5,6 +5,7 @@ import { ISurvey, IVote, SurveyStatus } from '@/interfaces/interfaces'
 import { getDoc, doc } from 'firebase/firestore'
 import { db } from '@/firebase/config'
 import { notifyError } from '@/services/notificationService'
+import { isVotingClosed } from '@/utils/surveyStatusUtils'
 import { FirestoreError } from '@/errors'
 import { listenerRegistry } from '@/services/listenerRegistry'
 import { createLogger } from 'src/utils/logger'
@@ -138,6 +139,14 @@ export function useSurveyUseCases() {
   const voteOnSurvey = async (surveyId: string, userUid: string, newVote: boolean) => {
     const survey = teamStore.surveys.find((s) => s.id === surveyId)
     if (survey) {
+      // Enforce voting cutoff (defense in depth — UI also blocks this)
+      const cutoffHours = teamStore.currentTeamSettings?.votingCutoffHours ?? null
+      const currentTeam = teamStore.currentTeam
+      const isPowerUser = currentTeam?.powerusers?.includes(userUid) ?? false
+      if (!isPowerUser && isVotingClosed(survey, cutoffHours)) {
+        notifyError('survey.votingClosed')
+        return
+      }
       try {
         await surveyFirebase.addOrUpdateVote(surveyId, userUid, newVote, survey.votes)
 

@@ -123,7 +123,7 @@ const { logoutUser, isAdmin } = useAuthComposable();
 const seasonStore = useSeasonStore();
 const teamStore = useTeamStore();
 const { setSurveysListener } = useSurveyUseCases();
-const { setPendingJoinRequestsListener } = useTeamUseCases();
+const { setPendingJoinRequestsListener, loadTeamSettings } = useTeamUseCases();
 
 const userTeams = computed(() => teamStore.teams);
 const currentTeam = computed(() => teamStore.currentTeam);
@@ -135,6 +135,9 @@ const selectTeam = (team) => {
   teamStore.currentTeam = team;
   setSurveysListener(team.id);
   setPendingJoinRequestsListener();
+  if (team.id) {
+    loadTeamSettings(team.id);
+  }
 };
 
 const drawerOpen = ref(true);

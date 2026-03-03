@@ -115,6 +115,15 @@ service cloud.firestore {
         allow read, delete: if isAppAdmin();
       }
 
+      // Subcollection: fine templates - members read, power users write
+      match /fineTemplates/{templateId} {
+        allow read: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.members.hasAny([request.auth.uid]);
+        allow create, update, delete: if request.auth != null &&
+          get(/databases/$(database)/documents/teams/$(teamId)).data.powerusers.hasAny([request.auth.uid]);
+        allow read, delete: if isAppAdmin();
+      }
+
       // Subcollection: fines - members read, power users write
       match /fines/{fineId} {
         allow read: if request.auth != null &&

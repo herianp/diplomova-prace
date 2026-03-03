@@ -56,12 +56,14 @@ import { useRouter } from 'vue-router'
 import { useTeamStore } from '@/stores/teamStore'
 import { useAuthStore } from '@/stores/authStore'
 import { useSurveyUseCases } from '@/composable/useSurveyUseCases'
+import { useTeamUseCases } from '@/composable/useTeamUseCases'
 import { listenerRegistry } from '@/services/listenerRegistry'
 
 const router = useRouter()
 const teamStore = useTeamStore()
 const authStore = useAuthStore()
 const { setSurveysListener } = useSurveyUseCases()
+const { loadTeamSettings } = useTeamUseCases()
 
 const props = defineProps({
   team: {
@@ -96,6 +98,10 @@ const selectTeam = () => {
 
   teamStore.setCurrentTeam(props.team)
   setSurveysListener(props.team.id)
+  // Load team settings so voting cutoff etc. are available immediately
+  if (props.team.id) {
+    loadTeamSettings(props.team.id)
+  }
 }
 
 const manageTeam = () => {

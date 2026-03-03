@@ -10,7 +10,7 @@ import {
   Unsubscribe,
   getDocs,
 } from 'firebase/firestore'
-import { IFineRule, IFine, IPayment, ICashboxHistoryEntry } from '@/interfaces/interfaces'
+import { IFineRule, IFine, IFineTemplate, IPayment, ICashboxHistoryEntry } from '@/interfaces/interfaces'
 import { mapFirestoreError } from '@/errors/errorMapper'
 import { FirestoreError } from '@/errors'
 import { createLogger } from 'src/utils/logger'
@@ -188,6 +188,19 @@ export function useCashboxFirebase() {
     }
   }
 
+  /**
+   * Query and return auto-fines for a specific survey.
+   * Returns DocumentReference[] for use in batch operations.
+   */
+  const getAutoFinesForSurvey = async (teamId: string, surveyId: string) => {
+    const finesRef = collection(doc(db, 'teams', teamId), 'fines')
+    const snapshot = await getDocs(finesRef)
+    return snapshot.docs.filter((d) => {
+      const data = d.data()
+      return data.surveyId === surveyId && data.source === 'auto'
+    })
+  }
+
   // ============================================================
   // Payments
   // ============================================================
@@ -327,6 +340,50 @@ export function useCashboxFirebase() {
     })
   }
 
+  // ============================================================
+  // Fine Templates
+  // ============================================================
+
+  const listenToFineTemplates = (
+    teamId: string,
+    callback: (templates: IFineTemplate[]) => void,
+    onError?: (error: FirestoreError) => void
+  ): Unsubscribe => {
+    const templatesRef = collection(doc(db, 'teams', teamId), 'fineTemplates')
+    return onSnapshot(templatesRef, (snapshot) => {
+      const templates = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })) as IFineTemplate[]
+      callback(templates)
+    }, (error) => {
+      const firestoreError = mapFirestoreError(error, 'read')
+      log.error('FineTemplates listener failed', { teamId, code: error.code, error: firestoreError.message })
+      if (error.code === 'permission-denied' && onError) {
+        onError(firestoreError)
+      } else {
+        callback([])
+      }
+    })
+  }
+
+  const addFineTemplate = async (teamId: string, template: Omit<IFineTemplate, 'id'>): Promise<void> => {
+    try {
+      await addDoc(collection(doc(db, 'teams', teamId), 'fineTemplates'), template)
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to add fine template', { teamId, error: firestoreError.message })
+      throw firestoreError
+    }
+  }
+
+  const deleteFineTemplate = async (teamId: string, templateId: string): Promise<void> => {
+    try {
+      await deleteDoc(doc(db, 'teams', teamId, 'fineTemplates', templateId))
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'delete')
+      log.error('Failed to delete fine template', { teamId, templateId, error: firestoreError.message })
+      throw firestoreError
+    }
+  }
+
   return {
     listenToFineRules,
     loadFineRules,
@@ -337,6 +394,7 @@ export function useCashboxFirebase() {
     addFine,
     deleteFine,
     bulkAddFines,
+    getAutoFinesForSurvey,
     listenToPayments,
     addPayment,
     deletePayment,
@@ -345,5 +403,8 @@ export function useCashboxFirebase() {
     bulkAddPayments,
     addCashboxHistoryEntry,
     listenToCashboxHistory,
+    listenToFineTemplates,
+    addFineTemplate,
+    deleteFineTemplate,
   }
 }
