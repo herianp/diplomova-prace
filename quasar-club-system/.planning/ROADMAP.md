@@ -96,3 +96,16 @@ Plans:
 | 14. Rate Limiting & User Quotas | v1.1 | 2/2 | Complete | 2026-02-22 |
 | 15. Auth Page i18n & Language Switcher | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 20. Onboarding Completion Button & State Fix | v1.3 | 1/1 | Complete | 2026-03-04 |
+
+### Phase 24: Sort Surveys by DateTime
+**Goal**: Sort surveys on the survey page by dateTime in descending order so newest surveys appear first
+**Depends on**: None (standalone improvement)
+**Success Criteria** (what must be TRUE):
+  1. Surveys on the SurveyPage are displayed sorted by dateTime descending (newest first)
+  2. Sorting is applied consistently when surveys load and when new surveys are added
+**Plans:** 1/1
+
+Plans:
+- [x] 24-01-PLAN.md — Reverse sort order in createFilteredSurveys, update tests
+
+| 24. Sort Surveys by DateTime | — | 1/1 | Complete | 2026-03-04 |

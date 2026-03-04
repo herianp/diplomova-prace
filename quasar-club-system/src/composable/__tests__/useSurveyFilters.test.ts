@@ -155,7 +155,7 @@ describe('useSurveyFilters', () => {
   })
 
   describe('createFilteredSurveys', () => {
-    it('returns computed sorted by date ascending', () => {
+    it('returns computed sorted by date descending', () => {
       const surveys = ref([
         createMockSurvey({ id: '1', date: '2025-09-15', title: 'B' }),
         createMockSurvey({ id: '2', date: '2025-08-01', title: 'A' }),
@@ -165,7 +165,7 @@ describe('useSurveyFilters', () => {
       // Clear date filters so all surveys pass through
       updateFilters({ dateFrom: '', dateTo: '' })
       const result = createFilteredSurveys(surveys)
-      expect(result.value.map(s => s.id)).toEqual(['2', '1', '3'])
+      expect(result.value.map(s => s.id)).toEqual(['3', '1', '2'])
     })
 
     it('filters by searchName reactively', () => {
@@ -178,7 +178,7 @@ describe('useSurveyFilters', () => {
       updateFilters({ searchName: 'training', dateFrom: '', dateTo: '' })
       const result = createFilteredSurveys(surveys)
       expect(result.value).toHaveLength(2)
-      expect(result.value.map(s => s.id)).toEqual(['1', '3'])
+      expect(result.value.map(s => s.id)).toEqual(['3', '1'])
     })
 
     it('uses custom filters ref when provided', () => {
