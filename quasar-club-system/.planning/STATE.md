@@ -5,17 +5,17 @@
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.1 — Phase 14: Rate Limiting & User Quotas
+**Current focus:** v1.3 — Phase 20: Onboarding Completion Button & State Fix
 
 ## Current Position
 
-Milestone: v1.1 New User Onboarding & No-Team UX
-Phase: 14 of 14 (Rate Limiting & User Quotas)
-Plan: 2 of 2 in current phase
-Status: Complete — Phase 14 fully done
-Last activity: 2026-02-24 — Completed quick task 6: Unify survey types to single source of truth
+Milestone: v1.3 Onboarding Improvements
+Phase: 20 (Onboarding Completion Button & State Fix)
+Plan: 1 of 1 in current phase
+Status: Complete — Phase 20 fully done
+Last activity: 2026-03-04 — Completed Phase 20
 
-Progress: [██████████] 100% (v1.1)
+Progress: [██████████] 100% (v1.3)
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ v1.1 decisions:
 ### Roadmap Evolution
 
 - Phase 14 added: Rate Limiting & User Quotas — Admin-configurable limits for user actions to prevent bot abuse and spam
+- Phase 20 added: Onboarding Completion Button & State Fix — "Complete" button after join requests + fix onboarding state after logout/register
 
 ### Pending Todos
 

@@ -115,11 +115,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useJoinRequestUseCases } from '@/composable/useJoinRequestUseCases'
 import { useTeamStore } from '@/stores/teamStore'
+
+const emit = defineEmits(['has-pending-requests'])
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -136,6 +138,14 @@ const selectedTeam = ref(null)
 
 let unsubscribeTeams = null
 let unsubscribeRequests = null
+
+watch(
+  () => userRequests.value,
+  (requests) => {
+    emit('has-pending-requests', requests.some((r) => r.status === 'pending'))
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   unsubscribeTeams = joinRequestUseCases.setAllTeamsListener((teams) => {

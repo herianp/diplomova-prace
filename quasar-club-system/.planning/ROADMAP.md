@@ -5,6 +5,7 @@
 - **v1.0 Production Hardening** — Phases 1-9 (shipped 2026-02-19)
 - **v1.1 New User Onboarding & No-Team UX** — Phases 10-14 (shipped 2026-02-22)
 - **v1.2 Auth Pages** — Phase 15 (shipped 2026-02-26)
+- **v1.3 Onboarding Improvements** — Phase 20 (active)
 
 ## Phases
 
@@ -41,7 +42,25 @@
 
 </details>
 
+### v1.3 Onboarding Improvements (Phase 20)
+
+- [x] Phase 20: Onboarding Completion Button & State Fix — completed 2026-03-04
+
 ## Phase Details
+
+### Phase 20: Onboarding Completion Button & State Fix
+**Goal**: Add a "Complete" button to the onboarding page that appears after sending one or more join requests, and fix onboarding page incorrectly showing after logout + new user registration on refresh
+**Depends on**: Phase 19 (v1.2 complete)
+**Requirements**: ONB-01, ONB-02
+**Success Criteria** (what must be TRUE):
+  1. A "Complete" button appears on the onboarding page after the user has sent at least one join request
+  2. Clicking "Complete" exits the onboarding flow and navigates to the main app
+  3. After logout and registering a new user, the onboarding page does NOT appear on refresh if the user has already completed onboarding (or is already in a team)
+  4. New users without a team still see the onboarding page correctly
+**Plans:** 1
+
+Plans:
+- [x] 20-01-PLAN.md — Add completion button after join requests + fix onboarding state on refresh
 
 ### Phase 15: Auth Page i18n & Language Switcher
 **Goal**: Auth pages (login, register) display all text in the selected language and provide a language switcher so users can change language before authenticating
@@ -76,5 +95,4 @@ Plans:
 | 13. Empty States | v1.1 | 1/1 | Complete | 2026-02-22 |
 | 14. Rate Limiting & User Quotas | v1.1 | 2/2 | Complete | 2026-02-22 |
 | 15. Auth Page i18n & Language Switcher | v1.2 | 1/1 | Complete | 2026-02-26 |
-
-**All milestones shipped. No active phases.**
+| 20. Onboarding Completion Button & State Fix | v1.3 | 1/1 | Complete | 2026-03-04 |

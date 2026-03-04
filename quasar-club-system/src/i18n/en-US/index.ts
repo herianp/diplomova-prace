@@ -560,6 +560,7 @@ export default {
     next: 'Continue',
     back: 'Back',
     skip: 'Skip for now',
+    complete: 'Complete',
     welcome: {
       title: 'Welcome',
       heading: 'Welcome to Club System',
