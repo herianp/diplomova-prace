@@ -33,8 +33,9 @@
     </q-banner>
 
     <!-- Teams list -->
-    <q-list v-else bordered separator rounded>
-      <q-item v-for="team in filteredTeams" :key="team.id" class="q-py-sm">
+    <div v-else class="team-list-scroll">
+      <q-list bordered separator rounded>
+        <q-item v-for="team in filteredTeams" :key="team.id" class="q-py-sm">
         <!-- Avatar icon -->
         <q-item-section avatar>
           <q-icon name="groups" color="primary" size="32px" />
@@ -85,7 +86,8 @@
           </div>
         </q-item-section>
       </q-item>
-    </q-list>
+      </q-list>
+    </div>
 
     <!-- Join confirmation dialog -->
     <q-dialog v-model="showConfirmDialog" persistent>
@@ -218,3 +220,10 @@ const cancelRequest = async (requestId) => {
   }
 }
 </script>
+
+<style scoped>
+.team-list-scroll {
+  max-height: 350px;
+  overflow-y: auto;
+}
+</style>

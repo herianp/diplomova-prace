@@ -62,6 +62,11 @@ v1.1 decisions:
 ### Roadmap Evolution
 
 - Phase 14 added: Rate Limiting & User Quotas — Admin-configurable limits for user actions to prevent bot abuse and spam
+- Phase 20 added: Fix Notification Dropdown Mobile — Fix notification dropdown rendering outside viewport on mobile view
+- Phase 21 added: Notifications Page Mobile UX — Improve /notifications page UI/UX for mobile view
+- Phase 22 added: Team Browse Scroll Container — Compact team search list with scroll container in teams/onboarding pages
+- Phase 23 added: Team Settings Reorder Members — Move team members section below deletion section in team settings page
+- Phase 24 added: Sort Surveys by DateTime — Sort surveys on survey page by dateTime descending so newest appear first
 
 ### Pending Todos
 
