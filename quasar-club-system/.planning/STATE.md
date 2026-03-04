@@ -66,6 +66,7 @@ v1.1 decisions:
 - Phase 21 added: Notifications Page Mobile UX — Improve /notifications page UI/UX for mobile view
 - Phase 22 added: Team Browse Scroll Container — Compact team search list with scroll container in teams/onboarding pages
 - Phase 23 added: Team Settings Reorder Members — Move team members section below deletion section in team settings page
+- Phase 24 added: Sort Surveys by DateTime — Sort surveys on survey page by dateTime descending so newest appear first
 
 ### Pending Todos
 
