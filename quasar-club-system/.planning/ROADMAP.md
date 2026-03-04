@@ -45,8 +45,20 @@
 ### v1.3 Onboarding Improvements (Phase 25)
 
 - [x] Phase 25: Onboarding Completion Button & State Fix — completed 2026-03-04
+- [x] Phase 26: UI Fixes — i18n Variables, Nav Reorder & Join Requests Scroll — completed 2026-03-04
 
 ## Phase Details
+
+### Phase 26: UI Fixes — i18n Variables, Nav Reorder & Join Requests Scroll
+**Goal**: Fix i18n interpolation variables not rendering in UI, rename and reorder nav items, add scroll container to join requests section
+**Depends on**: Phase 25
+**Success Criteria** (what must be TRUE):
+  1. Team settings "uzávěrka hlasování" displays actual hour count instead of `{count}` literal (e.g. "3 hodin před")
+  2. "Procházet týmy" section displays actual member count instead of `{count}` literal (e.g. "5 členů")
+  3. "Týmy" page is renamed to "Přehled týmu" in navigation
+  4. "Přehled týmu" nav item is positioned above "Administrace" in both desktop and mobile navigation
+  5. "Moje žádosti o přiřazení" section has a scroll container with max-height so it doesn't grow too tall
+**Plans:** 0
 
 ### Phase 25: Onboarding Completion Button & State Fix
 **Goal**: Add a "Complete" button to the onboarding page that appears after sending one or more join requests, and fix onboarding page incorrectly showing after logout + new user registration on refresh
@@ -96,6 +108,7 @@ Plans:
 | 14. Rate Limiting & User Quotas | v1.1 | 2/2 | Complete | 2026-02-22 |
 | 15. Auth Page i18n & Language Switcher | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 25. Onboarding Completion Button & State Fix | v1.3 | 1/1 | Complete | 2026-03-04 |
+| 26. UI Fixes — i18n Variables, Nav Reorder & Scroll | v1.3 | 1/1 | Complete | 2026-03-04 |
 
 ### Phase 24: Sort Surveys by DateTime
 **Goal**: Sort surveys on the survey page by dateTime in descending order so newest surveys appear first
