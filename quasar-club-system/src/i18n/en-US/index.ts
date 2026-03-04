@@ -8,7 +8,7 @@ export default {
   },
   navigation: {
     dashboard: "Dashboard",
-    teams: "Teams",
+    teams: "Team Overview",
     surveys: "Surveys",
     reports: "Reports",
     players: "Players",

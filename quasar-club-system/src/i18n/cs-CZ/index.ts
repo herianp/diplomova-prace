@@ -8,7 +8,7 @@ export default {
   },
   navigation: {
     dashboard: "Nástěnka",
-    teams: "Týmy",
+    teams: "Přehled týmu",
     surveys: "Ankety",
     reports: "Reporty",
     players: "Hráči",
