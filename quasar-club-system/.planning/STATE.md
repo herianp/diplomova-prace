@@ -68,6 +68,7 @@ v1.1 decisions:
 - Phase 23 added: Team Settings Reorder Members — Move team members section below deletion section in team settings page
 - Phase 24 added: Sort Surveys by DateTime — Sort surveys on survey page by dateTime descending so newest appear first
 - Phase 25 added: Onboarding Completion Button & State Fix — "Complete" button after join requests + fix onboarding state after logout/register
+- Phase 26 added: UI Fixes — Fix i18n variable interpolation, rename/reorder nav items, add scroll to join requests section
 
 ### Pending Todos
 

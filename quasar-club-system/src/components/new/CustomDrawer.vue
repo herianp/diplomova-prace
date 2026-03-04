@@ -68,9 +68,6 @@
           <q-icon :name="link.icon" />
         </q-item-section>
         <q-item-section>{{ link.title }}</q-item-section>
-        <q-item-section side v-if="link.route === RouteEnum.TEAM.path && pendingJoinRequestCount > 0">
-          <q-badge color="red">{{ pendingJoinRequestCount }}</q-badge>
-        </q-item-section>
       </q-item>
     </q-list>
 
@@ -80,6 +77,16 @@
     <q-list class="bottom-links">
 
       <q-separator />
+
+      <q-item v-if="hasTeam" clickable v-ripple @click="navigateTo(RouteEnum.TEAM.path)">
+        <q-item-section avatar>
+          <q-icon name="groups" />
+        </q-item-section>
+        <q-item-section>{{ teamsLink.title }}</q-item-section>
+        <q-item-section side v-if="pendingJoinRequestCount > 0">
+          <q-badge color="red">{{ pendingJoinRequestCount }}</q-badge>
+        </q-item-section>
+      </q-item>
 
       <q-item v-if="isAdmin" clickable v-ripple @click="navigateTo(RouteEnum.ADMIN.path)">
         <q-item-section avatar>
@@ -145,7 +152,6 @@ const drawerOpen = ref(true);
 // Top navigation links
 const allLinks = computed(() => [
   { title: t('navigation.dashboard'), icon: "dashboard", route: RouteEnum.DASHBOARD.path },
-  { title: t('navigation.teams'), icon: "groups", route: RouteEnum.TEAM.path },
   { title: t('navigation.surveys'), icon: "poll", route: RouteEnum.SURVEY.path },
   { title: t('navigation.reports'), icon: "bar_chart", route: RouteEnum.REPORTS.path },
   { title: t('navigation.players'), icon: "person", route: RouteEnum.PLAYERS.path },
@@ -153,8 +159,12 @@ const allLinks = computed(() => [
   { title: t('navigation.messages'), icon: "chat", route: RouteEnum.MESSAGES.path },
 ]);
 
+const teamsLink = computed(() => ({
+  title: t('navigation.teams'), icon: "groups", route: RouteEnum.TEAM.path
+}));
+
 const topLinks = computed(() =>
-  hasTeam.value ? allLinks.value : allLinks.value.filter(l => l.route === RouteEnum.TEAM.path)
+  hasTeam.value ? allLinks.value : [teamsLink.value]
 );
 
 // Navigation function

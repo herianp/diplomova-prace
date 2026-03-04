@@ -214,7 +214,7 @@
             </div>
           </q-card-section>
 
-          <q-card-section class="q-pa-none">
+          <q-card-section class="q-pa-none" style="max-height: 300px; overflow-y: auto;">
             <q-list separator>
               <q-item
                 v-for="request in myJoinRequests"
