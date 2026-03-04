@@ -560,6 +560,7 @@ export default {
     next: 'Pokračovat',
     back: 'Zpět',
     skip: 'Prozatím přeskočit',
+    complete: 'Dokončit',
     welcome: {
       title: 'Vítejte',
       heading: 'Vítejte v Club System',

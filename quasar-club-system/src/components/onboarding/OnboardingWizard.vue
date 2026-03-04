@@ -96,7 +96,15 @@
 
           <!-- Inline Browse Teams list -->
           <div v-else-if="teamChoicePath === 'browse'">
-            <TeamBrowseList />
+            <TeamBrowseList @has-pending-requests="onPendingRequestsChange" />
+            <div v-if="hasPendingRequests" class="row justify-center q-mt-lg">
+              <q-btn
+                color="primary"
+                :label="$t('onboarding.complete')"
+                @click="completeAfterRequests"
+                size="lg"
+              />
+            </div>
           </div>
         </div>
         <q-stepper-navigation>
@@ -132,12 +140,15 @@ const {
   isCreatingTeam,
   teamChoicePath,
   showSuccess,
+  hasPendingRequests,
   initDisplayName,
   createTeam,
   selectTeamPath,
   backToCardSelection,
   goToDashboard,
   skipOnboarding,
+  onPendingRequestsChange,
+  completeAfterRequests,
   nextStep,
   prevStep
 } = useOnboardingComposable()

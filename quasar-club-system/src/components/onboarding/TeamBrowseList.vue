@@ -33,8 +33,9 @@
     </q-banner>
 
     <!-- Teams list -->
-    <q-list v-else bordered separator rounded>
-      <q-item v-for="team in filteredTeams" :key="team.id" class="q-py-sm">
+    <div v-else class="team-list-scroll">
+      <q-list bordered separator rounded>
+        <q-item v-for="team in filteredTeams" :key="team.id" class="q-py-sm">
         <!-- Avatar icon -->
         <q-item-section avatar>
           <q-icon name="groups" color="primary" size="32px" />
@@ -85,7 +86,8 @@
           </div>
         </q-item-section>
       </q-item>
-    </q-list>
+      </q-list>
+    </div>
 
     <!-- Join confirmation dialog -->
     <q-dialog v-model="showConfirmDialog" persistent>
@@ -115,11 +117,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useQuasar } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useJoinRequestUseCases } from '@/composable/useJoinRequestUseCases'
 import { useTeamStore } from '@/stores/teamStore'
+
+const emit = defineEmits(['has-pending-requests'])
 
 const $q = useQuasar()
 const { t } = useI18n()
@@ -136,6 +140,14 @@ const selectedTeam = ref(null)
 
 let unsubscribeTeams = null
 let unsubscribeRequests = null
+
+watch(
+  () => userRequests.value,
+  (requests) => {
+    emit('has-pending-requests', requests.some((r) => r.status === 'pending'))
+  },
+  { deep: true }
+)
 
 onMounted(() => {
   unsubscribeTeams = joinRequestUseCases.setAllTeamsListener((teams) => {
@@ -218,3 +230,10 @@ const cancelRequest = async (requestId) => {
   }
 }
 </script>
+
+<style scoped>
+.team-list-scroll {
+  max-height: 350px;
+  overflow-y: auto;
+}
+</style>

@@ -10,35 +10,6 @@
         :description="$t('team.manageTeamDescription', { teamName: team.name, memberCount: team.members.length })"
       />
 
-      <div class="row q-col-gutter-lg">
-        <TeamPlayerCardsComponent
-          :team-members="teamMembers"
-          :pending-invitations="pendingInvitations"
-          :invite-form="inviteForm"
-          :sending-invite="sendingInvite"
-          :team="team"
-          @confirm-remove-member="confirmRemoveMember"
-          @promote-to-power-user="promoteToPowerUser"
-        />
-
-        <!-- Team Management Section (Power Users Only) -->
-        <div v-if="isPageUserPowerUser" class="col-12 col-lg-4">
-          <TeamInvitationComponent
-            :invite-form="inviteForm"
-            :sending-invite="sendingInvite"
-            @send-invitation="sendInvitation"
-            @update-email="updateInviteEmail"
-            @update-message="updateInviteMessage"
-          />
-
-          <!-- Pending Invitations -->
-          <TeamInvitationPendingComponent
-            :pending-invitations="pendingInvitations"
-            @cancel-invitation="cancelInvitation"
-          />
-        </div>
-      </div>
-
       <!-- Team Settings (Power Users Only) -->
       <div v-if="isPageUserPowerUser && teamSettings" class="q-mt-lg">
         <q-card flat bordered>
@@ -157,6 +128,36 @@
             />
           </q-card-actions>
         </q-card>
+      </div>
+
+      <!-- Invite New Member (Power Users Only) -->
+      <div v-if="isPageUserPowerUser" class="q-mt-lg">
+        <TeamInvitationComponent
+          :invite-form="inviteForm"
+          :sending-invite="sendingInvite"
+          @send-invitation="sendInvitation"
+          @update-email="updateInviteEmail"
+          @update-message="updateInviteMessage"
+        />
+
+        <!-- Pending Invitations -->
+        <TeamInvitationPendingComponent
+          :pending-invitations="pendingInvitations"
+          @cancel-invitation="cancelInvitation"
+        />
+      </div>
+
+      <!-- Team Members -->
+      <div class="q-mt-lg">
+        <TeamPlayerCardsComponent
+          :team-members="teamMembers"
+          :pending-invitations="pendingInvitations"
+          :invite-form="inviteForm"
+          :sending-invite="sendingInvite"
+          :team="team"
+          @confirm-remove-member="confirmRemoveMember"
+          @promote-to-power-user="promoteToPowerUser"
+        />
       </div>
     </div>
 

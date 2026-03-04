@@ -16,6 +16,7 @@ export function useOnboardingComposable() {
   const isCreatingTeam = ref(false)
   const teamChoicePath = ref<'create' | 'browse' | null>(null)
   const showSuccess = ref(false)
+  const hasPendingRequests = ref(false)
 
   const initDisplayName = () => {
     if (authStore.user?.displayName) {
@@ -78,6 +79,15 @@ export function useOnboardingComposable() {
     void router.push(RouteEnum.TEAM.path)
   }
 
+  const onPendingRequestsChange = (hasPending: boolean) => {
+    hasPendingRequests.value = hasPending
+  }
+
+  const completeAfterRequests = async () => {
+    await completeOnboarding()
+    void router.push(RouteEnum.TEAM.path)
+  }
+
   const nextStep = async () => {
     if (currentStep.value === 2) {
       await saveDisplayName()
@@ -96,6 +106,7 @@ export function useOnboardingComposable() {
     isCreatingTeam,
     teamChoicePath,
     showSuccess,
+    hasPendingRequests,
     initDisplayName,
     saveDisplayName,
     createTeam,
@@ -103,6 +114,8 @@ export function useOnboardingComposable() {
     backToCardSelection,
     goToDashboard,
     skipOnboarding,
+    onPendingRequestsChange,
+    completeAfterRequests,
     nextStep,
     prevStep
   }

@@ -1,23 +1,23 @@
 <template>
-  <div class="notifications-page q-pa-lg">
+  <div :class="['notifications-page', isMobile ? 'q-pa-sm' : 'q-pa-lg']">
     <div class="page-header q-mb-lg">
       <h2 v-if="!isMobile" class="text-center q-ma-none q-pa-none">{{ $t('notifications.title') }}</h2>
 
       <!-- Stats Bar -->
       <div class="stats-bar q-mt-md">
-        <div class="row q-gutter-md justify-center">
+        <div class="row q-gutter-sm justify-center">
           <div class="col-auto">
-            <q-chip color="primary" text-color="white" icon="notifications">
+            <q-chip color="primary" text-color="white" :icon="isMobile ? undefined : 'notifications'" :dense="isMobile" size="sm">
               {{ $t('notifications.total') }}: {{ notifications.length }}
             </q-chip>
           </div>
           <div class="col-auto">
-            <q-chip color="red" text-color="white" icon="circle">
+            <q-chip color="red" text-color="white" :icon="isMobile ? undefined : 'circle'" :dense="isMobile" size="sm">
               {{ $t('notifications.unread') }}: {{ unreadCount }}
             </q-chip>
           </div>
           <div class="col-auto">
-            <q-chip color="green" text-color="white" icon="check_circle">
+            <q-chip color="green" text-color="white" :icon="isMobile ? undefined : 'check_circle'" :dense="isMobile" size="sm">
               {{ $t('notifications.read') }}: {{ readCount }}
             </q-chip>
           </div>
@@ -25,11 +25,59 @@
       </div>
     </div>
 
-    <!-- Actions Bar -->
-    <div class="actions-bar q-mb-lg">
+    <!-- Actions Bar - Mobile -->
+    <div v-if="isMobile" class="actions-bar q-mb-md">
+      <div class="row items-center no-wrap q-mb-sm">
+        <div class="col filter-scroll">
+          <q-btn
+            v-for="opt in filterOptions"
+            :key="opt.value"
+            :color="filter === opt.value ? 'primary' : 'grey-3'"
+            :text-color="filter === opt.value ? 'white' : 'grey-8'"
+            :label="opt.label"
+            rounded
+            unelevated
+            no-caps
+            dense
+            size="sm"
+            class="q-mr-xs"
+            @click="filter = opt.value"
+          />
+        </div>
+        <div class="col-auto">
+          <q-btn
+            v-if="unreadCount > 0"
+            flat
+            round
+            dense
+            icon="mark_email_read"
+            color="positive"
+            @click="markAllAsRead"
+            :loading="markingAllRead"
+            size="sm"
+          >
+            <q-tooltip>{{ $t('notifications.markAllRead') }}</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            round
+            dense
+            icon="refresh"
+            color="grey-7"
+            @click="refreshNotifications"
+            :loading="refreshing"
+            size="sm"
+          >
+            <q-tooltip>{{ $t('notifications.refresh') }}</q-tooltip>
+          </q-btn>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions Bar - Desktop -->
+    <div v-else class="actions-bar q-mb-lg">
       <div class="row q-gutter-md items-center">
         <div class="col">
-          <!-- Filter Buttons -->
           <q-btn-toggle
             v-model="filter"
             spread
@@ -43,7 +91,6 @@
           />
         </div>
         <div class="col-auto">
-          <!-- Mark All Read Button -->
           <q-btn
             v-if="unreadCount > 0"
             color="positive"
@@ -52,7 +99,6 @@
             @click="markAllAsRead"
             :loading="markingAllRead"
           />
-          <!-- Refresh Button -->
           <q-btn
             flat
             round
@@ -86,6 +132,90 @@
         </div>
       </div>
 
+      <!-- Mobile: Card list (no timeline) -->
+      <div v-else-if="isMobile" class="notifications-list">
+        <q-card
+          v-for="notification in filteredNotifications"
+          :key="notification.id"
+          flat
+          bordered
+          class="notification-card-mobile cursor-pointer"
+          :class="{ 'bg-blue-1': !notification.read }"
+          @click="handleNotificationClick(notification)"
+        >
+          <q-card-section class="q-pa-sm">
+            <div class="row items-start no-wrap q-mb-xs">
+              <q-icon
+                :name="getNotificationIcon(notification.type)"
+                :color="getNotificationColor(notification)"
+                size="sm"
+                class="q-mr-sm q-mt-xs"
+              />
+              <div class="col">
+                <div class="text-subtitle2 text-weight-medium text-black">{{ getNotificationTitle(notification) }}</div>
+                <div class="text-caption text-grey-6">{{ formatDateTime(notification.createdAt) }}</div>
+              </div>
+              <div class="col-auto">
+                <q-btn
+                  v-if="!notification.read"
+                  flat
+                  round
+                  dense
+                  icon="visibility"
+                  color="grey-7"
+                  size="xs"
+                  @click.stop="markAsRead(notification)"
+                >
+                  <q-tooltip>{{ $t('notifications.markRead') }}</q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+            <div class="text-body2 text-grey-8 q-ml-lg">{{ getNotificationMessage(notification) }}</div>
+
+            <!-- Team Invitation Actions -->
+            <div v-if="notification.type === 'team_invitation' && notification.status === 'pending'" class="invitation-actions q-ml-lg" @click.stop>
+              <div class="row q-gutter-sm q-mt-sm">
+                <q-btn
+                  color="negative"
+                  icon="close"
+                  :label="$t('notifications.invitation.decline')"
+                  @click="handleInvitationResponse(notification, 'declined')"
+                  :loading="respondingTo === notification.id"
+                  outline
+                  dense
+                  size="sm"
+                />
+                <q-btn
+                  color="positive"
+                  icon="check"
+                  :label="$t('notifications.invitation.accept')"
+                  @click="handleInvitationResponse(notification, 'accepted')"
+                  :loading="respondingTo === notification.id"
+                  unelevated
+                  dense
+                  size="sm"
+                />
+              </div>
+            </div>
+
+            <!-- Responded Invitation Status -->
+            <div v-else-if="notification.type === 'team_invitation' && notification.status !== 'pending'" class="q-ml-lg q-mt-xs">
+              <q-chip
+                :color="notification.status === 'accepted' ? 'positive' : 'negative'"
+                text-color="white"
+                :icon="notification.status === 'accepted' ? 'check_circle' : 'cancel'"
+                :label="notification.status === 'accepted'
+                  ? $t('notifications.invitation.accepted')
+                  : $t('notifications.invitation.declined')"
+                dense
+                size="sm"
+              />
+            </div>
+          </q-card-section>
+        </q-card>
+      </div>
+
+      <!-- Desktop: Timeline layout -->
       <div v-else class="notifications-list">
         <q-timeline color="primary">
           <q-timeline-entry
@@ -128,12 +258,12 @@
                 </div>
               </div>
             </template>
-            
+
             <template v-slot:default>
-              <q-card 
-                flat 
-                bordered 
-                class="notification-card cursor-pointer" 
+              <q-card
+                flat
+                bordered
+                class="notification-card cursor-pointer"
                 @click="handleNotificationClick(notification)"
               >
                 <q-card-section class="q-pa-md">
@@ -141,45 +271,45 @@
 
                   <!-- Team Invitation Actions -->
                   <div v-if="notification.type === 'team_invitation' && notification.status === 'pending'" class="invitation-actions" @click.stop>
-                      <q-separator class="q-mb-md" />
-                      <div class="text-body2 text-grey-7 q-mb-md">
-                        {{ $t('notifications.invitation.actionRequired') }}
-                      </div>
-                      <div class="row q-gutter-sm">
-                        <q-btn
-                          color="negative"
-                          icon="close"
-                          :label="$t('notifications.invitation.decline')"
-                          @click="handleInvitationResponse(notification, 'declined')"
-                          :loading="respondingTo === notification.id"
-                          outline
-                        />
-                        <q-btn
-                          color="positive"
-                          icon="check"
-                          :label="$t('notifications.invitation.accept')"
-                          @click="handleInvitationResponse(notification, 'accepted')"
-                          :loading="respondingTo === notification.id"
-                          unelevated
-                        />
-                      </div>
+                    <q-separator class="q-mb-md" />
+                    <div class="text-body2 text-grey-7 q-mb-md">
+                      {{ $t('notifications.invitation.actionRequired') }}
                     </div>
-
-                    <!-- Responded Invitation Status -->
-                    <div v-else-if="notification.type === 'team_invitation' && notification.status !== 'pending'" class="invitation-status">
-                      <q-separator class="q-mb-md" />
-                      <q-chip
-                        :color="notification.status === 'accepted' ? 'positive' : 'negative'"
-                        text-color="white"
-                        :icon="notification.status === 'accepted' ? 'check_circle' : 'cancel'"
-                        :label="notification.status === 'accepted'
-                          ? $t('notifications.invitation.accepted')
-                          : $t('notifications.invitation.declined')"
+                    <div class="row q-gutter-sm">
+                      <q-btn
+                        color="negative"
+                        icon="close"
+                        :label="$t('notifications.invitation.decline')"
+                        @click="handleInvitationResponse(notification, 'declined')"
+                        :loading="respondingTo === notification.id"
+                        outline
+                      />
+                      <q-btn
+                        color="positive"
+                        icon="check"
+                        :label="$t('notifications.invitation.accept')"
+                        @click="handleInvitationResponse(notification, 'accepted')"
+                        :loading="respondingTo === notification.id"
+                        unelevated
                       />
                     </div>
-                  </q-card-section>
-                </q-card>
-              </template>
+                  </div>
+
+                  <!-- Responded Invitation Status -->
+                  <div v-else-if="notification.type === 'team_invitation' && notification.status !== 'pending'" class="invitation-status">
+                    <q-separator class="q-mb-md" />
+                    <q-chip
+                      :color="notification.status === 'accepted' ? 'positive' : 'negative'"
+                      text-color="white"
+                      :icon="notification.status === 'accepted' ? 'check_circle' : 'cancel'"
+                      :label="notification.status === 'accepted'
+                        ? $t('notifications.invitation.accepted')
+                        : $t('notifications.invitation.declined')"
+                    />
+                  </div>
+                </q-card-section>
+              </q-card>
+            </template>
           </q-timeline-entry>
         </q-timeline>
       </div>
@@ -546,13 +676,30 @@ onUnmounted(() => {
   justify-content: center;
 }
 
-@media (max-width: 768px) {
-  .notifications-page {
-    padding: 1rem;
-  }
+.notification-card-mobile {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
 
+.notification-card-mobile:last-child {
+  border-bottom: none;
+}
+
+.filter-scroll {
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 768px) {
   .stats-bar .row {
-    flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .actions-bar .row {

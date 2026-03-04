@@ -93,8 +93,8 @@ export function useSurveyFilters() {
 
       const filtered = filterSurveys(surveysValue, filtersValue)
 
-      // Sort: oldest first (ascending order)
-      return filtered.sort((a, b) => a.date.localeCompare(b.date))
+      // Sort: newest first (descending order), then by time descending for same date
+      return filtered.sort((a, b) => b.date.localeCompare(a.date) || (b.time || '').localeCompare(a.time || ''))
     })
   }
 
