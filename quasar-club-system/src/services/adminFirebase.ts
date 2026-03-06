@@ -1,6 +1,5 @@
 import { db } from '@/firebase/config'
-import { collection, getDocs } from 'firebase/firestore'
-import { getFunctions, httpsCallable } from 'firebase/functions'
+import { collection, getDocs, doc, updateDoc, arrayUnion } from 'firebase/firestore'
 import { ITeam, IUser, ISurvey } from '@/interfaces/interfaces'
 
 export interface ICreatorResolution {
@@ -10,8 +9,6 @@ export interface ICreatorResolution {
 }
 
 export function useAdminFirebase() {
-  const functions = getFunctions(undefined, 'europe-west1')
-
   const getAllTeams = async (): Promise<ITeam[]> => {
     const snapshot = await getDocs(collection(db, 'teams'))
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as ITeam[]
@@ -27,15 +24,26 @@ export function useAdminFirebase() {
     return snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as ISurvey[]
   }
 
-  const deleteUserAccount = async (data: { uid: string; creatorResolutions?: ICreatorResolution[] }): Promise<void> => {
-    const callable = httpsCallable(functions, 'deleteUserAccount')
-    await callable(data)
+  const softDeleteUser = async (uid: string, deletedByUid: string): Promise<void> => {
+    await updateDoc(doc(db, 'users', uid), {
+      status: 'deleted',
+      deletedAt: new Date(),
+      deletedBy: deletedByUid,
+    })
+  }
+
+  const reassignTeamCreator = async (teamId: string, newCreatorUid: string): Promise<void> => {
+    await updateDoc(doc(db, 'teams', teamId), {
+      creator: newCreatorUid,
+      powerusers: arrayUnion(newCreatorUid),
+    })
   }
 
   return {
     getAllTeams,
     getAllUsers,
     getAllSurveys,
-    deleteUserAccount,
+    softDeleteUser,
+    reassignTeamCreator,
   }
 }

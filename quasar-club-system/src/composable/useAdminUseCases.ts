@@ -55,15 +55,17 @@ export function useAdminUseCases() {
       await teamFirebase.deleteTeam(resolution.teamId)
     }
 
-    // Step 2: Call Cloud Function with only 'reassign' resolutions
+    // Step 2: Reassign creator for 'reassign' resolutions (client-side Firestore)
     const reassignResolutions = creatorResolutions.filter((r) => r.action === 'reassign')
-    await adminFirebase.deleteUserAccount({
-      uid,
-      creatorResolutions: reassignResolutions.length > 0 ? reassignResolutions : undefined,
-    })
+    for (const resolution of reassignResolutions) {
+      await adminFirebase.reassignTeamCreator(resolution.teamId, resolution.newCreatorUid!)
+    }
 
-    // Step 3: Audit logging (fire-and-forget)
+    // Step 3: Soft-delete user document (client-side Firestore)
     const actorUid = authStore.user?.uid || ''
+    await adminFirebase.softDeleteUser(uid, actorUid)
+
+    // Step 4: Audit logging (fire-and-forget)
     const actorDisplayName = authStore.user?.displayName || authStore.user?.email || 'Unknown'
 
     for (const resolution of reassignResolutions) {
