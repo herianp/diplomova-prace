@@ -407,6 +407,10 @@ const saveTeamName = async () => {
   try {
     await teamFirebase.updateTeamName(teamId.value, newName)
     team.value.name = newName
+    // Update store so navbar TeamDropdown reflects the new name
+    if (teamStore.currentTeam?.id === teamId.value) {
+      teamStore.currentTeam.name = newName
+    }
     $q.notify({
       type: 'positive',
       message: t('team.single.settings.teamNameSuccess'),
