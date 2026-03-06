@@ -130,6 +130,6 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 27-01-PLAN.md — Cloud Function project setup + TypeScript interfaces for soft-delete
+- [x] 27-01-PLAN.md — Cloud Function project setup + TypeScript interfaces for soft-delete
 - [ ] 27-02-PLAN.md — Client-side delete flow: service layer, use cases, admin UI with confirm/creator-conflict dialogs
 - [ ] 27-03-PLAN.md — Deleted user display handling, auth safety net, Firestore rules update

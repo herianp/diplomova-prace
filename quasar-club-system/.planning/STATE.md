@@ -21,17 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-21)
 
 **Core value:** Reliable real-time survey voting and team management that works correctly under concurrent use — no lost votes, no stale data, no silent failures.
-**Current focus:** v1.3 — Phase 25: Onboarding Completion Button & State Fix
+**Current focus:** Phase 27 — Admin User Deletion with Cascade Handling and Team Creator Reassignment
 
 ## Current Position
 
-Milestone: v1.3 Onboarding Improvements
-Phase: 25 (Onboarding Completion Button & State Fix)
-Plan: 1 of 1 in current phase
-Status: Complete — Phase 25 fully done
-Last activity: 2026-03-04 — Completed Phase 25
+Phase: 27 (Admin User Deletion with Cascade Handling and Team Creator Reassignment)
+Plan: 1 of 3 in current phase
+Status: In progress — Plan 01 complete (Cloud Functions infrastructure)
+Last activity: 2026-03-06 — Completed Phase 27 Plan 01
 
-Progress: [██████████] 100% (v1.3)
+Progress: Plan 01/03 in Phase 27
 
 ## Performance Metrics
 
@@ -74,6 +73,8 @@ v1.1 decisions:
 - [Phase 14-02]: useActionLimitStatus uses onMounted — works correctly in Vue SFC setup context
 - [Phase 14-02]: Weekly window uses Luxon startOf('week') = Monday (ISO 8601); daily uses ISO date string comparison for timezone safety
 - [Phase 14-02]: messageFirebase.ts hosts rate check since no separate message use case composable exists
+- [Phase 27-01]: Auth deletion failure after Firestore soft-delete returns success (recoverable state)
+- [Phase 27-01]: Team deletion for action 'delete' handled client-side before Cloud Function call
 
 ### Roadmap Evolution
 
@@ -113,6 +114,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T14:17:00.806Z
-Stopped at: Phase 27 context gathered
-Resume file: .planning/phases/27-admin-user-deletion-with-cascade-handling-and-team-creator-reassignment/27-CONTEXT.md
+Last session: 2026-03-06T14:42:16Z
+Stopped at: Completed 27-01-PLAN.md
+Resume file: .planning/phases/27-admin-user-deletion-with-cascade-handling-and-team-creator-reassignment/27-02-PLAN.md
