@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { useAdminUseCases, IAdminOverviewStats } from '@/composable/useAdminUseCases'
+import { ICreatorResolution } from '@/services/adminFirebase'
 import { ITeam, IUser, ISurvey } from '@/interfaces/interfaces'
 import { createLogger } from 'src/utils/logger'
 
@@ -12,6 +13,7 @@ export function useAdminComposable() {
   const allSurveys = ref<ISurvey[]>([])
   const isLoading = ref(false)
   const loadError = ref<string | null>(null)
+  const showDeletedUsers = ref(false)
 
   const teamSearchQuery = ref('')
   const userSearchQuery = ref('')
@@ -54,9 +56,16 @@ export function useAdminComposable() {
   })
 
   const filteredUsers = computed(() => {
+    // First filter by deleted status
+    let users = allUsers.value
+    if (!showDeletedUsers.value) {
+      users = users.filter((user) => user.status !== 'deleted')
+    }
+
+    // Then filter by search query
     const q = userSearchQuery.value.toLowerCase().trim()
-    if (!q) return allUsers.value
-    return allUsers.value.filter((user) =>
+    if (!q) return users
+    return users.filter((user) =>
       (user.displayName || user.name || '').toLowerCase().includes(q) ||
       (user.email || '').toLowerCase().includes(q)
     )
@@ -93,6 +102,33 @@ export function useAdminComposable() {
     allSurveys.value = allSurveys.value.filter((s) => s.teamId !== teamId)
   }
 
+  const deleteUser = async (uid: string, creatorResolutions: ICreatorResolution[]) => {
+    await adminUseCases.deleteUserAsAdmin(uid, creatorResolutions)
+
+    // Update local state: mark user as deleted
+    const userIndex = allUsers.value.findIndex((u) => u.uid === uid)
+    if (userIndex !== -1) {
+      allUsers.value[userIndex] = {
+        ...allUsers.value[userIndex],
+        status: 'deleted',
+        deletedAt: new Date(),
+      }
+    }
+
+    // Remove teams that were chosen for deletion
+    const deletedTeamIds = creatorResolutions
+      .filter((r) => r.action === 'delete')
+      .map((r) => r.teamId)
+    if (deletedTeamIds.length > 0) {
+      allTeams.value = allTeams.value.filter((t) => !deletedTeamIds.includes(t.id || ''))
+      allSurveys.value = allSurveys.value.filter((s) => !deletedTeamIds.includes(s.teamId))
+    }
+  }
+
+  const getTeamsWhereUserIsCreator = (uid: string, teams: ITeam[]): ITeam[] => {
+    return adminUseCases.getTeamsWhereUserIsCreator(uid, teams)
+  }
+
   const getCreatorName = (creatorUid: string): string => {
     const user = usersMap.value.get(creatorUid)
     return user?.displayName || user?.name || user?.email || creatorUid
@@ -104,6 +140,7 @@ export function useAdminComposable() {
     allSurveys,
     isLoading,
     loadError,
+    showDeletedUsers,
     teamSearchQuery,
     userSearchQuery,
     usersMap,
@@ -114,6 +151,8 @@ export function useAdminComposable() {
     overviewStats,
     loadAdminData,
     deleteTeam,
+    deleteUser,
+    getTeamsWhereUserIsCreator,
     getCreatorName,
   }
 }
