@@ -3,46 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Onboarding Improvements
 status: completed
-stopped_at: Completed 27-02-PLAN.md (all plans 01-03 now complete)
-last_updated: "2026-03-06T14:53:05.597Z"
-last_activity: 2026-03-06 — Completed Phase 27 Plan 02
+stopped_at: Completed 27-04-PLAN.md (all plans 01-04 now complete)
+last_updated: "2026-03-06T15:52:00Z"
+last_activity: 2026-03-06 — Completed Phase 27 Plan 04
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 5
----
-
----
-gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Onboarding Improvements
-status: completed
-stopped_at: Completed 27-03-PLAN.md
-last_updated: "2026-03-06T14:46:39.348Z"
-last_activity: 2026-03-06 — Completed Phase 27 Plan 01
-progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 6
-  completed_plans: 4
-  percent: 81
----
-
----
-gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Onboarding Improvements
-status: completed
-stopped_at: Phase 27 context gathered
-last_updated: "2026-03-06T14:17:00.812Z"
-last_activity: 2026-03-04 — Completed Phase 25
-progress:
-  [████████░░] 81%
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 2
-  percent: 100
+  total_plans: 7
+  completed_plans: 7
 ---
 
 # Project State
@@ -57,11 +25,11 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 ## Current Position
 
 Phase: 27 (Admin User Deletion with Cascade Handling and Team Creator Reassignment)
-Plan: 3 of 3 in current phase
-Status: In progress — Plans 01, 02, 03 complete
-Last activity: 2026-03-06 — Completed Phase 27 Plan 02
+Plan: 4 of 4 in current phase
+Status: Complete — All plans 01-04 complete
+Last activity: 2026-03-06 — Completed Phase 27 Plan 04
 
-Progress: Plan 03/03 in Phase 27
+Progress: Plan 04/04 in Phase 27 (DONE)
 
 ## Performance Metrics
 
@@ -110,6 +78,8 @@ v1.1 decisions:
 - [Phase 27-02]: Audit log for user.delete uses empty teamId (cross-team operation)
 - [Phase 27-02]: Delete button disabled for already-deleted users
 - [Phase 27]: Soft-delete check added in both initializeAuth and continuous auth listener for complete coverage
+- [Phase 27-04]: Dropped Firebase Auth account deletion — auth safety net handles soft-deleted users
+- [Phase 27-04]: Direct updateDoc calls replace httpsCallable for soft-delete and creator reassignment
 
 ### Roadmap Evolution
 
@@ -150,6 +120,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T14:48:42Z
-Stopped at: Completed 27-02-PLAN.md (all plans 01-03 now complete)
+Last session: 2026-03-06T15:52:00Z
+Stopped at: Completed 27-04-PLAN.md (Phase 27 fully complete)
 Resume file: None

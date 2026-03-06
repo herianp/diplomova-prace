@@ -127,7 +127,7 @@ Plans:
 
 **Goal:** Admin users can soft-delete players from the admin panel with cascade handling: user document preserved with deleted flag, auth safety net blocks soft-deleted users, and creator conflict resolution dialog for reassigning team creators. Client-side Firestore operations only (no Cloud Functions).
 **Depends on:** Phase 26
-**Plans:** 4 plans (3 complete, 1 gap closure)
+**Plans:** 4/4 plans complete
 
 Plans:
 - [x] 27-01-PLAN.md — Cloud Function project setup + TypeScript interfaces for soft-delete
