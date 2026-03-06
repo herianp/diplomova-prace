@@ -27,6 +27,9 @@ export interface IUser {
   createdAt: Date
   photoURL?: string
   onboardingCompleted?: boolean
+  status?: 'active' | 'deleted'
+  deletedAt?: Date
+  deletedBy?: string
 }
 
 export interface ICredentials {
@@ -210,6 +213,7 @@ export interface ITeamMember {
   email?: string
   name?: string
   photoURL?: string
+  status?: 'active' | 'deleted'
 }
 
 export interface IPlayerOption {
@@ -358,6 +362,8 @@ export type AuditOperation =
   | 'vote.verify'
   | 'joinRequest.approve'
   | 'joinRequest.decline'
+  | 'user.delete'
+  | 'team.reassignCreator'
 
 export interface IAuditLog {
   id?: string
@@ -367,7 +373,7 @@ export interface IAuditLog {
   actorDisplayName: string
   timestamp: Date
   entityId: string
-  entityType: 'survey' | 'fine' | 'member' | 'vote'
+  entityType: 'survey' | 'fine' | 'member' | 'vote' | 'user'
   before?: Record<string, unknown>
   after?: Record<string, unknown>
   metadata?: Record<string, unknown>
