@@ -29,7 +29,9 @@
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(head:*)",
       "Bash(cd /c/Users/Developer/Documents/projekty/diplomova-prace/quasar-club-system && npm run lint 2>&1)",
-      "Skill(gsd:discuss-phase)"
+      "Skill(gsd:discuss-phase)",
+      "Bash(sed:*)",
+      "Bash(npx tsc:*)"
     ]
   },
   "enableAllProjectMcpServers": true,

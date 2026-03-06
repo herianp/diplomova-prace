@@ -29,3 +29,9 @@ yarn build
 
 ### Customize the configuration
 See [Configuring quasar.config.js](https://v2.quasar.dev/quasar-cli-vite/quasar-config-js).
+
+###
+Firebase rules update
+```bash
+ firebase deploy --only firestore:rules 
+ ```
