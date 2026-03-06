@@ -89,7 +89,11 @@
               :filtered-users="filteredUsers"
               :user-search-query="userSearchQuery"
               :user-teams-count="userTeamsCount"
+              :show-deleted-users="showDeletedUsers"
+              :all-teams="allTeams"
               @update:user-search-query="userSearchQuery = $event"
+              @update:show-deleted-users="showDeletedUsers = $event"
+              @delete-user-clicked="handleUserDeleteClick"
             />
           </q-tab-panel>
 
@@ -103,6 +107,37 @@
         </q-tab-panels>
       </q-card>
     </template>
+
+    <!-- Simple delete user confirmation dialog (non-creator) -->
+    <q-dialog v-model="showSimpleDeleteDialog">
+      <q-card style="min-width: 350px">
+        <q-card-section>
+          <div class="text-h6">{{ $t('admin.deleteUser') }}</div>
+        </q-card-section>
+        <q-card-section>
+          <p>{{ $t('admin.confirmDeleteUser', { name: userToDelete?.displayName || userToDelete?.name || '-', email: userToDelete?.email || '' }) }}</p>
+        </q-card-section>
+        <q-card-actions align="right">
+          <q-btn flat :label="$t('common.cancel')" v-close-popup />
+          <q-btn
+            flat
+            :label="$t('common.delete')"
+            color="negative"
+            :loading="isDeletingUser"
+            @click="executeSimpleDelete"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
+    <!-- Creator conflict dialog -->
+    <CreatorConflictDialog
+      v-model="showCreatorConflict"
+      :user="userToDelete"
+      :affected-teams="creatorAffectedTeams"
+      :all-users="allUsers"
+      @confirm="executeCreatorDelete"
+    />
   </div>
 </template>
 
@@ -116,13 +151,17 @@ import AdminTeamsTab from '@/components/admin/AdminTeamsTab.vue'
 import AdminUsersTab from '@/components/admin/AdminUsersTab.vue'
 import AdminAuditTab from '@/components/admin/AdminAuditTab.vue'
 import AdminRateLimitsTab from '@/components/admin/AdminRateLimitsTab.vue'
+import CreatorConflictDialog from '@/components/admin/CreatorConflictDialog.vue'
 
 const $q = useQuasar()
 const { t } = useI18n()
 
 const {
+  allTeams,
+  allUsers,
   isLoading,
   loadError,
+  showDeletedUsers,
   teamSearchQuery,
   userSearchQuery,
   teamSurveysCount,
@@ -132,10 +171,19 @@ const {
   overviewStats,
   loadAdminData,
   deleteTeam,
+  deleteUser,
+  getTeamsWhereUserIsCreator,
   getCreatorName,
 } = useAdminComposable()
 
 const activeTab = ref('teams')
+
+// User deletion state
+const showSimpleDeleteDialog = ref(false)
+const showCreatorConflict = ref(false)
+const userToDelete = ref(null)
+const creatorAffectedTeams = ref([])
+const isDeletingUser = ref(false)
 
 const handleDeleteTeam = async (teamId) => {
   try {
@@ -143,6 +191,47 @@ const handleDeleteTeam = async (teamId) => {
     $q.notify({ type: 'positive', message: t('admin.deleteSuccess') })
   } catch {
     $q.notify({ type: 'negative', message: t('admin.deleteError') })
+  }
+}
+
+const handleUserDeleteClick = (user) => {
+  userToDelete.value = user
+  const affectedTeams = getTeamsWhereUserIsCreator(user.uid, allTeams.value)
+
+  if (affectedTeams.length === 0) {
+    // Non-creator: simple confirm
+    showSimpleDeleteDialog.value = true
+  } else {
+    // Creator: show creator conflict dialog
+    creatorAffectedTeams.value = affectedTeams
+    showCreatorConflict.value = true
+  }
+}
+
+const executeSimpleDelete = async () => {
+  if (!userToDelete.value) return
+  isDeletingUser.value = true
+  try {
+    await deleteUser(userToDelete.value.uid, [])
+    showSimpleDeleteDialog.value = false
+    $q.notify({ type: 'positive', message: t('admin.deleteUserSuccess') })
+  } catch {
+    $q.notify({ type: 'negative', message: t('admin.deleteUserError') })
+  } finally {
+    isDeletingUser.value = false
+  }
+}
+
+const executeCreatorDelete = async (resolutions) => {
+  if (!userToDelete.value) return
+  isDeletingUser.value = true
+  try {
+    await deleteUser(userToDelete.value.uid, resolutions)
+    $q.notify({ type: 'positive', message: t('admin.deleteUserSuccess') })
+  } catch {
+    $q.notify({ type: 'negative', message: t('admin.deleteUserError') })
+  } finally {
+    isDeletingUser.value = false
   }
 }
 

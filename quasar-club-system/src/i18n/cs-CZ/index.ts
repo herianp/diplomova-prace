@@ -458,6 +458,21 @@ export default {
       windowDaily: "/den",
       windowPending: "čekající"
     },
+    deleteUser: "Smazat uživatele",
+    confirmDeleteUser: "Opravdu chcete smazat uživatele {name} ({email})? Tato akce je nevratná.",
+    deleteUserSuccess: "Uživatel byl úspěšně smazán",
+    deleteUserError: "Nepodařilo se smazat uživatele",
+    showDeletedUsers: "Zobrazit smazané uživatele",
+    userDeleted: "Smazán",
+    status: "Stav",
+    creatorConflict: {
+      title: "Smazání tvůrce týmu",
+      description: "Tento uživatel je tvůrcem {count} týmů. Zvolte akci pro každý tým:",
+      deleteTeamOption: "Smazat tým",
+      reassignCreatorOption: "Přiřadit nového tvůrce",
+      selectNewCreator: "Vyberte nového tvůrce",
+      confirmDelete: "Smazat uživatele",
+    },
     audit: {
       selectTeam: "Vyberte tým",
       operation: "Operace",
@@ -479,7 +494,9 @@ export default {
         member_remove: "Odebrání člena",
         vote_verify: "Ověření hlasování",
         joinRequest_approve: "Schválení žádosti o připojení",
-        joinRequest_decline: "Zamítnutí žádosti o připojení"
+        joinRequest_decline: "Zamítnutí žádosti o připojení",
+        user_delete: "Smazání uživatele",
+        team_reassignCreator: "Přeřazení tvůrce týmu"
       }
     }
   },

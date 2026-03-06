@@ -458,6 +458,21 @@ export default {
       windowDaily: "/day",
       windowPending: "pending"
     },
+    deleteUser: "Delete user",
+    confirmDeleteUser: "Are you sure you want to delete user {name} ({email})? This action is irreversible.",
+    deleteUserSuccess: "User deleted successfully",
+    deleteUserError: "Failed to delete user",
+    showDeletedUsers: "Show deleted users",
+    userDeleted: "Deleted",
+    status: "Status",
+    creatorConflict: {
+      title: "Delete team creator",
+      description: "This user is the creator of {count} team(s). Choose an action for each team:",
+      deleteTeamOption: "Delete team",
+      reassignCreatorOption: "Reassign creator",
+      selectNewCreator: "Select new creator",
+      confirmDelete: "Delete user",
+    },
     audit: {
       selectTeam: "Select team",
       operation: "Operation",
@@ -479,7 +494,9 @@ export default {
         member_remove: "Member removed",
         vote_verify: "Vote verified",
         joinRequest_approve: "Join request approved",
-        joinRequest_decline: "Join request declined"
+        joinRequest_decline: "Join request declined",
+        user_delete: "User deleted",
+        team_reassignCreator: "Team creator reassigned"
       }
     }
   },
