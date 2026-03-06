@@ -126,6 +126,8 @@ const OPERATIONS = [
   'fine.delete',
   'member.remove',
   'vote.verify',
+  'joinRequest.approve',
+  'joinRequest.decline',
 ]
 
 const operationOptions = computed(() => [
@@ -187,6 +189,8 @@ const operationColor = (op) => {
     'fine.delete': 'negative',
     'member.remove': 'negative',
     'vote.verify': 'positive',
+    'joinRequest.approve': 'positive',
+    'joinRequest.decline': 'negative',
   }
   return colors[op] || 'grey'
 }

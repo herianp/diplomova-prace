@@ -477,7 +477,9 @@ export default {
         fine_update: "Fine updated",
         fine_delete: "Fine deleted",
         member_remove: "Member removed",
-        vote_verify: "Vote verified"
+        vote_verify: "Vote verified",
+        joinRequest_approve: "Join request approved",
+        joinRequest_decline: "Join request declined"
       }
     }
   },

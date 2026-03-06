@@ -477,7 +477,9 @@ export default {
         fine_update: "Úprava pokuty",
         fine_delete: "Smazání pokuty",
         member_remove: "Odebrání člena",
-        vote_verify: "Ověření hlasování"
+        vote_verify: "Ověření hlasování",
+        joinRequest_approve: "Schválení žádosti o připojení",
+        joinRequest_decline: "Zamítnutí žádosti o připojení"
       }
     }
   },
