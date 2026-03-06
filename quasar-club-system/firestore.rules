@@ -87,6 +87,9 @@ service cloud.firestore {
       allow delete: if request.auth != null &&
         (request.auth.uid == resource.data.creator || isAppAdmin());
 
+      // Allow app admin to update any team (creator reassignment during user deletion)
+      allow update: if isAppAdmin();
+
       // Allow users to add themselves to team when accepting invitation
       // Note: This is validated by the invitation system and batch writes
       allow update: if request.auth != null &&
