@@ -19,6 +19,36 @@
               {{ $t('team.single.settings.title') }}
             </div>
 
+            <!-- Team Name -->
+            <div class="q-mb-md">
+              <div class="row q-gutter-sm items-end">
+                <q-input
+                  v-model="editedTeamName"
+                  :label="$t('team.single.settings.teamName')"
+                  outlined
+                  dense
+                  class="col"
+                  :rules="[val => !!val?.trim() || $t('team.single.settings.teamNameRequired')]"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="edit" />
+                  </template>
+                </q-input>
+                <q-btn
+                  :label="$t('team.single.settings.renameTeam')"
+                  icon="save"
+                  color="primary"
+                  outline
+                  dense
+                  :loading="savingTeamName"
+                  :disable="!editedTeamName?.trim() || editedTeamName === team?.name"
+                  @click="saveTeamName"
+                />
+              </div>
+            </div>
+
+            <q-separator class="q-mb-md" />
+
             <!-- Chat Toggle -->
             <q-toggle
               v-model="teamSettings.chatEnabled"
@@ -267,6 +297,8 @@ const teamSettings = ref(null)
 const savingSettings = ref(false)
 const addressSearch = ref('')
 const searchingAddress = ref(false)
+const editedTeamName = ref('')
+const savingTeamName = ref(false)
 
 // Form
 const inviteForm = reactive({
@@ -299,6 +331,7 @@ const loadTeam = async () => {
     const teamData = await teamFirebase.getTeamById(teamId.value)
     if (teamData) {
       team.value = { id: teamId.value, ...teamData }
+      editedTeamName.value = teamData.name || ''
       await loadTeamMembers()
       await loadSettingsData()
       // Check power user status against the loaded team (not teamStore.currentTeam)
@@ -364,6 +397,34 @@ const saveSettings = async () => {
     })
   } finally {
     savingSettings.value = false
+  }
+}
+
+const saveTeamName = async () => {
+  const newName = editedTeamName.value?.trim()
+  if (!newName || newName === team.value?.name) return
+  savingTeamName.value = true
+  try {
+    await teamFirebase.updateTeamName(teamId.value, newName)
+    team.value.name = newName
+    $q.notify({
+      type: 'positive',
+      message: t('team.single.settings.teamNameSuccess'),
+      icon: 'check'
+    })
+  } catch (error) {
+    log.error('Failed to update team name', {
+      error: error instanceof Error ? error.message : String(error),
+      teamId: teamId.value
+    })
+    $q.notify({
+      type: 'negative',
+      message: t('team.single.settings.teamNameError'),
+      icon: 'error'
+    })
+    editedTeamName.value = team.value?.name || ''
+  } finally {
+    savingTeamName.value = false
   }
 }
 

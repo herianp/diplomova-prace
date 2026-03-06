@@ -339,6 +339,17 @@ export function useTeamFirebase() {
     }
   }
 
+  const updateTeamName = async (teamId: string, newName: string): Promise<void> => {
+    try {
+      const teamRef = doc(db, 'teams', teamId)
+      await updateDoc(teamRef, { name: newName })
+    } catch (error: unknown) {
+      const firestoreError = mapFirestoreError(error, 'write')
+      log.error('Failed to update team name', { teamId, error: firestoreError.message })
+      throw firestoreError
+    }
+  }
+
   return {
     createTeam,
     deleteTeam,
@@ -353,5 +364,6 @@ export function useTeamFirebase() {
     promoteToPowerUser,
     getTeamSettings,
     updateTeamSettings,
+    updateTeamName,
   }
 }

@@ -191,6 +191,11 @@ export default {
       },
       settings: {
         title: "Nastavení týmu",
+        teamName: "Název týmu",
+        teamNameRequired: "Název týmu je povinný",
+        renameTeam: "Přejmenovat",
+        teamNameSuccess: "Název týmu byl aktualizován",
+        teamNameError: "Nepodařilo se aktualizovat název týmu",
         chatEnabled: "Povolit chat",
         chatEnabledHint: "Když je vypnuto, nikdo nemůže odesílat zprávy",
         votingCutoff: "Uzávěrka hlasování",

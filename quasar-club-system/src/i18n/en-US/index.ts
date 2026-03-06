@@ -191,6 +191,11 @@ export default {
       },
       settings: {
         title: "Team Settings",
+        teamName: "Team Name",
+        teamNameRequired: "Team name is required",
+        renameTeam: "Rename",
+        teamNameSuccess: "Team name updated",
+        teamNameError: "Failed to update team name",
         chatEnabled: "Enable Chat",
         chatEnabledHint: "When disabled, no one can send messages",
         votingCutoff: "Voting cutoff",
