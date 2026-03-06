@@ -20,6 +20,15 @@ export function useAuditLogFirebase() {
    * Fire-and-forget audit log write. Do NOT await — audit failures must not block operations.
    */
   const writeAuditLog = (entry: Omit<IAuditLog, 'id'>): Promise<void> => {
+    if (!entry.teamId) {
+      log.info('Audit log skipped (no teamId)', {
+        operation: entry.operation,
+        actorUid: entry.actorUid,
+        entityId: entry.entityId
+      })
+      return Promise.resolve()
+    }
+
     const auditLogsRef = collection(doc(db, 'teams', entry.teamId), 'auditLogs')
 
     return addDoc(auditLogsRef, { ...entry, timestamp: new Date() })

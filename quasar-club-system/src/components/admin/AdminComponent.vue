@@ -215,7 +215,8 @@ const executeSimpleDelete = async () => {
     await deleteUser(userToDelete.value.uid, [])
     showSimpleDeleteDialog.value = false
     $q.notify({ type: 'positive', message: t('admin.deleteUserSuccess') })
-  } catch {
+  } catch (error) {
+    console.error('Delete user failed:', error)
     $q.notify({ type: 'negative', message: t('admin.deleteUserError') })
   } finally {
     isDeletingUser.value = false
