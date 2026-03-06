@@ -21,6 +21,14 @@ export function useSurveyUseCases() {
   const { checkLimit, incrementUsage } = useRateLimiter()
 
   const setSurveysListener = (teamId: string) => {
+    // Skip if listener already active for this team
+    if (listenerRegistry.isActive('surveys')) {
+      const existing = listenerRegistry.getDebugInfo().find(l => l.id === 'surveys')
+      if (existing?.context?.teamId === teamId) {
+        return
+      }
+    }
+
     // Set up new listener
     const unsubscribe = surveyFirebase.getSurveysByTeamId(teamId, (surveysList) => {
       teamStore.setSurveys(surveysList)
