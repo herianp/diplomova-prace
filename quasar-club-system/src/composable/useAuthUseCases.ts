@@ -92,6 +92,8 @@ export function useAuthUseCases() {
     try {
       const user = await loginUser(email, password)
       authStore.setUser(user)
+      // Re-initialize auth listener and team setup (listener was killed on logout)
+      await initializeAuth()
       return user
     } catch (error: unknown) {
       authStore.setUser(null)
@@ -116,6 +118,8 @@ export function useAuthUseCases() {
     try {
       const user = await registerUser(email, password, name)
       authStore.setUser(user)
+      // Re-initialize auth listener and team setup (listener was killed on logout)
+      await initializeAuth()
       return user
     } catch (error: unknown) {
       authStore.setUser(null)
