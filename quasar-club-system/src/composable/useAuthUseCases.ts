@@ -141,6 +141,8 @@ export function useAuthUseCases() {
       listenerRegistry.unregisterAll()
       await logoutUser()
       authStore.cleanup()
+      // Re-set authReady so router guard doesn't block navigation
+      authStore.setAuthReady(true)
       teamStore.clearData()
       router.push(RouteEnum.HOME.path)
     } catch (error: unknown) {
