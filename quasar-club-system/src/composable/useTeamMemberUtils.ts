@@ -38,7 +38,11 @@ export function useTeamMemberUtils() {
    * Get display name for a team member
    */
   const getMemberDisplayName = (member: ITeamMember): string => {
-    return member.displayName || member.email || `Member ${member.uid.substring(0, 8)}...`
+    const baseName = member.displayName || member.email || `Member ${member.uid.substring(0, 8)}...`
+    if (member.status === 'deleted') {
+      return `${baseName} (deleted)`
+    }
+    return baseName
   }
 
   /**

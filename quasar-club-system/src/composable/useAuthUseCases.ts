@@ -39,6 +39,18 @@ export function useAuthUseCases() {
 
       // Load onboarding status from Firestore
       const firestoreUser = await getUserFromFirestore(initialUser.uid)
+
+      // Safety net: block soft-deleted users from accessing the app
+      // Handles edge case where Auth deletion failed but Firestore was soft-deleted
+      if (firestoreUser?.status === 'deleted') {
+        log.warn('Soft-deleted user attempted login', { uid: initialUser.uid })
+        await logoutUser()
+        authStore.setUser(null)
+        authStore.setAdmin(false)
+        authStore.setAuthReady(true)
+        return
+      }
+
       authStore.setOnboardingComplete(firestoreUser?.onboardingCompleted === true)
     }
 
@@ -53,6 +65,16 @@ export function useAuthUseCases() {
         // Check admin custom claim
         const tokenResult = await user.getIdTokenResult()
         authStore.setAdmin(tokenResult.claims.admin === true)
+
+        // Safety net: block soft-deleted users on auth state changes
+        const firestoreUserData = await getUserFromFirestore(user.uid)
+        if (firestoreUserData?.status === 'deleted') {
+          log.warn('Soft-deleted user attempted login', { uid: user.uid })
+          await logoutUser()
+          authStore.setUser(null)
+          authStore.setAdmin(false)
+          return
+        }
 
         try {
           const { setTeamListener } = useTeamUseCases()
