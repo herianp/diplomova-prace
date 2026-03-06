@@ -43,10 +43,10 @@ See: .planning/PROJECT.md (updated 2026-02-21)
 
 Phase: 27 (Admin User Deletion with Cascade Handling and Team Creator Reassignment)
 Plan: 3 of 3 in current phase
-Status: In progress — Plan 03 complete (Deleted user display and auth safety net)
-Last activity: 2026-03-06 — Completed Phase 27 Plan 03
+Status: In progress — Plans 01, 02, 03 complete
+Last activity: 2026-03-06 — Completed Phase 27 Plan 02
 
-Progress: Plan 01/03 in Phase 27
+Progress: Plan 03/03 in Phase 27
 
 ## Performance Metrics
 
@@ -91,6 +91,9 @@ v1.1 decisions:
 - [Phase 14-02]: messageFirebase.ts hosts rate check since no separate message use case composable exists
 - [Phase 27-01]: Auth deletion failure after Firestore soft-delete returns success (recoverable state)
 - [Phase 27-01]: Team deletion for action 'delete' handled client-side before Cloud Function call
+- [Phase 27-02]: httpsCallable uses europe-west1 region matching Cloud Function deployment
+- [Phase 27-02]: Audit log for user.delete uses empty teamId (cross-team operation)
+- [Phase 27-02]: Delete button disabled for already-deleted users
 - [Phase 27]: Soft-delete check added in both initializeAuth and continuous auth listener for complete coverage
 
 ### Roadmap Evolution
@@ -132,6 +135,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-06T14:46:39.343Z
-Stopped at: Completed 27-03-PLAN.md
+Last session: 2026-03-06T14:48:42Z
+Stopped at: Completed 27-02-PLAN.md (all plans 01-03 now complete)
 Resume file: None
