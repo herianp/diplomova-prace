@@ -140,7 +140,7 @@ export function useAuthUseCases() {
       // Unregister all Firestore listeners BEFORE signing out to prevent permission-denied errors
       listenerRegistry.unregisterAll()
       await logoutUser()
-      authStore.setUser(null)
+      authStore.cleanup()
       teamStore.clearData()
       router.push(RouteEnum.HOME.path)
     } catch (error: unknown) {
