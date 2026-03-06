@@ -125,11 +125,12 @@ Plans:
 
 ### Phase 27: Admin user deletion with cascade handling and team creator reassignment
 
-**Goal:** Admin users can soft-delete players from the admin panel with cascade handling: user document preserved with deleted flag, Firebase Auth account fully deleted via Cloud Function, and creator conflict resolution dialog for reassigning team creators.
+**Goal:** Admin users can soft-delete players from the admin panel with cascade handling: user document preserved with deleted flag, auth safety net blocks soft-deleted users, and creator conflict resolution dialog for reassigning team creators. Client-side Firestore operations only (no Cloud Functions).
 **Depends on:** Phase 26
-**Plans:** 3/3 plans complete
+**Plans:** 4 plans (3 complete, 1 gap closure)
 
 Plans:
 - [x] 27-01-PLAN.md — Cloud Function project setup + TypeScript interfaces for soft-delete
-- [ ] 27-02-PLAN.md — Client-side delete flow: service layer, use cases, admin UI with confirm/creator-conflict dialogs
-- [ ] 27-03-PLAN.md — Deleted user display handling, auth safety net, Firestore rules update
+- [x] 27-02-PLAN.md — Client-side delete flow: service layer, use cases, admin UI with confirm/creator-conflict dialogs
+- [x] 27-03-PLAN.md — Deleted user display handling, auth safety net, Firestore rules update
+- [ ] 27-04-PLAN.md — Gap closure: replace Cloud Function with client-side Firestore operations
